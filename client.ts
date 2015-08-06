@@ -48,6 +48,17 @@ class GrblClient extends events.EventEmitter {
 				then( (res) => {
 					console.log('gcode res', res);
 				});
+			this.request({ method: 'command', params: { command: '$X' } }).
+				then( (res) => {
+					console.log('gcode res', res);
+				});
+
+			this.request({ method: 'gcode', params: {
+				gcode : "G01 X0.000 Y0.000 F500\n"
+			} }).
+				then( (res) => {
+					console.log('gcode res', res);
+				});
 		});
 
 		this.client.on('connectFailed', (err) => {

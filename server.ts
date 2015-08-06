@@ -95,7 +95,7 @@ class GrblServer {
 				var method: string = data.method;
 				var params: any = data.params || {};
 				var id: number = data.id;
-				this['service_' + method](method, params).
+				this['service_' + method](params).
 					then( (result) => {
 						connection.sendUTF(JSON.stringify({
 							id: id,
@@ -140,11 +140,15 @@ class GrblServer {
 		});
 	}
 
-	service_config(params: any): any {
+	service_config(params: any): Promise<any> {
 		return new Promise( (resolve, reject) => {
 			this.grbl.getConfig().
 				then(resolve, reject);
 		});
+	}
+
+	service_command(params: any): Promise<any> {
+		return this.grbl.command(params.command);
 	}
 
 	broadcast(message: any) {
@@ -231,6 +235,7 @@ class GrblServer {
 	}
 
 	executeGcode(gcode: string) {
+		console.log('executeGcode');
 		if (this.remain.length) {
 			throw "remain gcode is not empty";
 		}
