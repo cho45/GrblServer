@@ -21,6 +21,7 @@ class GrblServer {
 	grbl : Grbl;
 	config: GrblServerConfig;
 
+	canceling: boolean;
 	sent : Array<string>;
 	remain: Array<string>;
 
@@ -28,7 +29,7 @@ class GrblServer {
 		this.loadConfig();
 		this.startHttp();
 		this.startWebSocket();
-		// this.openSerialPort();
+		this.openSerialPort();
 	}
 
 	loadConfig() {
@@ -77,26 +78,35 @@ class GrblServer {
 
 			this.sessions.push(connection);
 
+			connection.sendUTF(JSON.stringify({
+				id: null,
+				result: {
+					type: 'init',
+					lastAlarm: this.grbl.lastAlarm ? this.grbl.lastAlarm.message : null,
+					lastFeedback: this.grbl.lastFeedback ? this.grbl.lastFeedback.message : null,
+					status: this.grbl.status,
+				}
+			}));
+
 			connection.on('message', (message) => {
 				if (message.type !== 'utf8') return;
-				try {
-					console.log('Req: ' + message.utf8Data);
-					var data = JSON.parse(message.utf8Data);
-					var method: string = data.method;
-					var params: any = data.params;
-					var id: number = data.id;
-					var result = this['service_' + method](method, params);
-					connection.sendUTF(JSON.stringify({
-						id: id,
-						result: result
-					}));
-				} catch (e) {
-					console.log(e);
-					connection.sendUTF(JSON.stringify({
-						id: id,
-						error: e
-					}));
-				}
+				console.log('Req: ' + message.utf8Data);
+				var data = JSON.parse(message.utf8Data);
+				var method: string = data.method;
+				var params: any = data.params || {};
+				var id: number = data.id;
+				this['service_' + method](method, params).
+					then( (result) => {
+						connection.sendUTF(JSON.stringify({
+							id: id,
+							result: result
+						}));
+					}, (error) => {
+						connection.sendUTF(JSON.stringify({
+							id: id,
+							error: error
+						}));
+					});
 			});
 
 			connection.on('close', (reasonCode, description) => {
@@ -107,8 +117,34 @@ class GrblServer {
 		});
 	}
 
-	service_gcode(params: any): any {
-		this.executeGcode(params.gcode);
+	service_gcode(params: any): Promise<any> {
+		return new Promise( (resolve, reject) => {
+			if (params.gcode) {
+				this.executeGcode(params.gcode);
+				this.broadcast({
+					id: null,
+					result: {
+						type: 'gcode',
+						sent: this.sent,
+						remain: this.remain,
+					}
+				});
+				resolve();
+			} else {
+				resolve({
+					type: 'gcode',
+					sent: this.sent,
+					remain: this.remain,
+				});
+			}
+		});
+	}
+
+	service_config(params: any): any {
+		return new Promise( (resolve, reject) => {
+			this.grbl.getConfig().
+				then(resolve, reject);
+		});
 	}
 
 	broadcast(message: any) {
@@ -125,6 +161,49 @@ class GrblServer {
 
 		this.grbl = new Grbl(sp);
 		this.grbl.open();
+
+		this.grbl.on('startup', (res) => {
+			this.initializeGrbl();
+			this.broadcast({
+				id: null,
+				result: {
+					type: 'startup',
+					version: res.version,
+				}
+			});
+		});
+
+		this.grbl.on('statuschange', (status) => {
+			console.log('statuschange');
+			this.broadcast({
+				id: null,
+				result: {
+					type: 'status',
+					status: status
+				}
+			});
+		});
+
+		this.grbl.on('alarm', (res) => {
+			this.broadcast({
+				id: null,
+				result: {
+					type: 'alarm',
+					message: res.message,
+				}
+			});
+		});
+
+		this.grbl.on('feedback', (res) => {
+			this.broadcast({
+				id: null,
+				result: {
+					type: 'feedback',
+					message: res.message,
+				}
+			});
+		});
+
 		this.grbl.on('error', (e) => {
 			console.log('Error on grbl: ' + e);
 			this.broadcast({
@@ -141,6 +220,15 @@ class GrblServer {
 		this.grbl.close();
 	}
 
+	initializeGrbl() {
+		this.sent = [];
+		this.remain = [];
+		this.grbl.getConfig().
+			then( (res) => {
+				console.log(res);
+			}, (e) => {
+			});
+	}
 
 	executeGcode(gcode: string) {
 		if (this.remain.length) {
@@ -152,6 +240,11 @@ class GrblServer {
 	}
 
 	sendOneLine() {
+		if (this.canceling) {
+			this.canceling = false;
+			return;
+		}
+
 		if (!this.remain.length) {
 			// done
 			this.broadcast({

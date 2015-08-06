@@ -99,6 +99,17 @@ result = parser.parse("$20=1");
 assert(result instanceof GrblLineParserResultDollar);
 assert(result.message == '$20=1');
 
+var s1 = new GrblLineParserResultStatus();
+s1.state = 'Idle';
+s1.machinePosition = {x : 0, y : 0, z : 0};
+s1.workingPosition = {x : 0, y : 0, z : 0};
+var s2 = new GrblLineParserResultStatus();
+s2.state = 'Idle';
+s2.machinePosition = {x : 0, y : 0, z : 0};
+s2.workingPosition = {x : 0, y : 0, z : 0};
+assert(s1.equals(s2));
+
+
 import events = require("events");
 
 class MockSerialPort extends events.EventEmitter implements SerialPort {
@@ -127,7 +138,7 @@ var mock = new MockSerialPort();
 var grbl = new Grbl(mock);
 grbl.open().then( () => {
 	console.log('open');
-	mock.emit("data", "Grbl v0.9j ['$' for help]\r\n");
+	mock.emit("data", "Grbl 0.9j ['$' for help]\n");
 });
 
 grbl.on("raw", (e) => {

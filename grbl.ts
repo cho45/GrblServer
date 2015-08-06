@@ -16,17 +16,6 @@ const MESSAGE_FEEDBACK = /^\[(.+)\]$/;
 const MESSAGE_STATUS   = /^<(.+)>$/;
 const MESSAGE_DOLLAR   = /^\$/;
 
-interface GrblStatus {
-	state: string;
-	version: GrblVersion;
-	machinePosition: GrblPosition;
-	workingPosition: GrblPosition;
-	lastResult: string;
-	lastFeedback: string;
-	lastError: string;
-	lastAlarm: string;
-}
-
 interface GrblVersion {
 	major: number;
 	minor: string;
@@ -90,6 +79,21 @@ export class GrblLineParserResultStatus extends GrblLineParserResult {
 	workingPosition: GrblPosition;
 	plannerBufferCount: number;
 	rxBufferCount: number;
+
+	equals(other: GrblLineParserResultStatus): boolean {
+		var ret = 
+			this.state === other.state &&
+			this.plannerBufferCount === other.plannerBufferCount &&
+			this.rxBufferCount === other.rxBufferCount &&
+			this.machinePosition.x === other.machinePosition.x &&
+			this.machinePosition.y === other.machinePosition.y &&
+			this.machinePosition.z === other.machinePosition.z &&
+			this.workingPosition.x === other.workingPosition.x &&
+			this.workingPosition.y === other.workingPosition.y &&
+			this.workingPosition.z === other.workingPosition.z;
+
+		return ret;
+	}
 }
 
 export class GrblLineParser {
@@ -106,8 +110,6 @@ export class GrblLineParser {
 			this.parseDollar,
 			this.parseStartup
 		];
-
-		line = line.replace(/\s+$/, '');
 
 		for (let i = 0, it; (it = parsers[i]); i++) {
 			var result = it.call(this, line);
@@ -213,7 +215,10 @@ export interface SerialPort {
 import events = require("events");
 
 export class Grbl extends events.EventEmitter {
-	status : GrblStatus;
+	status : GrblLineParserResultStatus;
+	lastFeedback: GrblLineParserResultFeedback;
+	lastAlarm: GrblLineParserResultAlarm;
+
 	serialport : SerialPort;
 	parser : GrblLineParser;
 	isOpened: boolean;
@@ -223,7 +228,7 @@ export class Grbl extends events.EventEmitter {
 
 	constructor(serialport: SerialPort) {
 		super();
-		this.status = <GrblStatus>{};
+		this.status = new GrblLineParserResultStatus();
 		this.serialport = serialport;
 		this.parser = new GrblLineParser();
 		this.isOpened = false;
@@ -290,18 +295,35 @@ export class Grbl extends events.EventEmitter {
 
 	getConfig():Promise<any> {
 		return new Promise( (resolve, reject) => {
+			if (this.status.state != STATE_IDLE) {
+				reject('Must called in idle state');
+			}
+
+			var results = [];
+			var listener;
+			listener = (e) => {
+				results.push(e);
+			};
+			this.on("dollar", listener);
+			this.command("$$").
+				then( () => {
+					resolve(results);
+				}, reject);
 		});
 	}
 
 	getStatus():Promise<any> {
 		return new Promise( (resolve, reject) => {
-	//		this.realtimeCommand("?");
+			this.once("status", (res) => {
+				resolve(res);
+			});
+			this.realtimeCommand("?");
 		});
 	}
 
 	command(cmd: string):Promise<any> {
 		return new Promise( (resolve, reject) => {
-			console.log(cmd);
+			console.log('>>', cmd);
 			this.serialport.write(cmd + '\n');
 			this.waitingQueue.push( (err: any) => {
 				if (err) return reject(err);
@@ -319,11 +341,21 @@ export class Grbl extends events.EventEmitter {
 	}
 
 	processData(data: string) {
-		if (/^\s*$/.test(data)) return;
+		console.log('<<', data);
+
+		data = data.replace(/\s+$/, '');
+		if (!data) return;
 
 		this.emit("raw", data);
 		var result = this.parser.parse(data);
 		this.emit("response", result);
+		if (result instanceof GrblLineParserResultStatus) {
+			if (!this.status.equals(result)) {
+				this.emit("statuschange", result);
+			}
+			this.status = result;
+			this.emit("status", result);
+		} else
 		if (result instanceof GrblLineParserResultOk) {
 			this.waitingQueue.shift()(null);
 		} else
@@ -332,6 +364,17 @@ export class Grbl extends events.EventEmitter {
 		} else
 		if (result instanceof GrblLineParserResultStartup) {
 			this.emit("startup", result);
+		} else
+		if (result instanceof GrblLineParserResultAlarm) {
+			this.lastAlarm = result;
+			this.emit("alarm", result);
+		} else
+		if (result instanceof GrblLineParserResultFeedback) {
+			this.lastFeedback = result;
+			this.emit("feedback", result);
+		} else
+		if (result instanceof GrblLineParserResultDollar) {
+			this.emit("dollar", result);
 		}
 	}
 }
