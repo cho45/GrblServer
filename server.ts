@@ -2,17 +2,81 @@
 
 ///<reference path="./typings/bundle.d.ts"/>
 ///<reference path="./typings/serialport.d.ts" />
+///<reference path="./typings/config.d.ts" />
 
 import * as websocket from 'websocket';
 import {Grbl} from './grbl';
 import http = require('http');
 import serialport = require("serialport");
+import config = require("config");
 
 interface GrblServerConfig {
 	serialPort: string;
 	serialBaud: number;
 	serverPort: number;
 };
+
+interface JSONRPCRequest {
+	method: string;
+	params: any;
+	id: number;
+}
+
+interface JSONRPCResponse {
+	result?: any;
+	error?: JSONRPCError;
+	id: number;
+}
+
+interface JSONRPCError {
+	code: number;
+	message?: string;
+	data?: any;
+}
+
+const JSONRPCErrorParseError = <JSONRPCError>{
+	code: -32700,
+	message: 'Parse Error'
+};
+const JSONRPCErrorInvalidRequest = <JSONRPCError>{
+	code: -32600,
+	message: 'Invalid Request'
+};
+const JSONRPCErrorMethodNotFound = <JSONRPCError>{
+	code: -32601,
+	message: 'Method not found'
+};
+const JSONRPCErrorInvalidParams = <JSONRPCError>{
+	code: -32602,
+	message: 'Invalid params'
+};
+const JSONRPCErrorInternalError = <JSONRPCError>{
+	code: -32603,
+	message: 'Internal error'
+};
+
+class JSONRPCErrorServerError implements JSONRPCError {
+	code: number; /* -32000 to -32099 */
+	message: string;
+	data: any;
+	constructor(code: number, message: string, data: any) {
+		this.code = code;
+		this.message = message;
+		this.data = data;
+	}
+}
+
+class JSONRPCErrorGrblError extends JSONRPCErrorServerError {
+	constructor(data: any) {
+		super(-32000, "Error on grbl", data);
+	}
+}
+
+class JSONRPCErrorRemainGcode extends JSONRPCErrorServerError {
+	constructor(data: any) {
+		super(-32001, "Server gcode is not empty", data);
+	}
+}
 
 class GrblServer {
 	httpServer : http.Server;
@@ -34,13 +98,16 @@ class GrblServer {
 
 	loadConfig() {
 		this.config = <GrblServerConfig>{
-			serverPort: 8080,
-			serialPort: '/dev/tty.usbserial-AL011AVX',
-			serialBaud: 115200,
+			serverPort: config.get('serverPort'),
+			serialPort: config.get('serialPort'),
+			serialBaud: config.get('serialBaud'),
 		};
+		console.log('Launching with this config: ');
+		console.log(this.config);
 	}
 
 	startHttp() {
+		console.log('startHttp');
 		this.httpServer = http.createServer( (req, res) => {
 			console.log(req.url);
 			res.writeHead(404);
@@ -53,6 +120,7 @@ class GrblServer {
 	}
 
 	startWebSocket() {
+		console.log('startWebSocket');
 		this.sessions = [];
 
 		this.wsServer = new websocket.server({
@@ -78,35 +146,48 @@ class GrblServer {
 
 			this.sessions.push(connection);
 
-			connection.sendUTF(JSON.stringify({
-				id: null,
-				result: {
-					type: 'init',
-					lastAlarm: this.grbl.lastAlarm ? this.grbl.lastAlarm.message : null,
-					lastFeedback: this.grbl.lastFeedback ? this.grbl.lastFeedback.message : null,
-					status: this.grbl.status,
-				}
-			}));
+			this.sendInitialMessage(connection);
 
 			connection.on('message', (message) => {
-				if (message.type !== 'utf8') return;
-				console.log('Req: ' + message.utf8Data);
-				var data = JSON.parse(message.utf8Data);
-				var method: string = data.method;
-				var params: any = data.params || {};
-				var id: number = data.id;
-				this['service_' + method](params).
-					then( (result) => {
-						connection.sendUTF(JSON.stringify({
-							id: id,
-							result: result
-						}));
-					}, (error) => {
-						connection.sendUTF(JSON.stringify({
-							id: id,
-							error: error
-						}));
+				try {
+					if (message.type !== 'utf8') return;
+					console.log('Req: ' + message.utf8Data);
+					var req: JSONRPCRequest;
+					try {
+						req = JSON.parse(message.utf8Data);
+					} catch (e) {
+						this.sendMessage(connection, {
+							id: null,
+							error: JSONRPCErrorParseError,
+						});
+					}
+
+					var method = this['service_' + req.method];
+					if (!method) {
+						this.sendMessage(connection, {
+							id: req.id,
+							error: JSONRPCErrorMethodNotFound,
+						});
+					}
+
+					method.call(this, req.params || {}).
+						then( (result) => {
+							this.sendMessage(connection, {
+								id: req.id,
+								result: result
+							});
+						}, (error: JSONRPCErrorServerError) => {
+							this.sendMessage(connection, {
+								id: req.id,
+								error: error
+							});
+						});
+				} catch (e) {
+					this.sendMessage(connection, {
+						id: null,
+						error: JSONRPCErrorInternalError,
 					});
+				}
 			});
 
 			connection.on('close', (reasonCode, description) => {
@@ -117,11 +198,40 @@ class GrblServer {
 		});
 	}
 
+	sendInitialMessage(connection: websocket.connection) {
+		this.sendMessage(connection, {
+			id: null,
+			result: {
+				type: 'init',
+				lastAlarm: this.grbl.lastAlarm ? this.grbl.lastAlarm.message : null,
+				lastFeedback: this.grbl.lastFeedback ? this.grbl.lastFeedback.message : null,
+				status: this.grbl.status,
+			}
+		});
+	}
+
+	sendMessage(connection: websocket.connection, response: JSONRPCResponse) {
+		connection.sendUTF(JSON.stringify(response));
+	}
+
+	sendBroadcastMessage(message: any) {
+		for (let i = 0, it: websocket.connection; it = this.sessions[i]; i++) {
+			this.sendMessage(it, message);
+		}
+	}
+
 	service_gcode(params: any): Promise<any> {
 		return new Promise( (resolve, reject) => {
 			if (params.gcode) {
-				this.executeGcode(params.gcode);
-				this.broadcast({
+				if (this.remain.length) {
+					reject(new JSONRPCErrorRemainGcode(''));
+					return;
+				}
+
+				this.sent = [];
+				this.remain = params.gcode.split(/\n/);
+
+				this.sendBroadcastMessage({
 					id: null,
 					result: {
 						type: 'gcode',
@@ -129,6 +239,8 @@ class GrblServer {
 						remain: this.remain,
 					}
 				});
+
+				this.sendOneLine();
 				resolve();
 			} else {
 				resolve({
@@ -151,13 +263,8 @@ class GrblServer {
 		return this.grbl.command(params.command);
 	}
 
-	broadcast(message: any) {
-		for (let i = 0, it: websocket.connection; it = this.sessions[i]; i++) {
-			it.sendUTF(JSON.stringify(message));
-		}
-	}
-
 	openSerialPort() {
+		console.log('openSerialPort');
 		var sp = new serialport.SerialPort(this.config.serialPort, {
 			baudrate: this.config.serialBaud,
 			parser: serialport.parsers.readline("\n")
@@ -168,7 +275,7 @@ class GrblServer {
 
 		this.grbl.on('startup', (res) => {
 			this.initializeGrbl();
-			this.broadcast({
+			this.sendBroadcastMessage({
 				id: null,
 				result: {
 					type: 'startup',
@@ -179,7 +286,7 @@ class GrblServer {
 
 		this.grbl.on('statuschange', (status) => {
 			console.log('statuschange');
-			this.broadcast({
+			this.sendBroadcastMessage({
 				id: null,
 				result: {
 					type: 'status',
@@ -189,7 +296,7 @@ class GrblServer {
 		});
 
 		this.grbl.on('alarm', (res) => {
-			this.broadcast({
+			this.sendBroadcastMessage({
 				id: null,
 				result: {
 					type: 'alarm',
@@ -199,7 +306,7 @@ class GrblServer {
 		});
 
 		this.grbl.on('feedback', (res) => {
-			this.broadcast({
+			this.sendBroadcastMessage({
 				id: null,
 				result: {
 					type: 'feedback',
@@ -210,13 +317,13 @@ class GrblServer {
 
 		this.grbl.on('error', (e) => {
 			console.log('Error on grbl: ' + e);
-			this.broadcast({
+			this.sendBroadcastMessage({
 				id: null,
-				error: e
+				error: new JSONRPCErrorGrblError(e),
 			});
 			setTimeout( () => {
 				this.openSerialPort();
-			}, 1000);
+			}, 5000);
 		});
 	}
 
@@ -234,16 +341,6 @@ class GrblServer {
 			});
 	}
 
-	executeGcode(gcode: string) {
-		console.log('executeGcode');
-		if (this.remain.length) {
-			throw "remain gcode is not empty";
-		}
-		this.sent = [];
-		this.remain = gcode.split(/\n/);
-		this.sendOneLine();
-	}
-
 	sendOneLine() {
 		if (this.canceling) {
 			this.canceling = false;
@@ -252,7 +349,7 @@ class GrblServer {
 
 		if (!this.remain.length) {
 			// done
-			this.broadcast({
+			this.sendBroadcastMessage({
 				id: null,
 				result: {
 					type: 'done'
@@ -262,7 +359,7 @@ class GrblServer {
 		}
 		var code = this.remain.shift();
 		this.sent.push(code);
-			this.broadcast({
+			this.sendBroadcastMessage({
 				id: null,
 				result: {
 					type: 'gcode',
@@ -274,9 +371,9 @@ class GrblServer {
 				this.sendOneLine();
 			}, (e) => {
 				console.log('Error on sending gcode:' + e);
-				this.broadcast({
+				this.sendBroadcastMessage({
 					id: null,
-					error: e
+					error: new JSONRPCErrorGrblError(e),
 				});
 			});
 	}

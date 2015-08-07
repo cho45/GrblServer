@@ -8,7 +8,8 @@
   },
   "dependencies": {
 	  "serialport": "*",
-	  "websocket": "*"
+	  "websocket": "*",
+	  "config": "*"
   },
   "author": "cho45 <cho45@lowreal.net> (http://www.lowreal.net/)",
   "license": "MIT"

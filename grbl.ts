@@ -238,9 +238,14 @@ export class Grbl extends events.EventEmitter {
 	open():Promise<any> {
 		return new Promise( (resolve, reject) => {
 			this.serialport.open( (err) => {
-				if (err) reject(err);
+				if (err) {
+					this.emit('error', 'error on opening serialport');
+					reject(err);
+					return;
+				}
 				this.isOpened = true;
 				this.reset();
+				this.realtimeCommand("?");
 
 				this.serialport.on("data", (data) => {
 					this.processData(data);
@@ -341,9 +346,8 @@ export class Grbl extends events.EventEmitter {
 	}
 
 	processData(data: string) {
-		console.log('<<', data);
-
 		data = data.replace(/\s+$/, '');
+		console.log('<<', data);
 		if (!data) return;
 
 		this.emit("raw", data);
