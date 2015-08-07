@@ -1,0 +1,19 @@
+{
+  "name": "grbl-server-browser",
+  "version": "0.0.0",
+  "authors": [
+    "cho45 <cho45@lowreal.net>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "paper-elements": "PolymerElements/paper-elements#^1.0.0",
+    "iron-localstorage": "PolymerElements/iron-localstorage#^1.0.0"
+  }
+}

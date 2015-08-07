@@ -1,0 +1,389 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/hardware-icons.html">
+<link rel="import" href="../bower_components/iron-icons/device-icons.html">
+<link rel="import" href="../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+
+<!-- dom-module id="my-app-compact">
+	<style is="custom-style">
+		:root {
+			font-size: 11px;
+		}
+
+		paper-tabs {
+			background-color: #00bcd4;
+			color: #fff;
+			font-size: 11px;
+			height: 22px;
+			box-shadow: none;
+		}
+	</style>
+	<template>
+		<div style="width: 320px; height: 240px; outline: 1px solid #000; font-size:11px;">
+			<div style="width: 160px">
+				<paper-tabs selected="0" noink no-slide>
+					<paper-tab>Working</paper-tab>
+					<paper-tab>Machine</paper-tab>
+				</paper-tabs>
+				<table>
+					<tr>
+						<th>X</th>
+						<td>+000.00</td>
+					</tr>
+					<tr>
+						<th>Y</th>
+						<td>+000.00</td>
+					</tr>
+					<tr>
+						<th>Z</th>
+						<td>+000.00</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</template>
+</dom-module -->
+
+<dom-module id="my-app">
+	<style is="custom-style">
+		:host {
+			cursor: default;
+		}
+
+		paper-tabs {
+			background-color: #00bcd4;
+			color: #fff;
+			height: 30px;
+			margin: 10px 0 0 0;
+		}
+
+		paper-button {
+			background: var(--paper-grey-100);
+		}
+
+		table tr {
+		}
+
+		.coords {
+			font-size: 24px;
+			line-height: 24px;
+			color: #333;
+			width: 100%;
+		}
+
+		.coords th,
+		.coords td {
+			padding: 5px 10px;
+		}
+
+		.coords iron-icon {
+			width: 32px;
+			height: 32px;
+		}
+
+		.coords .axis {
+			padding: 0 30px;
+		}
+
+		.coords .reset {
+			width: 32px;
+			padding: 0;
+		}
+
+		.coords .number {
+			text-align: right;
+		}
+
+		.coords paper-button {
+			font-size: 16px;
+			background: #fff;
+		}
+
+		.jog {
+			font-size: 12px;
+		}
+
+		.jog iron-icon {
+			width: 32px;
+			height: 32px;
+		}
+
+		.jog paper-button {
+			white-space: nowrap;
+			background: #fff;
+		}
+
+		.axis-label {
+			color: #999;
+		}
+
+		.status {
+		}
+
+		.status div {
+			display: inline-block;
+		}
+
+		.status .title {
+			height: 100%;
+			padding: 12px;
+			color: #fff;
+			background: var(--paper-blue-grey-300);
+			font-size: 14px;
+		}
+
+		.status .title iron-icon {
+			padding: 5px;
+			margin-top: -2px;
+		}
+
+		.status .value {
+		}
+
+		paper-material {
+			margin: 10px;
+		}
+
+		paper-tabs[align-bottom] {
+			box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.15);
+		}
+
+		select {
+			border: none;
+		}
+
+		select option {
+			font-size: 12px;
+			padding: 5px;
+		}
+
+		select option:nth-child(even) {
+			background: var(--paper-grey-100);
+		}
+		
+		select option:nth-child(odd) {
+		}
+
+		.action-resume {
+			background: var(--paper-green-800);
+			color: #fff;
+		}
+
+		.action-pause {
+			background: var(--paper-yellow-800);
+			color: #fff;
+		}
+
+		.action-reset {
+			background: var(--paper-red-800);
+			color: #fff;
+		}
+	</style>
+	<template>
+		<paper-material elevation="0" style="width: 800px; margin: 0 auto" class="layout vertical">
+			<paper-material class="status layout horizontal" elevation="1">
+				<div class="flex">
+					<div class="title">
+						<iron-icon icon="device:network-wifi"></iron-icon>
+						Idle
+					</div>
+					<div class="" style="padding: 0 16px">
+						<div class="feedback" style="font-weight: bold">
+							<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
+							Grbl is locked. Unlock by:
+						</div>
+						<paper-button>
+							<iron-icon icon="icons:lock-open"></iron-icon>
+							Unlock
+						</paper-button>
+						or
+						<paper-button>
+							<iron-icon icon="icons:home"></iron-icon>
+							Homing
+						</paper-button>
+					</div>
+				</div>
+			</paper-material>
+			<div class="layout horizontal">
+				<paper-material class="" elevation="1">
+					<table class="coords">
+						<tr>
+							<th class="axis">X</th>
+							<td class="number">+000.000</td>
+							<td class="reset"><paper-button><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+						</tr>
+						<tr>
+							<th class="axis">Y</th>
+							<td class="number">+000.000</td>
+							<td class="reset"><paper-button><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+						</tr>
+						<tr>
+							<th class="axis">Z</th>
+							<td class="number">+000.000</td>
+							<td class="reset"><paper-button><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+						</tr>
+					</table>
+					<paper-tabs selected="0" noink no-slide align-bottom>
+						<paper-tab>Working</paper-tab>
+						<paper-tab>Machine</paper-tab>
+					</paper-tabs>
+					<div style="text-align: center; padding: 16px">
+						<paper-button>
+							<iron-icon icon="icons:home"></iron-icon>
+							Homing
+						</paper-button>
+						<paper-button>
+							<iron-icon icon="icons:home"></iron-icon>
+							Return to zero
+						</paper-button>
+					</div>
+				</paper-material>
+				<div class="flex layout vertical">
+					<div class="jog flex">
+						<table style="width: 300px; margin: 8px auto">
+							<tr>
+								<td>
+								</td>
+								<td>
+									<paper-button raised><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+										<div class="axis-label">+Y</div>
+									</paper-button>
+								</td>
+								<td>
+								</td>
+								<td>
+									<paper-button raised><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+										<div class="axis-label">+Z</div>
+									</paper-button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<paper-button raised><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
+										<span class="axis-label" style="margin-right: 10px">-Z</span>
+									</paper-button>
+								</td>
+								<td>
+								</td>
+								<td>
+									<paper-button raised>
+										<span class="axis-label" style="margin-left: 10px">+Z</span>
+										<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
+								</td>
+								<td>
+								</td>
+							</tr>
+							<tr>
+								<td>
+								</td>
+								<td>
+									<paper-button raised>
+										<div class="axis-label">-Y</div>
+										<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
+								</td>
+								<td>
+								</td>
+								<td>
+									<paper-button raised>
+										<div class="axis-label">-Z</div>
+										<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div class="flex">
+						<paper-material style="padding: 16px; text-align: center;">
+							<paper-menu-button style="padding: 0">
+								<paper-button class="dropdown-trigger" style="text-transform: none">
+									<iron-icon icon="av:fast-forward"></iron-icon>
+									Feed Rate: 500 mm/min
+								</paper-button>
+								<paper-menu class="dropdown-content">
+									<paper-item>100 mm/min</paper-item>
+									<paper-item>200 mm/min</paper-item>
+									<paper-item>500 mm/min</paper-item>
+									<paper-item>800 mm/min</paper-item>
+									<paper-item>1000 mm/min</paper-item>
+								</paper-menu>
+							</paper-menu-button>
+							<paper-menu-button style="padding: 0">
+								<paper-button class="dropdown-trigger" style="text-transform: none">
+									<iron-icon icon="image:straighten"></iron-icon>
+									Step: 1mm
+								</paper-button>
+								<paper-menu class="dropdown-content">
+									<paper-item>0.1mm</paper-item>
+									<paper-item>0.5mm</paper-item>
+									<paper-item>1mm</paper-item>
+									<paper-item>10mm</paper-item>
+								</paper-menu>
+							</paper-menu-button>
+						</paper-material>
+					</div>
+				</div>
+			</div>
+			<paper-material class="" style="padding: 16px;">
+				<div class="layout horizontal">
+					<div>
+						<paper-button class="action-resume">
+							<iron-icon icon="av:play-arrow"></iron-icon>
+							Resume
+						</paper-button>
+						<paper-button class="action-pause">
+							<iron-icon icon="av:pause"></iron-icon>
+							Pause
+						</paper-button>
+						<paper-button class="action-reset">
+							<iron-icon icon="av:stop"></iron-icon>
+							Reset
+						</paper-button>
+					</div>
+					<div style="line-height: 40px; padding-left: 16px; font-size: 16px">
+						Elapsed: 00:00, Remain: 00:00
+					</div>
+				</div>
+				<paper-progress value="10" style="width: 100%"></paper-progress>
+			</paper-material>
+			<paper-material class="" style="">
+				<paper-tabs selected="0" noink no-slide>
+					<paper-tab>Command Line</paper-tab>
+					<paper-tab>Upload File</paper-tab>
+				</paper-tabs>
+				<div style="padding: 16px">
+					<paper-input label="Command"></paper-input>
+				</div>
+				<div style="padding: 16px">
+					<select size="10" style="width: 100%">
+						<option>G00 0000</option>
+						<option>G00 0000</option>
+						<option>G00 0000</option>
+						<option>G00 0000</option>
+						<option>G00 0000</option>
+						<option>G00 0000</option>
+					</select>
+				</div>
+			</paper-material>
+		</paper-material>
+	</template>
+</dom-module>
+
+<script src="app.js"></script>
