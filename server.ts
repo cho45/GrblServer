@@ -174,12 +174,12 @@ class GrblServer {
 						then( (result) => {
 							this.sendMessage(connection, {
 								id: req.id,
-								result: result
+								result: result || null
 							});
 						}, (error: JSONRPCErrorServerError) => {
 							this.sendMessage(connection, {
 								id: req.id,
-								error: error
+								error: error || null
 							});
 						});
 				} catch (e) {
@@ -261,6 +261,27 @@ class GrblServer {
 
 	service_command(params: any): Promise<any> {
 		return this.grbl.command(params.command);
+	}
+
+	service_reset(params: any): Promise<any> {
+		return new Promise( (resolve, reject) => {
+			this.grbl.reset();
+			resolve();
+		});
+	}
+
+	service_resume(params: any): Promise<any> {
+		return new Promise( (resolve, reject) => {
+			this.grbl.realtimeCommand('~');
+			resolve();
+		});
+	}
+
+	service_pause(params: any): Promise<any> {
+		return new Promise( (resolve, reject) => {
+			this.grbl.realtimeCommand('!');
+			resolve();
+		});
 	}
 
 	openSerialPort() {

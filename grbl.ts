@@ -118,7 +118,8 @@ export class GrblLineParser {
 			}
 		}
 
-		throw "unknown message: " + line;
+		console.log("unknown message: " + line);
+		return null;
 	}
 
 	parseStartup(line: string): GrblLineParserResult {
@@ -236,6 +237,10 @@ export class Grbl extends events.EventEmitter {
 	}
 
 	open():Promise<any> {
+		this.on("startup", (r) => {
+			this.realtimeCommand("?");
+		});
+
 		return new Promise( (resolve, reject) => {
 			this.serialport.open( (err) => {
 				if (err) {
@@ -245,7 +250,6 @@ export class Grbl extends events.EventEmitter {
 				}
 				this.isOpened = true;
 				this.reset();
-				this.realtimeCommand("?");
 
 				this.serialport.on("data", (data) => {
 					this.processData(data);
@@ -319,10 +323,14 @@ export class Grbl extends events.EventEmitter {
 
 	getStatus():Promise<any> {
 		return new Promise( (resolve, reject) => {
-			this.once("status", (res) => {
-				resolve(res);
-			});
-			this.realtimeCommand("?");
+			if (this.status.state !== STATE_ALARM) {
+				this.once("status", (res) => {
+					resolve(res);
+				});
+				this.realtimeCommand("?");
+			} else {
+				reject();
+			}
 		});
 	}
 
@@ -352,6 +360,7 @@ export class Grbl extends events.EventEmitter {
 
 		this.emit("raw", data);
 		var result = this.parser.parse(data);
+		if (!result) return;
 		this.emit("response", result);
 		if (result instanceof GrblLineParserResultStatus) {
 			if (!this.status.equals(result)) {
@@ -371,7 +380,9 @@ export class Grbl extends events.EventEmitter {
 		} else
 		if (result instanceof GrblLineParserResultAlarm) {
 			this.lastAlarm = result;
+			this.status.state = STATE_ALARM;
 			this.emit("alarm", result);
+			this.emit("status", this.status);
 		} else
 		if (result instanceof GrblLineParserResultFeedback) {
 			this.lastFeedback = result;

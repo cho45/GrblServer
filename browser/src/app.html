@@ -151,6 +151,32 @@
 			font-size: 14px;
 		}
 
+		.status .title.Idle {
+		}
+
+		.status .title.Alarm {
+			background: var(--paper-red-800);
+		}
+
+		.status .title.Run {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Hold {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Home {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Door {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Check {
+		}
+
 		.status .title iron-icon {
 			padding: 5px;
 			margin-top: -2px;
@@ -202,24 +228,32 @@
 		<paper-material elevation="0" style="width: 800px; margin: 0 auto" class="layout vertical">
 			<paper-material class="status layout horizontal" elevation="1">
 				<div class="flex">
-					<div class="title">
-						<iron-icon icon="device:network-wifi"></iron-icon>
-						Idle
+					<div class$="{{sprintf('title %s', status.state)}}">
+						<iron-icon icon="{{conditional(isConnected, 'device:network-wifi', 'device:signal-wifi-off')}}"></iron-icon>
+						<span>{{status.state}}</span>
 					</div>
 					<div class="" style="padding: 0 16px">
-						<div class="feedback" style="font-weight: bold">
-							<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
-							Grbl is locked. Unlock by:
-						</div>
-						<paper-button>
-							<iron-icon icon="icons:lock-open"></iron-icon>
-							Unlock
-						</paper-button>
-						or
-						<paper-button>
-							<iron-icon icon="icons:home"></iron-icon>
-							Homing
-						</paper-button>
+						<template is="dom-if" if="{{equals(status.state, 'Alarm')}}">
+							<div class="feedback" style="font-weight: bold">
+								<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
+								Grbl is locked. Unlock by:
+							</div>
+							<paper-button on-click="commandUnlock">
+								<iron-icon icon="icons:lock-open"></iron-icon>
+								Unlock
+							</paper-button>
+							or
+							<paper-button on-click="commandHoming">
+								<iron-icon icon="icons:home"></iron-icon>
+								Homing
+							</paper-button>
+						</template>
+						<template is="dom-if" if="{{error}}">
+							<div class="error" style="font-weight: bold">
+								<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
+								<span>{{error}}</span>
+							</div>
+						</template>
 					</div>
 				</div>
 			</paper-material>
@@ -228,21 +262,21 @@
 					<table class="coords">
 						<tr>
 							<th class="axis">X</th>
-							<td class="number">+000.000</td>
-							<td class="reset"><paper-button><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="number">{{formatCoords('x', status.workingPosition.x, status.machinePosition.x, positioningSystem)}}</td>
+							<td class="reset"><paper-button data-axis="x" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Y</th>
-							<td class="number">+000.000</td>
-							<td class="reset"><paper-button><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="number">{{formatCoords('y', status.workingPosition.y, status.machinePosition.y, positioningSystem)}}</td>
+							<td class="reset"><paper-button data-axis="y" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Z</th>
-							<td class="number">+000.000</td>
-							<td class="reset"><paper-button><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="number">{{formatCoords('z', status.workingPosition.z, status.machinePosition.z, positioningSystem)}}</td>
+							<td class="reset"><paper-button data-axis="z" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 					</table>
-					<paper-tabs selected="0" noink no-slide align-bottom>
+					<paper-tabs selected="{{positioningSystem}}" noink no-slide align-bottom>
 						<paper-tab>Working</paper-tab>
 						<paper-tab>Machine</paper-tab>
 					</paper-tabs>
@@ -264,29 +298,29 @@
 								<td>
 								</td>
 								<td>
-									<paper-button raised><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+									<paper-button raised data-axis="y" data-direction="+1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 										<div class="axis-label">+Y</div>
 									</paper-button>
 								</td>
 								<td>
 								</td>
 								<td>
-									<paper-button raised><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+									<paper-button raised data-axis="z" data-direction="+1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 										<div class="axis-label">+Z</div>
 									</paper-button>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									<paper-button raised><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
-										<span class="axis-label" style="margin-right: 10px">-Z</span>
+									<paper-button raised data-axis="x" data-direction="-1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
+										<span class="axis-label" style="margin-right: 10px">-X</span>
 									</paper-button>
 								</td>
 								<td>
 								</td>
 								<td>
-									<paper-button raised>
-										<span class="axis-label" style="margin-left: 10px">+Z</span>
+									<paper-button raised data-axis="x" data-direction="+1" on-click="commandMove">
+										<span class="axis-label" style="margin-left: 10px">+X</span>
 										<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
 								</td>
 								<td>
@@ -296,14 +330,14 @@
 								<td>
 								</td>
 								<td>
-									<paper-button raised>
+									<paper-button raised data-axis="y" data-direction="-1" on-click="commandMove">
 										<div class="axis-label">-Y</div>
 										<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 								</td>
 								<td>
 								</td>
 								<td>
-									<paper-button raised>
+									<paper-button raised data-axis="z" data-direction="-1" on-click="commandMove">
 										<div class="axis-label">-Z</div>
 										<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 								</td>
@@ -315,7 +349,7 @@
 							<paper-menu-button style="padding: 0">
 								<paper-button class="dropdown-trigger" style="text-transform: none">
 									<iron-icon icon="av:fast-forward"></iron-icon>
-									Feed Rate: 500 mm/min
+									Feed Rate: <span>{{jogFeedRate}}</span> mm/min
 								</paper-button>
 								<paper-menu class="dropdown-content">
 									<paper-item>100 mm/min</paper-item>
@@ -328,7 +362,7 @@
 							<paper-menu-button style="padding: 0">
 								<paper-button class="dropdown-trigger" style="text-transform: none">
 									<iron-icon icon="image:straighten"></iron-icon>
-									Step: 1mm
+									Step: <span>{{jogStep}}</span> mm
 								</paper-button>
 								<paper-menu class="dropdown-content">
 									<paper-item>0.1mm</paper-item>
@@ -344,15 +378,15 @@
 			<paper-material class="" style="padding: 16px;">
 				<div class="layout horizontal">
 					<div>
-						<paper-button class="action-resume">
+						<paper-button class="action-resume" on-click="commandResume">
 							<iron-icon icon="av:play-arrow"></iron-icon>
 							Resume
 						</paper-button>
-						<paper-button class="action-pause">
+						<paper-button class="action-pause" on-click="commandPause">
 							<iron-icon icon="av:pause"></iron-icon>
 							Pause
 						</paper-button>
-						<paper-button class="action-reset">
+						<paper-button class="action-reset" on-click="commandReset">
 							<iron-icon icon="av:stop"></iron-icon>
 							Reset
 						</paper-button>
@@ -386,4 +420,5 @@
 	</template>
 </dom-module>
 
+<script src="../bower_components/sprintf/dist/sprintf.min.js"></script>
 <script src="app.js"></script>
