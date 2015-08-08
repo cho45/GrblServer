@@ -228,6 +228,33 @@
 			background: var(--paper-red-800);
 			color: #fff;
 		}
+
+		.gcode {
+			font-family: monospace;
+			font-size: 12px;
+			line-height: 12px;
+		}
+
+		.gcode .line {
+			padding: 6px;
+		}
+
+		.gcode .line:nth-child(even) {
+			background: var(--paper-grey-100);
+		}
+
+		.gcode .line:nth-child(odd) {
+		}
+
+		.gcode .line.sent:nth-child(even) {
+			background: var(--paper-grey-300);
+			color: var(--paper-grey-800);
+		}
+
+		.gcode .line.sent:nth-child(odd) {
+			background: var(--paper-grey-200);
+			color: var(--paper-grey-800);
+		}
 	</style>
 	<template>
 		<div class="layout horizontal">
@@ -420,7 +447,27 @@
 						</div>
 					</div>
 					<div style="padding: 16px">
+						<p>
+							Uploaded file: <span>{{gcode.name}}</span>
+						</p>
+						<paper-button class="action-resume" on-click="commandRunGCode">
+							<iron-icon icon="av:play-arrow"></iron-icon>
+							Execute
+						</paper-button>
 						<input type="file" on-change="uploadFile"></input>
+						<div class="layout horizontal">
+							<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly></paper-input>
+							<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly></paper-input>
+							<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly></paper-input>
+						</div>
+						<div class="gcode" style="overflow-y: scroll; height: 240px">
+							<template is="dom-repeat" items="{{gcode.sent}}">
+								<div class="line sent">{{item}}</div>
+							</template>
+							<template is="dom-repeat" items="{{gcode.remain}}">
+								<div class="line">{{item}}</div>
+							</template>
+						</div>
 					</div>
 				</iron-pages>
 			</paper-material>
