@@ -352,11 +352,11 @@
 									Feed Rate: <span>{{jogFeedRate}}</span> mm/min
 								</paper-button>
 								<paper-menu class="dropdown-content">
-									<paper-item>100 mm/min</paper-item>
-									<paper-item>200 mm/min</paper-item>
-									<paper-item>500 mm/min</paper-item>
-									<paper-item>800 mm/min</paper-item>
-									<paper-item>1000 mm/min</paper-item>
+									<paper-item>Feed Rate: 100 mm/min</paper-item>
+									<paper-item>Feed Rate: 200 mm/min</paper-item>
+									<paper-item>Feed Rate: 500 mm/min</paper-item>
+									<paper-item>Feed Rate: 800 mm/min</paper-item>
+									<paper-item>Feed Rate: 1000 mm/min</paper-item>
 								</paper-menu>
 							</paper-menu-button>
 							<paper-menu-button style="padding: 0">
@@ -365,10 +365,10 @@
 									Step: <span>{{jogStep}}</span> mm
 								</paper-button>
 								<paper-menu class="dropdown-content">
-									<paper-item>0.1mm</paper-item>
-									<paper-item>0.5mm</paper-item>
-									<paper-item>1mm</paper-item>
-									<paper-item>10mm</paper-item>
+									<paper-item>Step: 0.1mm</paper-item>
+									<paper-item>Step: 0.5mm</paper-item>
+									<paper-item>Step: 1mm</paper-item>
+									<paper-item>Step: 10mm</paper-item>
 								</paper-menu>
 							</paper-menu-button>
 						</paper-material>
@@ -407,12 +407,9 @@
 				</div>
 				<div style="padding: 16px">
 					<select size="10" style="width: 100%">
-						<option>G00 0000</option>
-						<option>G00 0000</option>
-						<option>G00 0000</option>
-						<option>G00 0000</option>
-						<option>G00 0000</option>
-						<option>G00 0000</option>
+						<template is="dom-repeat" items="{{commandHistory}}">
+							<option>{{item}}</option>
+						</template>
 					</select>
 				</div>
 			</paper-material>
