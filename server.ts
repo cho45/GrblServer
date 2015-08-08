@@ -5,7 +5,7 @@
 ///<reference path="./typings/config.d.ts" />
 
 import * as websocket from 'websocket';
-import {Grbl} from './grbl';
+import {Grbl, STATE_IDLE} from './grbl';
 import http = require('http');
 import serialport = require("serialport");
 import config = require("config");
@@ -72,9 +72,21 @@ class JSONRPCErrorGrblError extends JSONRPCErrorServerError {
 	}
 }
 
-class JSONRPCErrorRemainGcode extends JSONRPCErrorServerError {
+class JSONRPCErrorNotIdleError extends JSONRPCErrorServerError {
 	constructor(data: any) {
-		super(-32001, "Server gcode is not empty", data);
+		super(-32001, "Grbl state is not idle", data);
+	}
+}
+
+
+class GCode {
+	name : string;
+	sent : Array<string>
+	remain: Array<string>
+	constructor(name: string, gcode: string) {
+		this.name   = name;
+		this.sent   = [];
+		this.remain = gcode.split(/\n/);
 	}
 }
 
@@ -86,8 +98,7 @@ class GrblServer {
 	config: GrblServerConfig;
 
 	canceling: boolean;
-	sent : Array<string>;
-	remain: Array<string>;
+	gcode: GCode;
 
 	start() {
 		this.loadConfig();
@@ -125,8 +136,11 @@ class GrblServer {
 
 		this.wsServer = new websocket.server({
 			httpServer: this.httpServer,
+			maxReceivedFrameSize: 131072,
+			maxReceivedMessageSize: 10 * 1024 * 1024,
 			autoAcceptConnections: false
 		});
+		console.log(this.wsServer);
 
 		this.wsServer.on('request', (req) => {
 			if (!req.remoteAddress.match(/^((::ffff:)?(127\.|10\.|192\.168\.)|::1)/)) {
@@ -149,6 +163,7 @@ class GrblServer {
 			this.sendInitialMessage(connection);
 
 			connection.on('message', (message) => {
+				console.log(message);
 				try {
 					if (message.type !== 'utf8') return;
 					console.log('Req: ' + message.utf8Data);
@@ -162,6 +177,7 @@ class GrblServer {
 						});
 					}
 
+					console.log('request ', req.method);
 					var method = this['service_' + req.method];
 					if (!method) {
 						this.sendMessage(connection, {
@@ -190,8 +206,16 @@ class GrblServer {
 				}
 			});
 
+			connection.on('frame', (frame: websocket.frame) => {
+				console.log(frame);
+			});
+
+			connection.on('error', (e) => {
+				console.log(e);
+			});
+
 			connection.on('close', (reasonCode, description) => {
-				console.log('Peer ' + connection.remoteAddress + ' disconnected.');
+				console.log('Peer ' + connection.remoteAddress + ' disconnected.', reasonCode, description);
 				this.sessions.splice(this.sessions.indexOf(connection), 1);
 				console.log(this.sessions);
 			});
@@ -220,33 +244,39 @@ class GrblServer {
 		}
 	}
 
+	service_upload(params: any): Promise<any> {
+		return new Promise( (resolve, reject) => {
+//			if (this.grbl.status.state !== STATE_IDLE) {
+//				reject(new JSONRPCErrorNotIdleError(this.grbl.status.state));
+//				return;
+//			}
+
+			// load new gcode
+			this.gcode = new GCode(params.name, params.gcode);
+
+			console.log('New gcode uploaded: ', this.gcode.remain.length, 'lines');
+
+			this.sendBroadcastMessage({
+				id: null,
+				result: {
+					type: 'gcode',
+					gcode: this.gcode,
+				}
+			});
+
+			resolve();
+		});
+	}
+
 	service_gcode(params: any): Promise<any> {
 		return new Promise( (resolve, reject) => {
-			if (params.gcode) {
-				if (this.remain.length) {
-					reject(new JSONRPCErrorRemainGcode(''));
-					return;
-				}
-
-				this.sent = [];
-				this.remain = params.gcode.split(/\n/);
-
-				this.sendBroadcastMessage({
-					id: null,
-					result: {
-						type: 'gcode',
-						sent: this.sent,
-						remain: this.remain,
-					}
-				});
-
+			if (params.send) {
 				this.sendOneLine();
 				resolve();
 			} else {
 				resolve({
 					type: 'gcode',
-					sent: this.sent,
-					remain: this.remain,
+					gcode: this.gcode,
 				});
 			}
 		});
@@ -353,8 +383,7 @@ class GrblServer {
 	}
 
 	initializeGrbl() {
-		this.sent = [];
-		this.remain = [];
+		this.gcode = null;
 		this.grbl.getConfig().
 			then( (res) => {
 				console.log(res);
@@ -368,7 +397,7 @@ class GrblServer {
 			return;
 		}
 
-		if (!this.remain.length) {
+		if (!this.gcode.remain.length) {
 			// done
 			this.sendBroadcastMessage({
 				id: null,
@@ -378,8 +407,8 @@ class GrblServer {
 			});
 			return;
 		}
-		var code = this.remain.shift();
-		this.sent.push(code);
+		var code = this.gcode.remain.shift();
+		this.gcode.sent.push(code);
 			this.sendBroadcastMessage({
 				id: null,
 				result: {
