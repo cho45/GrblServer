@@ -407,17 +407,23 @@
 			</div>
 			<paper-material class="" style="padding: 16px;">
 				<div class="layout horizontal">
-					<div>
-						<paper-button class="action-resume" on-click="commandResume">
-							<iron-icon icon="av:play-arrow"></iron-icon>
-							Resume
-						</paper-button>
-						<paper-button class="action-pause" on-click="commandPause">
-							<iron-icon icon="av:pause"></iron-icon>
-							Pause
-						</paper-button>
+					<div class="flex">
+						<template is="dom-if" if="{{equals(status.state, 'Hold')}}">
+							<paper-button class="action-resume" on-click="commandResume">
+								<iron-icon icon="av:play-arrow"></iron-icon>
+								Resume
+							</paper-button>
+						</template>
+						<template is="dom-if" if="{{!equals(status.state, 'Hold')}}">
+							<paper-button class="action-pause" on-click="commandPause">
+								<iron-icon icon="av:pause"></iron-icon>
+								Pause
+							</paper-button>
+						</template>
+					</div>
+					<div class="flex" style="text-align: right">
 						<paper-button class="action-reset" on-click="commandReset">
-							<iron-icon icon="av:stop"></iron-icon>
+							<iron-icon icon="icons:cancel"></iron-icon>
 							Reset
 						</paper-button>
 					</div>

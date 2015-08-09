@@ -379,7 +379,7 @@ export class Grbl extends events.EventEmitter {
 		if (result instanceof GrblLineParserResultError) {
 			// callback maybe null after reseting
 			var callback = this.waitingQueue.shift();
-			if (callback) callback(null);
+			if (callback) callback(result);
 		} else
 		if (result instanceof GrblLineParserResultStartup) {
 			this.emit("startup", result);
