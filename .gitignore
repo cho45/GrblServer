@@ -1,2 +1,5 @@
-*.js
 node_modules/
+grbl.js
+server.js
+test.js
+
