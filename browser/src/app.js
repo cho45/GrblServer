@@ -202,9 +202,7 @@ Polymer({
 			self.set('gcode.startedTime', res.time);
 		} else
 		if (res.type === 'gcode.progress') {
-			console.log('gcode.progress');
 			self.push('gcode.sent', self.shift('gcode.remain'));
-			console.log(self.gcode);
 			self.async(function () {
 				var container = document.getElementById('gcode-list');
 				var target = container.querySelector('.remain');

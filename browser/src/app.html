@@ -470,12 +470,14 @@
 							</div>
 						</template>
 						<template is="dom-if" if="{{gcode}}">
-							<div style="vertical-align: baseline">
-								<paper-button class="action-resume" on-click="commandRunGCode">
-									<iron-icon icon="av:play-arrow"></iron-icon>
-									Execute
-								</paper-button>
-							</div>
+							<template is="dom-if" if="{{!gcode.startedTime}}">
+								<div style="vertical-align: baseline">
+									<paper-button class="action-resume" on-click="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
+										<iron-icon icon="av:play-arrow"></iron-icon>
+										Execute
+									</paper-button>
+								</div>
+							</template>
 							<div class="layout horizontal">
 								<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
 								<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
