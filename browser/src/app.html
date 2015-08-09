@@ -198,20 +198,25 @@
 			box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.15);
 		}
 
-		select {
-			border: none;
+
+		#command-history {
+			overflow-y: scroll;
+			font-family: monospace;
+			font-size: 12px;
+			line-height: 12px;
+			height: 280px;
 		}
 
-		select option {
+		#command-history .line {
 			font-size: 12px;
 			padding: 5px;
 		}
 
-		select option:nth-child(even) {
+		#command-history .line:nth-child(even) {
 			background: var(--paper-grey-100);
 		}
 		
-		select option:nth-child(odd) {
+		#command-history .line:nth-child(odd) {
 		}
 
 		.action-resume {
@@ -447,11 +452,11 @@
 							<paper-input label="Command" placeholder="G28" on-keydown="commandAny"></paper-input>
 						</div>
 						<div style="padding: 16px">
-							<select size="10" style="width: 100%">
+							<div id="command-history">
 								<template is="dom-repeat" items="{{commandHistory}}">
-									<option>{{item}}</option>
+									<div class="line">{{item}}</div>
 								</template>
-							</select>
+							</div>
 						</div>
 					</div>
 					<div style="padding: 16px">
