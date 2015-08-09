@@ -69,6 +69,17 @@ Polymer({
 		gcode: {
 			type: Object,
 			value: null
+		},
+
+		config: {
+			type: Array,
+			value: [
+				{
+					name: '$1',
+					desc: 'step pulse, usec',
+					value: 10
+				}
+			]
 		}
 	},
 
@@ -106,6 +117,54 @@ Polymer({
 		});
 
 		this.openWebSocket();
+
+		this.loadConfig();
+		var dialog = document.getElementById('config-dialog');
+		document.body.appendChild(dialog);
+		dialog.open();
+	},
+
+	loadConfig : function () {
+		var lines = [ '$0=10 (step pulse, usec)',
+'$1=25 (step idle delay, msec)',
+'$2=0 (step port invert mask:00000000)',
+'$3=6 (dir port invert mask:00000110)',
+'$4=0 (step enable invert, bool)',
+'$5=0 (limit pins invert, bool)',
+'$6=0 (probe pin invert, bool)',
+'$10=3 (status report mask:00000011)',
+'$11=0.020 (junction deviation, mm)',
+'$12=0.002 (arc tolerance, mm)',
+'$13=0 (report inches, bool)',
+'$20=0 (soft limits, bool)',
+'$21=0 (hard limits, bool)',
+'$22=0 (homing cycle, bool)',
+'$23=1 (homing dir invert mask:00000001)',
+'$24=50.000 (homing feed, mm/min)',
+'$25=635.000 (homing seek, mm/min)',
+'$26=250 (homing debounce, msec)',
+'$27=1.000 (homing pull-off, mm)',
+'$100=314.961 (x, step/mm)',
+'$101=314.961 (y, step/mm)',
+'$102=314.961 (z, step/mm)',
+'$110=635.000 (x max rate, mm/min)',
+'$111=635.000 (y max rate, mm/min)',
+'$112=635.000 (z max rate, mm/min)',
+'$120=50.000 (x accel, mm/sec^2)',
+'$121=50.000 (y accel, mm/sec^2)',
+'$122=50.000 (z accel, mm/sec^2)',
+'$130=225.000 (x max travel, mm)',
+'$131=125.000 (y max travel, mm)',
+'$132=170.000 (z max travel, mm)'];
+
+		for (var i = 0, len = lines.length; i < len; i++) {
+			var m = lines[i].match(/^(\$\d+)=([^ ]+) \((.+?)\)/);
+			this.push('config', {
+				name : m[1],
+				desc : m[3],
+				value: m[2]
+			});
+		}
 	},
 
 	openWebSocket : function () {

@@ -20,6 +20,7 @@
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html ">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
@@ -259,6 +260,14 @@
 		.gcode .line.sent:nth-child(odd) {
 			background: var(--paper-grey-400);
 			color: var(--paper-grey-800);
+		}
+
+		#config-dialog {
+		}
+
+		#config-dialog .config {
+			width: 300px;
+			margin: 10px;
 		}
 	</style>
 	<template>
@@ -504,6 +513,22 @@
 				</iron-pages>
 			</paper-material>
 		</div>
+
+
+		<paper-dialog id="config-dialog" style="width: 80%">
+			<h2>Configure Grbl</h2>
+			<div style="height: 500px" class="layout wrap horizontal">
+				<template is="dom-repeat" items="{{config}}">
+					<div class="config">
+						<paper-input label="{{item.desc}}" name="{{item.name}}" value="{{item.value}}"></paper-input>
+					</div>
+				</template>
+			</div>
+			<div class="buttons">
+				<paper-button dialog-dismiss>Cancel</paper-button>
+				<paper-button dialog-confirm>Accept</paper-button>
+			</div>
+		</paper-dialog>
 	</template>
 </dom-module>
 
