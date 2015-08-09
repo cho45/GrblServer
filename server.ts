@@ -323,7 +323,11 @@ class GrblServer {
 	}
 
 	service_command(params: any): Promise<any> {
-		return this.grbl.command(params.command);
+		if (params.command === '$$') {
+			return this.grbl.getConfig();
+		} else {
+			return this.grbl.command(params.command);
+		}
 	}
 
 	service_reset(params: any): Promise<any> {

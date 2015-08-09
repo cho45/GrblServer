@@ -317,6 +317,7 @@ export class Grbl extends events.EventEmitter {
 			this.on("dollar", listener);
 			this.command("$$").
 				then( () => {
+					this.removeListener("dollar", listener);
 					resolve(results);
 				}, reject);
 		});
