@@ -422,7 +422,9 @@
 						</paper-button>
 					</div>
 					<div style="line-height: 40px; padding-left: 16px; font-size: 16px">
-						Elapsed: 00:00, Remain: 00:00
+						<template is="dom-if" if="{{elapsedTime}}">
+							Elapsed: <span>{{elapsedTime}}</span>
+						</template>
 					</div>
 				</div>
 				<paper-progress value="10" style="width: 100%"></paper-progress>
@@ -436,7 +438,7 @@
 				<iron-pages selected="{{commandTab}}">
 					<div>
 						<div style="padding: 16px">
-							<paper-input label="Command"></paper-input>
+							<paper-input label="Command" placeholder="G28" on-keydown="commandAny"></paper-input>
 						</div>
 						<div style="padding: 16px">
 							<select size="10" style="width: 100%">
@@ -447,30 +449,44 @@
 						</div>
 					</div>
 					<div style="padding: 16px">
-						<p>
-							Uploaded file: <span>{{gcode.name}}</span>
-							(is uploaded at: <span>{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}</span>,
-							started at: <span>{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}</span>
-							)
-						</p>
-						<paper-button class="action-resume" on-click="commandRunGCode">
-							<iron-icon icon="av:play-arrow"></iron-icon>
-							Execute
-						</paper-button>
-						<input type="file" on-change="uploadFile"></input>
-						<div class="layout horizontal">
-							<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly></paper-input>
-							<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly></paper-input>
-							<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly></paper-input>
-						</div>
-						<div id="gcode-list" class="gcode" style="overflow-y: scroll; height: 240px; position: relative">
-							<template is="dom-repeat" items="{{gcode.sent}}">
-								<div class="line sent">{{item}}</div>
-							</template>
-							<template is="dom-repeat" items="{{gcode.remain}}">
-								<div class="line remain">{{item}}</div>
-							</template>
-						</div>
+						<template is="dom-if" if="{{!gcode}}">
+							<div id="upload-file" style="padding: 20px">
+								<div style="padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
+									Drag and Drop here
+									<div style="font-size: 50%">or click to open select dialogue</div>
+								</div>
+								<input type="file" style="visibility: hidden"></input>
+							</div>
+						</template>
+						<template is="dom-if" if="{{gcode}}">
+							<div style="vertical-align: baseline">
+								<paper-button class="action-resume" on-click="commandRunGCode">
+									<iron-icon icon="av:play-arrow"></iron-icon>
+									Execute
+								</paper-button>
+							</div>
+							<div class="layout horizontal">
+								<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
+								<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
+									<paper-icon-button icon="icons:clear" on-click="commandClearUploadedFile" title="Clear uploaded file"></paper-icon-button>
+								</div>
+								<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly></paper-input>
+								<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly></paper-input>
+							</div>
+							<div class="layout horizontal">
+								<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly></paper-input>
+								<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly></paper-input>
+								<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly></paper-input>
+							</div>
+							<div id="gcode-list" class="gcode" style="overflow-y: scroll; height: 240px; position: relative">
+								<template is="dom-repeat" items="{{gcode.sent}}">
+									<div class="line sent">{{item}}</div>
+								</template>
+								<template is="dom-repeat" items="{{gcode.remain}}">
+									<div class="line remain">{{item}}</div>
+								</template>
+							</div>
+						</template>
 					</div>
 				</iron-pages>
 			</paper-material>

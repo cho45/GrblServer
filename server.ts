@@ -296,6 +296,16 @@ class GrblServer {
 					}
 				});
 				resolve();
+			} else
+			if (params.clear) {
+				this.gcode = null;
+				this.sendBroadcastMessage({
+					id: null,
+					result: {
+						type: 'gcode',
+						gcode: this.gcode,
+					}
+				});
 			} else {
 				resolve({
 					type: 'gcode',
