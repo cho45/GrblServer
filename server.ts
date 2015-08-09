@@ -83,10 +83,15 @@ class GCode {
 	name : string;
 	sent : Array<string>
 	remain: Array<string>
+	total: number;
+	createdTime: number;
+	startedTime : number;
 	constructor(name: string, gcode: string) {
 		this.name   = name;
 		this.sent   = [];
 		this.remain = gcode.split(/\n/);
+		this.total  = this.remain.length;
+		this.createdTime = new Date().getTime();
 	}
 }
 
@@ -232,6 +237,16 @@ class GrblServer {
 				status: this.grbl.status,
 			}
 		});
+
+		if (this.gcode) {
+			this.sendMessage(connection, {
+				id: null,
+				result: {
+					type: 'gcode',
+					gcode: this.gcode,
+				}
+			});
+		}
 	}
 
 	sendMessage(connection: websocket.connection, response: JSONRPCResponse) {
@@ -270,8 +285,16 @@ class GrblServer {
 
 	service_gcode(params: any): Promise<any> {
 		return new Promise( (resolve, reject) => {
-			if (params.send) {
+			if (params.execute) {
+				this.gcode.startedTime = new Date().getTime();
 				this.sendOneLine();
+				this.sendBroadcastMessage({
+					id: null,
+					result: {
+						type: 'gcode.start',
+						time: this.gcode.startedTime,
+					}
+				});
 				resolve();
 			} else {
 				resolve({
@@ -331,6 +354,13 @@ class GrblServer {
 				result: {
 					type: 'startup',
 					version: res.version,
+				}
+			});
+			this.sendBroadcastMessage({
+				id: null,
+				result: {
+					type: 'gcode',
+					gcode: null,
 				}
 			});
 		});
@@ -402,24 +432,25 @@ class GrblServer {
 			this.sendBroadcastMessage({
 				id: null,
 				result: {
-					type: 'done'
+					type: 'gcode.done'
 				}
 			});
 			return;
 		}
 		var code = this.gcode.remain.shift();
 		this.gcode.sent.push(code);
-			this.sendBroadcastMessage({
-				id: null,
-				result: {
-					type: 'gcode',
-					gcode: code,
-				}
-			});
+		this.sendBroadcastMessage({
+			id: null,
+			result: {
+				type: 'gcode.progress',
+				gcode: code,
+			}
+		});
 		this.grbl.command(code).
 			then( () => {
 				this.sendOneLine();
 			}, (e) => {
+				this.sendOneLine();
 				console.log('Error on sending gcode:' + e);
 				this.sendBroadcastMessage({
 					id: null,

@@ -247,12 +247,12 @@
 		}
 
 		.gcode .line.sent:nth-child(even) {
-			background: var(--paper-grey-300);
+			background: var(--paper-grey-500);
 			color: var(--paper-grey-800);
 		}
 
 		.gcode .line.sent:nth-child(odd) {
-			background: var(--paper-grey-200);
+			background: var(--paper-grey-400);
 			color: var(--paper-grey-800);
 		}
 	</style>
@@ -449,6 +449,9 @@
 					<div style="padding: 16px">
 						<p>
 							Uploaded file: <span>{{gcode.name}}</span>
+							(is uploaded at: <span>{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}</span>,
+							started at: <span>{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}</span>
+							)
 						</p>
 						<paper-button class="action-resume" on-click="commandRunGCode">
 							<iron-icon icon="av:play-arrow"></iron-icon>
@@ -460,12 +463,12 @@
 							<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly></paper-input>
 							<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly></paper-input>
 						</div>
-						<div class="gcode" style="overflow-y: scroll; height: 240px">
+						<div id="gcode-list" class="gcode" style="overflow-y: scroll; height: 240px; position: relative">
 							<template is="dom-repeat" items="{{gcode.sent}}">
 								<div class="line sent">{{item}}</div>
 							</template>
 							<template is="dom-repeat" items="{{gcode.remain}}">
-								<div class="line">{{item}}</div>
+								<div class="line remain">{{item}}</div>
 							</template>
 						</div>
 					</div>
@@ -475,5 +478,6 @@
 	</template>
 </dom-module>
 
+<script src="../bower_components/strftime/strftime.js"></script>
 <script src="../bower_components/sprintf/dist/sprintf.min.js"></script>
 <script src="app.js"></script>

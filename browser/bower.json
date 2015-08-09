@@ -16,6 +16,7 @@
     "iron-elements": "PolymerElements/iron-elements#^1.0.0",
     "paper-elements": "PolymerElements/paper-elements#^1.0.0",
     "iron-localstorage": "PolymerElements/iron-localstorage#^1.0.0",
-    "sprintf": "~1.0.3"
+    "sprintf": "~1.0.3",
+    "strftime": "~0.9.2"
   }
 }

@@ -238,6 +238,7 @@ export class Grbl extends events.EventEmitter {
 
 	open():Promise<any> {
 		this.on("startup", (r) => {
+			this.waitingQueue = [];
 			this.realtimeCommand("?");
 		});
 
@@ -370,10 +371,14 @@ export class Grbl extends events.EventEmitter {
 			this.emit("status", result);
 		} else
 		if (result instanceof GrblLineParserResultOk) {
-			this.waitingQueue.shift()(null);
+			// callback maybe null after reseting
+			var callback = this.waitingQueue.shift();
+			if (callback) callback(null);
 		} else
 		if (result instanceof GrblLineParserResultError) {
-			this.waitingQueue.shift()(result);
+			// callback maybe null after reseting
+			var callback = this.waitingQueue.shift();
+			if (callback) callback(null);
 		} else
 		if (result instanceof GrblLineParserResultStartup) {
 			this.emit("startup", result);
