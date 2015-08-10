@@ -88,6 +88,10 @@
 		table tr {
 		}
 
+		#coords .machine .coords .reset paper-button{
+			visibility: hidden;
+		}
+
 		.coords {
 			font-size: 24px;
 			line-height: 24px;
@@ -116,6 +120,7 @@
 
 		.coords .number {
 			text-align: right;
+			width: 200px;
 		}
 
 		.coords paper-button {
@@ -295,8 +300,8 @@
 					</div>
 				</div>
 			</paper-material>
-			<div class="layout horizontal">
-				<paper-material class="" elevation="1">
+			<div class="layout horizontal" id="coords">
+				<paper-material elevation="1" style="width: 320px" class$="{{conditional(positioningSystem, 'machine', 'working')}}">
 					<table class="coords">
 						<tr>
 							<th class="axis">X</th>
