@@ -3,12 +3,14 @@
 ///<reference path="./typings/bundle.d.ts"/>
 ///<reference path="./typings/serialport.d.ts" />
 ///<reference path="./typings/config.d.ts" />
+///<reference path="./typings/node-static.d.ts" />
 
 import * as websocket from 'websocket';
 import {Grbl, STATE_IDLE} from './grbl';
 import http = require('http');
 import serialport = require("serialport");
 import config = require("config");
+import static = require("node-static");
 
 interface GrblServerConfig {
 	serialPort: string;
@@ -123,11 +125,11 @@ class GrblServer {
 	}
 
 	startHttp() {
+		var fileServer = new static.Server('./browser');
+
 		console.log('startHttp');
 		this.httpServer = http.createServer( (req, res) => {
-			console.log(req.url);
-			res.writeHead(404);
-			res.end();
+			fileServer.serve(req, res);
 		});
 
 		this.httpServer.listen(this.config.serverPort, () => {

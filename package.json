@@ -7,9 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-	  "serialport": "*",
-	  "websocket": "*",
-	  "config": "*"
+    "config": "*",
+    "node-static": "^0.7.7",
+    "serialport": "*",
+    "websocket": "*"
   },
   "author": "cho45 <cho45@lowreal.net> (http://www.lowreal.net/)",
   "license": "MIT"
