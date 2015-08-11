@@ -129,7 +129,12 @@ class GrblServer {
 
 		console.log('startHttp');
 		this.httpServer = http.createServer( (req, res) => {
-			fileServer.serve(req, res);
+			if (req.url === '/config') {
+				res.writeHead(200, { 'Content-Type': 'application/json' });
+				res.end(JSON.stringify(this.config));
+			} else {
+				fileServer.serve(req, res);
+			}
 		});
 
 		this.httpServer.listen(this.config.serverPort, () => {

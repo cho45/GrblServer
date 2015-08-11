@@ -91,7 +91,13 @@ var GrblServer = (function () {
         var fileServer = new static.Server('./browser');
         console.log('startHttp');
         this.httpServer = http.createServer(function (req, res) {
-            fileServer.serve(req, res);
+            if (req.url === '/config') {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(_this.config));
+            }
+            else {
+                fileServer.serve(req, res);
+            }
         });
         this.httpServer.listen(this.config.serverPort, function () {
             console.log('Server is listening on port ' + _this.config.serverPort);

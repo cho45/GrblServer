@@ -24,46 +24,6 @@
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 
-<!-- dom-module id="my-app-compact">
-	<style is="custom-style">
-		:root {
-			font-size: 11px;
-		}
-
-		paper-tabs {
-			background-color: #00bcd4;
-			color: #fff;
-			font-size: 11px;
-			height: 22px;
-			box-shadow: none;
-		}
-	</style>
-	<template>
-		<div style="width: 320px; height: 240px; outline: 1px solid #000; font-size:11px;">
-			<div style="width: 160px">
-				<paper-tabs selected="0" noink no-slide>
-					<paper-tab>Working</paper-tab>
-					<paper-tab>Machine</paper-tab>
-				</paper-tabs>
-				<table>
-					<tr>
-						<th>X</th>
-						<td>+000.00</td>
-					</tr>
-					<tr>
-						<th>Y</th>
-						<td>+000.00</td>
-					</tr>
-					<tr>
-						<th>Z</th>
-						<td>+000.00</td>
-					</tr>
-				</table>
-			</div>
-		</div>
-	</template>
-</dom-module -->
-
 <dom-module id="my-app">
 	<style is="custom-style">
 		:host {
@@ -265,6 +225,10 @@
 			background: var(--paper-grey-400);
 			color: var(--paper-grey-800);
 		}
+
+		[disabled] {
+			opacity: 0.3;
+		}
 	</style>
 	<template>
 		<div class="layout horizontal">
@@ -300,7 +264,7 @@
 					</div>
 				</div>
 			</paper-material>
-			<div class="layout horizontal" id="coords">
+			<div class="layout horizontal" id="coords" disabled$="{{equals(status.state, 'Unknown')}}">
 				<paper-material elevation="1" style="width: 320px" class$="{{conditional(positioningSystem, 'machine', 'working')}}">
 					<table class="coords">
 						<tr>
@@ -329,7 +293,7 @@
 							Homing
 						</paper-button>
 						<paper-button on-click="commandReturn">
-							<iron-icon icon="icons:home"></iron-icon>
+							<iron-icon icon="hardware:keyboard-return"></iron-icon>
 							Return to zero
 						</paper-button>
 					</div>
@@ -415,7 +379,7 @@
 					</div>
 				</div>
 			</div>
-			<paper-material class="" style="padding: 16px;">
+			<paper-material class="" style="padding: 16px;" disabled$="{{equals(status.state, 'Unknown')}}">
 				<div class="layout horizontal">
 					<div class="flex">
 						<template is="dom-if" if="{{equals(status.state, 'Hold')}}">
@@ -446,7 +410,7 @@
 				<paper-progress value="10" style="width: 100%"></paper-progress>
 			</paper-material>
 		</paper-material>
-			<paper-material class="flex" style="">
+			<paper-material class="flex" style="" disabled$="{{equals(status.state, 'Unknown')}}">
 				<paper-tabs selected="{{commandTab}}" noink no-slide>
 					<paper-tab>Command Line</paper-tab>
 					<paper-tab>Upload File</paper-tab>

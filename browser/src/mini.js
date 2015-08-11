@@ -1,4 +1,3 @@
-
 Polymer({
 	is: "my-app",
 
@@ -6,7 +5,9 @@ Polymer({
 		status: {
 			type: Object,
 			value: {
-				state: 'Unknown'
+				state: 'Unknown',
+				workingPosition : { x : 0, y: 0, z : 0 },
+				machinePosition : { x : 0, y: 0, z : 0 }
 			}
 		},
 
@@ -78,32 +79,6 @@ Polymer({
 	ready : function () {
 		var self = this;
 		console.log('ready');
-
-		self.async(function () {
-			var uploadFile = document.getElementById('upload-file');
-			var inputFile = uploadFile.querySelector('input[type=file]');
-
-			uploadFile.onclick = function () {
-				inputFile.click();
-			};
-
-			inputFile.onchange = function () {
-				var files = inputFile.files;
-				self.uploadFile(files[0]);
-			};
-
-			document.body.addEventListener("drop", function (e) {
-				e.preventDefault();
-				var files = e.dataTransfer.files;
-				self.uploadFile(files[0]);
-			}, false);
-			document.body.addEventListener("dragenter", function (e) {
-				e.preventDefault();
-			}, false);
-			document.body.addEventListener("dragover", function (e) {
-				e.preventDefault();
-			}, false);
-		});
 
 		this.openWebSocket();
 	},
@@ -262,10 +237,6 @@ Polymer({
 		var self = this;
 		while (self.commandHistory.length > 50) self.commandHistory.shift();
 		self.set('commandHistory', self.commandHistory.slice(0));
-		self.async(function () {
-			var history = document.getElementById('command-history');
-			history.scrollTop = history.scrollHeight;
-		});
 	},
 
 	resetToZero : function (e) {
@@ -391,20 +362,16 @@ Polymer({
 	},
 
 	changeFeedRate : function (e) {
-		var value = Polymer.dom(e).path.filter(function (i) {
-			console.log(i);
-			return i.getAttribute && i.getAttribute('data-value');
-		})[0].getAttribute('data-value');
-
+		var current = this.jogFeedRateList.indexOf(this.jogFeedRate);
+		var next = (current + 1) % this.jogFeedRateList.length;
+		var value = this.jogFeedRateList[next];
 		this.set('jogFeedRate', value);
 	},
 
 	changeStep : function (e) {
-		var value = Polymer.dom(e).path.filter(function (i) {
-			console.log(i);
-			return i.getAttribute && i.getAttribute('data-value');
-		})[0].getAttribute('data-value');
-
+		var current = this.jogStepList.indexOf(this.jogStep);
+		var next = (current + 1) % this.jogStepList.length;
+		var value = this.jogStepList[next];
 		this.set('jogStep', value);
 	},
 
@@ -418,3 +385,4 @@ Polymer({
 		return strftime(format, date);
 	}
 });
+

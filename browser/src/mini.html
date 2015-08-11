@@ -1,0 +1,374 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/hardware-icons.html">
+<link rel="import" href="../bower_components/iron-icons/device-icons.html">
+<link rel="import" href="../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+
+<dom-module id="my-app">
+	<style is="custom-style">
+		:host {
+			display: block;
+			font-size: 11px;
+			width: 320px;
+			height: 240px;
+			overflow: hidden;
+			outline: 1px solid #000;
+		}
+
+		paper-button {
+			font-size: 11px;
+			min-width: 0;
+			background: #fff;
+			padding: 0;
+		}
+
+		paper-button iron-icon {
+			width: 16px;
+			height: 16px;
+		}
+
+		paper-button ::content paper-material.paper-button {
+			padding: 3px 5px;
+		}
+
+		paper-tabs {
+			background-color: #00bcd4;
+			color: #fff;
+			font-size: 11px;
+			height: 22px;
+			box-shadow: none;
+		}
+
+		#coords .machine .coords .reset paper-button{
+			visibility: hidden;
+		}
+
+		.coords {
+			font-size: 13px;
+			line-height: 15px;
+			color: #333;
+			width: 120px;
+			border-collapse: collapse;
+			table-layout: fixed;
+			padding: 0;
+			margin: 5px 0;
+		}
+
+		.coords th,
+		.coords td {
+			width: 32px;
+			padding: 0;
+			margin: 0;
+		}
+
+		.coords iron-icon {
+			width: 16px;
+			height: 16px;
+		}
+
+		.coords .axis {
+		}
+
+		.coords .number {
+			text-align: right;
+			width: auto;
+		}
+
+		.coords .reset {
+		}
+
+		.coords paper-button {
+			font-size: 16px;
+			width: 32px;
+			min-width: 0;
+			background: #fff;
+		}
+
+		.coords paper-button ::content paper-material {
+			padding: 7px 5px;
+		}
+
+		.status {
+		}
+
+		.status div {
+			display: inline-block;
+		}
+
+		.status .title {
+			height: 100%;
+			padding: 0 6px;
+			color: #fff;
+			background: var(--paper-blue-grey-300);
+		}
+
+		.status .title.Idle {
+		}
+
+		.status .title.Alarm {
+			background: var(--paper-red-800);
+		}
+
+		.status .title.Run {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Hold {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Home {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Door {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Check {
+		}
+
+		.status .title iron-icon {
+			padding: 5px;
+			margin-top: -2px;
+		}
+
+		.status .value {
+		}
+
+		.status .error,
+		.status .feedback {
+			font-size: 10px;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+
+		.status .error iron-icon,
+		.status .feedback iron-icon {
+			width: 16px;
+			height: 16px;
+		}
+
+		.status .feedback paper-button {
+			font-size: 10px;
+		}
+
+		.status .feedback paper-button ::content paper-material.paper-button {
+			padding: 0px;
+		}
+
+		.jog {
+			font-size: 10px;
+		}
+
+		.jog table {
+			border-collapse: collapse;
+			table-layout: fixed;
+			width: 185px;
+			margin: 5px;
+			padding: 0;
+		}
+
+		.jog iron-icon {
+			width: 16px;
+			height: 16px;
+		}
+
+		.jog paper-button {
+			font-size: 10px;
+			min-width: 50px;
+			white-space: nowrap;
+			background: #fff;
+			margin: 0;
+			padding: 0;
+			display: inline-block;
+		}
+
+		
+		.jog paper-button ::content paper-material {
+			padding: 5px;
+		}
+
+		.axis-label {
+			color: #999;
+		}
+
+		[disabled] {
+			opacity: 0.3;
+		}
+	</style>
+	<template>
+		<paper-material class="status layout horizontal" elevation="1">
+				<div class$="{{sprintf('title %s', status.state)}}">
+					<iron-icon icon="{{conditional(isConnected, 'image:flash-on', 'image:flash-off')}}"></iron-icon>
+					<span>{{status.state}}</span>
+				</div>
+				<div class="flex feedback" style="padding: 0px 6px; line-height: 32px">
+					<template is="dom-if" if="{{equals(status.state, 'Alarm')}}">
+						<div class="" style="font-weight: bold">
+							<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 0px; margin-top: -4px"></iron-icon>
+							Locked:
+						</div>
+						<paper-button on-click="commandUnlock">
+							<iron-icon icon="icons:lock-open"></iron-icon>
+							Unlock
+						</paper-button>
+						<paper-button on-click="commandHoming">
+							<iron-icon icon="icons:home"></iron-icon>
+							Homing
+						</paper-button>
+					</template>
+					<template is="dom-if" if="{{error}}">
+						<div class="" style="font-weight: bold">
+							<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 0px; margin-top: -4px"></iron-icon>
+							<span>{{error}}</span>
+						</div>
+					</template>
+				</div>
+		</paper-material>
+		<div class="layout horizontal" id="coords" disabled$="{{equals(status.state, 'Unknown')}}">
+			<paper-material elevation="0" style="width: 120px" class$="{{conditional(positioningSystem, 'machine', 'working')}}">
+				<table class="coords">
+					<tr>
+						<th class="axis">X</th>
+						<td class="number">{{formatCoords('x', status.workingPosition.x, status.machinePosition.x, positioningSystem)}}</td>
+						<td class="reset"><paper-button data-axis="x" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+					</tr>
+					<tr>
+						<th class="axis">Y</th>
+						<td class="number">{{formatCoords('y', status.workingPosition.y, status.machinePosition.y, positioningSystem)}}</td>
+						<td class="reset"><paper-button data-axis="y" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+					</tr>
+					<tr>
+						<th class="axis">Z</th>
+						<td class="number">{{formatCoords('z', status.workingPosition.z, status.machinePosition.z, positioningSystem)}}</td>
+						<td class="reset"><paper-button data-axis="z" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+					</tr>
+				</table>
+				<paper-tabs class="system" selected="{{positioningSystem}}" noink no-slide align-bottom>
+					<paper-tab>Working</paper-tab>
+					<paper-tab>Machine</paper-tab>
+				</paper-tabs>
+				<div style="padding: 5px;">
+					<paper-button on-click="commandHoming">
+						<iron-icon icon="icons:home"></iron-icon>
+					</paper-button>
+					<paper-button on-click="commandReturn">
+						<iron-icon icon="hardware:keyboard-return"></iron-icon>
+					</paper-button>
+				</div>
+			</paper-material>
+			<div class="flex layout vertical">
+				<div class="jog flex">
+					<table style="">
+						<tr>
+							<td>
+							</td>
+							<td>
+								<paper-button noink raised data-axis="y" data-direction="+1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+									<div class="axis-label">+Y</div>
+								</paper-button>
+							</td>
+							<td>
+							</td>
+							<td>
+								<paper-button noink raised data-axis="z" data-direction="+1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+									<div class="axis-label">+Z</div>
+								</paper-button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<paper-button noink raised data-axis="x" data-direction="-1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
+									<span class="axis-label" style="margin-right: 10px">-X</span>
+								</paper-button>
+							</td>
+							<td>
+							</td>
+							<td>
+								<paper-button noink raised data-axis="x" data-direction="+1" on-click="commandMove">
+									<span class="axis-label" style="margin-left: 10px">+X</span>
+									<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
+							</td>
+							<td>
+							</td>
+						</tr>
+						<tr>
+							<td>
+							</td>
+							<td>
+								<paper-button noink raised data-axis="y" data-direction="-1" on-click="commandMove">
+									<div class="axis-label">-Y</div>
+									<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
+							</td>
+							<td>
+							</td>
+							<td>
+								<paper-button noink raised data-axis="z" data-direction="-1" on-click="commandMove">
+									<div class="axis-label">-Z</div>
+									<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="flex">
+					<paper-material elevation="0"  style="padding: 5px; text-align: center; font-size: 12px;">
+						<paper-button class="dropdown-trigger" style="text-transform: none" on-click="changeFeedRate">
+							<iron-icon icon="av:fast-forward"></iron-icon>
+							<span>{{jogFeedRate}}</span> mm/min
+						</paper-button>
+						<paper-button class="dropdown-trigger" style="text-transform: none" on-click="changeStep">
+							<iron-icon icon="image:straighten"></iron-icon>
+							<span>{{jogStep}}</span> mm
+						</paper-button>
+					</paper-material>
+				</div>
+			</div>
+		</div>
+		<paper-material class="actions" style="padding: 5px;" elevation="0" disabled$="{{equals(status.state, 'Unknown')}}">
+			<div class="layout horizontal">
+				<div class="flex">
+					<template is="dom-if" if="{{equals(status.state, 'Hold')}}">
+						<paper-button class="action-resume" on-click="commandResume">
+							<iron-icon icon="av:play-arrow"></iron-icon>
+							Resume
+						</paper-button>
+					</template>
+					<template is="dom-if" if="{{!equals(status.state, 'Hold')}}">
+						<paper-button class="action-pause" on-click="commandPause">
+							<iron-icon icon="av:pause"></iron-icon>
+							Pause
+						</paper-button>
+					</template>
+				</div>
+				<div class="flex" style="text-align: right">
+					<paper-button class="action-reset" on-click="commandReset">
+						<iron-icon icon="icons:cancel"></iron-icon>
+						Reset
+					</paper-button>
+				</div>
+				<div style="line-height: 40px; padding-left: 16px; font-size: 16px">
+					<template is="dom-if" if="{{elapsedTime}}">
+						Elapsed: <span>{{elapsedTime}}</span>
+					</template>
+				</div>
+			</div>
+			<paper-progress value="10" style="width: 100%"></paper-progress>
+		</paper-material>
+	</template>
+</dom-module>
+
+<script src="../bower_components/strftime/strftime.js"></script>
+<script src="../bower_components/sprintf/dist/sprintf.min.js"></script>
+<script src="mini.js"></script>
+
