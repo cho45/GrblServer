@@ -23,37 +23,37 @@ assert(result.version.major == '0.5');
 assert(result.version.minor == '1');
 result = parser.parse("<Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000>");
 assert(result instanceof grbl_1.GrblLineParserResultStatus);
-assert(result.state == 'Idle');
-assert(result.machinePosition.x == 0);
-assert(result.machinePosition.y == 0);
-assert(result.machinePosition.z == 0);
-assert(result.workingPosition.x == 0);
-assert(result.workingPosition.y == 0);
-assert(result.workingPosition.z == 0);
-assert(result.plannerBufferCount == undefined);
-assert(result.rxBufferCount == undefined);
+assert(result.state === 'Idle');
+assert(result.machinePosition.x === 0);
+assert(result.machinePosition.y === 0);
+assert(result.machinePosition.z === 0);
+assert(result.workingPosition.x === 0);
+assert(result.workingPosition.y === 0);
+assert(result.workingPosition.z === 0);
+assert(result.plannerBufferCount === undefined);
+assert(result.rxBufferCount === undefined);
 result = parser.parse("<Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000,Buf:0>");
 assert(result instanceof grbl_1.GrblLineParserResultStatus);
-assert(result.state == 'Idle');
-assert(result.machinePosition.x == 0);
-assert(result.machinePosition.y == 0);
-assert(result.machinePosition.z == 0);
-assert(result.workingPosition.x == 0);
-assert(result.workingPosition.y == 0);
-assert(result.workingPosition.z == 0);
-assert(result.plannerBufferCount == 0);
-assert(result.rxBufferCount == undefined);
+assert(result.state === 'Idle');
+assert(result.machinePosition.x === 0);
+assert(result.machinePosition.y === 0);
+assert(result.machinePosition.z === 0);
+assert(result.workingPosition.x === 0);
+assert(result.workingPosition.y === 0);
+assert(result.workingPosition.z === 0);
+assert(result.plannerBufferCount === 0);
+assert(result.rxBufferCount === undefined);
 result = parser.parse("<Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000,Buf:0,RX:0>");
 assert(result instanceof grbl_1.GrblLineParserResultStatus);
-assert(result.state == 'Idle');
-assert(result.machinePosition.x == 0);
-assert(result.machinePosition.y == 0);
-assert(result.machinePosition.z == 0);
-assert(result.workingPosition.x == 0);
-assert(result.workingPosition.y == 0);
-assert(result.workingPosition.z == 0);
-assert(result.plannerBufferCount == 0);
-assert(result.rxBufferCount == 0);
+assert(result.state === 'Idle');
+assert(result.machinePosition.x === 0);
+assert(result.machinePosition.y === 0);
+assert(result.machinePosition.z === 0);
+assert(result.workingPosition.x === 0);
+assert(result.workingPosition.y === 0);
+assert(result.workingPosition.z === 0);
+assert(result.plannerBufferCount === 0);
+assert(result.rxBufferCount === 0);
 result = parser.parse("[Reset to continue]");
 assert(result instanceof grbl_1.GrblLineParserResultFeedback);
 assert(result.message == 'Reset to continue');
@@ -77,12 +77,12 @@ assert(result instanceof grbl_1.GrblLineParserResultError);
 assert(result.message == 'Invalid gcode ID:XX');
 result = parser.parse("$20=1");
 assert(result instanceof grbl_1.GrblLineParserResultDollar);
-assert(result.message == '$20=1');
-var s1 = new grbl_1.GrblLineParserResultStatus();
+assert(result.raw == '$20=1');
+var s1 = new grbl_1.GrblLineParserResultStatus(null);
 s1.state = 'Idle';
 s1.machinePosition = { x: 0, y: 0, z: 0 };
 s1.workingPosition = { x: 0, y: 0, z: 0 };
-var s2 = new grbl_1.GrblLineParserResultStatus();
+var s2 = new grbl_1.GrblLineParserResultStatus("");
 s2.state = 'Idle';
 s2.machinePosition = { x: 0, y: 0, z: 0 };
 s2.workingPosition = { x: 0, y: 0, z: 0 };
@@ -138,11 +138,12 @@ Promise.resolve().
     return grbl.open().then(function () {
         assert(grbl.isOpened);
         console.log('open');
+        grbl.status.state = grbl_1.STATE_IDLE;
     });
 }).
     then(function () {
     var promise = grbl.getConfig().then(function (config) {
-        assert.deepEqual(config, [{ message: '$0=a' }, { message: '$1=b' }]);
+        assert.deepEqual(config, [{ raw: '$0=a' }, { raw: '$1=b' }]);
     });
     mock.mockResponse('$0=a\n');
     mock.mockResponse('$1=b\n');
@@ -151,9 +152,12 @@ Promise.resolve().
 }).
     then(function () {
     return grbl.getStatus().then(function (status) {
-        assert.deepEqual(status, { state: 'Idle',
+        assert.deepEqual(status, {
+            raw: '<Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000>',
+            state: 'Idle',
             machinePosition: { x: 0, y: 0, z: 0 },
-            workingPosition: { x: 0, y: 0, z: 0 } });
+            workingPosition: { x: 0, y: 0, z: 0 }
+        });
     });
 }).
     then(function () {
@@ -167,7 +171,7 @@ Promise.resolve().
     var promise = grbl.command("G01 X0.000 Y0.000 F500").then(function () {
         assert(false);
     }, function (e) {
-        assert.deepEqual(e, { message: 'test error' });
+        assert.deepEqual(e, { raw: 'error:test error', message: 'test error' });
     });
     mock.mockResponse('error:test error\n');
     return promise;
@@ -175,8 +179,8 @@ Promise.resolve().
     then(function () {
     return new Promise(function (resolve, reject) {
         grbl.once('alarm', function (r) {
-            assert.deepEqual(r, { message: 'TEST ALARM' });
-            assert.deepEqual(grbl.lastAlarm, { message: 'TEST ALARM' });
+            assert.deepEqual(r, { raw: 'ALARM:TEST ALARM', message: 'TEST ALARM' });
+            assert.deepEqual(grbl.lastAlarm, { raw: 'ALARM:TEST ALARM', message: 'TEST ALARM' });
             resolve();
         });
         mock.mockResponse('ALARM:TEST ALARM\n');
@@ -185,8 +189,8 @@ Promise.resolve().
     then(function () {
     return new Promise(function (resolve, reject) {
         grbl.once('feedback', function (r) {
-            assert.deepEqual(r, { message: 'Enabled' });
-            assert.deepEqual(grbl.lastFeedback, { message: 'Enabled' });
+            assert.deepEqual(r, { raw: '[Enabled]', message: 'Enabled' });
+            assert.deepEqual(grbl.lastFeedback, { raw: '[Enabled]', message: 'Enabled' });
             resolve();
         });
         mock.mockResponse('[Enabled]\n');
@@ -199,6 +203,4 @@ Promise.resolve().
     catch(function (e) {
     console.log(e);
     process.exit(1);
-});
-grbl.on("statusupdate", function (e) {
 });

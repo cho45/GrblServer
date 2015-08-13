@@ -6,7 +6,17 @@
 ///<reference path="./typings/node-static.d.ts" />
 
 import * as websocket from 'websocket';
-import {Grbl, STATE_IDLE} from './grbl';
+import {
+	Grbl,
+	STATE_IDLE,
+	GrblLineParserResultStartup,
+	GrblLineParserResultOk,
+	GrblLineParserResultError,
+	GrblLineParserResultAlarm,
+	GrblLineParserResultFeedback,
+	GrblLineParserResultDollar,
+	GrblLineParserResultStatus,
+} from './grbl';
 import http = require('http');
 import serialport = require("serialport");
 import config = require("config");
@@ -190,7 +200,8 @@ class GrblServer {
 					}
 
 					console.log('request ', req.method);
-					var method = this['service_' + req.method];
+
+					var method: (params: any)=>Promise<any> = (<any>this)['service_' + req.method];
 					if (!method) {
 						this.sendMessage(connection, {
 							id: req.id,
@@ -199,7 +210,7 @@ class GrblServer {
 					}
 
 					method.call(this, req.params || {}).
-						then( (result) => {
+						then( (result: any) => {
 							this.sendMessage(connection, {
 								id: req.id,
 								result: result || null
@@ -368,14 +379,13 @@ class GrblServer {
 		this.grbl = new Grbl(sp);
 		this.grbl.open();
 
-		this.grbl.on('startup', (res) => {
+		this.grbl.on('startup', (res: GrblLineParserResultStartup) => {
 			this.initializeGrbl();
 			this.sendBroadcastMessage({
 				id: null,
-				result: {
+				result: res.toObject({
 					type: 'startup',
-					version: res.version,
-				}
+				}),
 			});
 			this.sendBroadcastMessage({
 				id: null,
@@ -386,7 +396,7 @@ class GrblServer {
 			});
 		});
 
-		this.grbl.on('statuschange', (status) => {
+		this.grbl.on('statuschange', (status: GrblLineParserResultStatus) => {
 			console.log('statuschange');
 			this.sendBroadcastMessage({
 				id: null,
@@ -397,27 +407,25 @@ class GrblServer {
 			});
 		});
 
-		this.grbl.on('alarm', (res) => {
+		this.grbl.on('alarm', (res: GrblLineParserResultAlarm) => {
 			this.sendBroadcastMessage({
 				id: null,
-				result: {
+				result: res.toObject({
 					type: 'alarm',
-					message: res.message,
-				}
+				}),
 			});
 		});
 
-		this.grbl.on('feedback', (res) => {
+		this.grbl.on('feedback', (res: GrblLineParserResultFeedback) => {
 			this.sendBroadcastMessage({
 				id: null,
-				result: {
+				result: res.toObject({
 					type: 'feedback',
-					message: res.message,
-				}
+				}),
 			});
 		});
 
-		this.grbl.on('error', (e) => {
+		this.grbl.on('error', (e: GrblLineParserResultError) => {
 			console.log('Error on grbl: ' + e);
 			this.sendBroadcastMessage({
 				id: null,

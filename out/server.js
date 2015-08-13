@@ -318,10 +318,9 @@ var GrblServer = (function () {
             _this.initializeGrbl();
             _this.sendBroadcastMessage({
                 id: null,
-                result: {
-                    type: 'startup',
-                    version: res.version
-                }
+                result: res.toObject({
+                    type: 'startup'
+                })
             });
             _this.sendBroadcastMessage({
                 id: null,
@@ -344,19 +343,17 @@ var GrblServer = (function () {
         this.grbl.on('alarm', function (res) {
             _this.sendBroadcastMessage({
                 id: null,
-                result: {
-                    type: 'alarm',
-                    message: res.message
-                }
+                result: res.toObject({
+                    type: 'alarm'
+                })
             });
         });
         this.grbl.on('feedback', function (res) {
             _this.sendBroadcastMessage({
                 id: null,
-                result: {
-                    type: 'feedback',
-                    message: res.message
-                }
+                result: res.toObject({
+                    type: 'feedback'
+                })
             });
         });
         this.grbl.on('error', function (e) {

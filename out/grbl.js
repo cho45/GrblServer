@@ -20,17 +20,40 @@ var MESSAGE_FEEDBACK = /^\[(.+)\]$/;
 var MESSAGE_STATUS = /^<(.+)>$/;
 var MESSAGE_DOLLAR = /^\$/;
 var GrblLineParserResult = (function () {
-    function GrblLineParserResult() {
+    function GrblLineParserResult(raw) {
+        this.raw = raw;
     }
+    GrblLineParserResult.prototype.toObject = function (copy) {
+        var _this = this;
+        var ret = {};
+        Object.keys(this).forEach(function (key) {
+            ret[key] = _this[key];
+        });
+        if (copy) {
+            Object.keys(copy).forEach(function (key) {
+                ret[key] = copy[key];
+            });
+        }
+        return ret;
+    };
     return GrblLineParserResult;
 })();
 exports.GrblLineParserResult = GrblLineParserResult;
 var GrblLineParserResultStartup = (function (_super) {
     __extends(GrblLineParserResultStartup, _super);
-    function GrblLineParserResultStartup(version) {
-        _super.call(this);
-        this.version = version;
+    function GrblLineParserResultStartup() {
+        _super.apply(this, arguments);
     }
+    GrblLineParserResultStartup.parse = function (line) {
+        if (!MESSAGE_STARTUP.test(line))
+            return null;
+        var ret = new this(line);
+        ret.version = {
+            major: +RegExp.$1,
+            minor: RegExp.$2
+        };
+        return ret;
+    };
     return GrblLineParserResultStartup;
 })(GrblLineParserResult);
 exports.GrblLineParserResultStartup = GrblLineParserResultStartup;
@@ -39,124 +62,85 @@ var GrblLineParserResultOk = (function (_super) {
     function GrblLineParserResultOk() {
         _super.apply(this, arguments);
     }
+    GrblLineParserResultOk.parse = function (line) {
+        if (!MESSAGE_OK.test(line))
+            return null;
+        return new this(line);
+    };
     return GrblLineParserResultOk;
 })(GrblLineParserResult);
 exports.GrblLineParserResultOk = GrblLineParserResultOk;
 var GrblLineParserResultError = (function (_super) {
     __extends(GrblLineParserResultError, _super);
-    function GrblLineParserResultError(message) {
-        _super.call(this);
-        this.message = message;
+    function GrblLineParserResultError() {
+        _super.apply(this, arguments);
     }
+    GrblLineParserResultError.parse = function (line) {
+        if (!MESSAGE_ERROR.test(line))
+            return null;
+        var ret = new this(line);
+        ret.message = RegExp.$1;
+        return ret;
+    };
     return GrblLineParserResultError;
 })(GrblLineParserResult);
 exports.GrblLineParserResultError = GrblLineParserResultError;
 var GrblLineParserResultAlarm = (function (_super) {
     __extends(GrblLineParserResultAlarm, _super);
-    function GrblLineParserResultAlarm(message) {
-        _super.call(this);
-        this.message = message;
+    function GrblLineParserResultAlarm() {
+        _super.apply(this, arguments);
     }
+    GrblLineParserResultAlarm.parse = function (line) {
+        if (!MESSAGE_ALARM.test(line))
+            return null;
+        var ret = new this(line);
+        ret.message = RegExp.$1;
+        return ret;
+    };
     return GrblLineParserResultAlarm;
 })(GrblLineParserResult);
 exports.GrblLineParserResultAlarm = GrblLineParserResultAlarm;
 var GrblLineParserResultFeedback = (function (_super) {
     __extends(GrblLineParserResultFeedback, _super);
-    function GrblLineParserResultFeedback(message) {
-        _super.call(this);
-        this.message = message;
+    function GrblLineParserResultFeedback() {
+        _super.apply(this, arguments);
     }
+    GrblLineParserResultFeedback.parse = function (line) {
+        if (!MESSAGE_FEEDBACK.test(line))
+            return null;
+        var ret = new this(line);
+        ret.message = RegExp.$1;
+        return ret;
+    };
     return GrblLineParserResultFeedback;
 })(GrblLineParserResult);
 exports.GrblLineParserResultFeedback = GrblLineParserResultFeedback;
 var GrblLineParserResultDollar = (function (_super) {
     __extends(GrblLineParserResultDollar, _super);
-    function GrblLineParserResultDollar(message) {
-        _super.call(this);
-        this.message = message;
+    function GrblLineParserResultDollar() {
+        _super.apply(this, arguments);
     }
+    GrblLineParserResultDollar.parse = function (line) {
+        if (!MESSAGE_DOLLAR.test(line))
+            return null;
+        var ret = new this(line);
+        return ret;
+    };
     return GrblLineParserResultDollar;
 })(GrblLineParserResult);
 exports.GrblLineParserResultDollar = GrblLineParserResultDollar;
 var GrblLineParserResultStatus = (function (_super) {
     __extends(GrblLineParserResultStatus, _super);
-    function GrblLineParserResultStatus() {
-        _super.apply(this, arguments);
+    function GrblLineParserResultStatus(raw) {
+        _super.call(this, raw);
+        this.state = exports.STATE_IDLE;
+        this.machinePosition = { x: 0, y: 0, z: 0 };
+        this.workingPosition = { x: 0, y: 0, z: 0 };
     }
-    GrblLineParserResultStatus.prototype.equals = function (other) {
-        var ret = this.state === other.state &&
-            this.plannerBufferCount === other.plannerBufferCount &&
-            this.rxBufferCount === other.rxBufferCount &&
-            this.machinePosition.x === other.machinePosition.x &&
-            this.machinePosition.y === other.machinePosition.y &&
-            this.machinePosition.z === other.machinePosition.z &&
-            this.workingPosition.x === other.workingPosition.x &&
-            this.workingPosition.y === other.workingPosition.y &&
-            this.workingPosition.z === other.workingPosition.z;
-        return ret;
-    };
-    return GrblLineParserResultStatus;
-})(GrblLineParserResult);
-exports.GrblLineParserResultStatus = GrblLineParserResultStatus;
-var GrblLineParser = (function () {
-    function GrblLineParser() {
-    }
-    GrblLineParser.prototype.parse = function (line) {
-        var parsers = [
-            this.parseStatus,
-            this.parseOk,
-            this.parseError,
-            this.parseAlarm,
-            this.parseFeedback,
-            this.parseDollar,
-            this.parseStartup
-        ];
-        for (var i = 0, it = void 0; (it = parsers[i]); i++) {
-            var result = it.call(this, line);
-            if (result) {
-                return result;
-            }
-        }
-        console.log("unknown message: " + line);
-        return null;
-    };
-    GrblLineParser.prototype.parseStartup = function (line) {
-        if (!MESSAGE_STARTUP.test(line))
-            return false;
-        return new GrblLineParserResultStartup({
-            major: +RegExp.$1,
-            minor: RegExp.$2
-        });
-    };
-    GrblLineParser.prototype.parseOk = function (line) {
-        if (!MESSAGE_OK.test(line))
-            return false;
-        return new GrblLineParserResultOk();
-    };
-    GrblLineParser.prototype.parseError = function (line) {
-        if (!MESSAGE_ERROR.test(line))
-            return false;
-        return new GrblLineParserResultError(RegExp.$1);
-    };
-    GrblLineParser.prototype.parseAlarm = function (line) {
-        if (!MESSAGE_ALARM.test(line))
-            return false;
-        return new GrblLineParserResultAlarm(RegExp.$1);
-    };
-    GrblLineParser.prototype.parseFeedback = function (line) {
-        if (!MESSAGE_FEEDBACK.test(line))
-            return false;
-        return new GrblLineParserResultFeedback(RegExp.$1);
-    };
-    GrblLineParser.prototype.parseDollar = function (line) {
-        if (!MESSAGE_DOLLAR.test(line))
-            return false;
-        return new GrblLineParserResultDollar(line);
-    };
-    GrblLineParser.prototype.parseStatus = function (line) {
+    GrblLineParserResultStatus.parse = function (line) {
         if (!MESSAGE_STATUS.test(line))
-            return false;
-        var ret = new GrblLineParserResultStatus();
+            return null;
+        var ret = new this(line);
         var params = RegExp.$1.split(/,/);
         ret.state = params.shift();
         var map = {};
@@ -183,13 +167,50 @@ var GrblLineParser = (function () {
             y: +map['WPos'][1],
             z: +map['WPos'][2]
         };
-        if (map['Buf']) {
+        if (map.hasOwnProperty('Buf')) {
             ret.plannerBufferCount = +map['Buf'][0];
         }
-        if (map['RX']) {
+        if (map.hasOwnProperty('RX')) {
             ret.rxBufferCount = +map['RX'][0];
         }
         return ret;
+    };
+    GrblLineParserResultStatus.prototype.equals = function (other) {
+        var ret = this.state === other.state &&
+            this.plannerBufferCount === other.plannerBufferCount &&
+            this.rxBufferCount === other.rxBufferCount &&
+            this.machinePosition.x === other.machinePosition.x &&
+            this.machinePosition.y === other.machinePosition.y &&
+            this.machinePosition.z === other.machinePosition.z &&
+            this.workingPosition.x === other.workingPosition.x &&
+            this.workingPosition.y === other.workingPosition.y &&
+            this.workingPosition.z === other.workingPosition.z;
+        return ret;
+    };
+    return GrblLineParserResultStatus;
+})(GrblLineParserResult);
+exports.GrblLineParserResultStatus = GrblLineParserResultStatus;
+var GrblLineParser = (function () {
+    function GrblLineParser() {
+    }
+    GrblLineParser.prototype.parse = function (line) {
+        var parsers = [
+            GrblLineParserResultStatus,
+            GrblLineParserResultOk,
+            GrblLineParserResultError,
+            GrblLineParserResultAlarm,
+            GrblLineParserResultFeedback,
+            GrblLineParserResultDollar,
+            GrblLineParserResultStartup
+        ];
+        for (var i = 0, it = void 0; (it = parsers[i]); i++) {
+            var result = it.parse(line);
+            if (result) {
+                return result;
+            }
+        }
+        console.log("unknown message: " + line);
+        return null;
     };
     return GrblLineParser;
 })();
@@ -199,7 +220,7 @@ var Grbl = (function (_super) {
     __extends(Grbl, _super);
     function Grbl(serialport) {
         _super.call(this);
-        this.status = new GrblLineParserResultStatus();
+        this.status = new GrblLineParserResultStatus(null);
         this.serialport = serialport;
         this.parser = new GrblLineParser();
         this.isOpened = false;
@@ -209,7 +230,9 @@ var Grbl = (function (_super) {
         var _this = this;
         this.on("startup", function (r) {
             _this.waitingQueue = [];
+            _this.stopQueryStatus();
             _this.realtimeCommand("?");
+            _this.startQueryStatus();
         });
         return new Promise(function (resolve, reject) {
             _this.serialport.open(function (err) {
@@ -233,21 +256,24 @@ var Grbl = (function (_super) {
                     _this.emit('error', 'unexpected error on the serialport');
                     _this.destroy();
                 });
-                _this.startTimer();
                 _this.once("startup", function (r) {
                     resolve();
                 });
             });
         });
     };
-    Grbl.prototype.startTimer = function () {
+    Grbl.prototype.startQueryStatus = function () {
         var _this = this;
-        this.timer = setTimeout(function () {
+        this.statusQueryTimer = setTimeout(function () {
             _this.getStatus();
             if (_this.isOpened) {
-                _this.startTimer();
+                _this.startQueryStatus();
             }
         }, 1 / 10 * 1000);
+    };
+    Grbl.prototype.stopQueryStatus = function () {
+        clearTimeout(this.statusQueryTimer);
+        this.statusQueryTimer = null;
     };
     Grbl.prototype.close = function () {
         var _this = this;
@@ -265,7 +291,7 @@ var Grbl = (function (_super) {
     Grbl.prototype.destroy = function () {
         if (this.isOpened) {
             this.isOpened = false;
-            clearTimeout(this.timer);
+            this.stopQueryStatus();
         }
     };
     Grbl.prototype.getConfig = function () {
@@ -275,8 +301,7 @@ var Grbl = (function (_super) {
                 reject('Must called in idle state');
             }
             var results = [];
-            var listener;
-            listener = function (e) {
+            var listener = function (e) {
                 results.push(e);
             };
             _this.on("dollar", listener);
@@ -290,20 +315,21 @@ var Grbl = (function (_super) {
     Grbl.prototype.getStatus = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            if (_this.status.state !== exports.STATE_ALARM) {
+            if (_this.status.state !== exports.STATE_ALARM &&
+                _this.status.state !== exports.STATE_HOME) {
                 _this.once("status", function (res) {
                     resolve(res);
                 });
                 _this.realtimeCommand("?");
             }
             else {
-                reject();
+                reject("state is alarm or homing");
             }
         });
     };
     Grbl.prototype.command = function (cmd) {
         var _this = this;
-        return new Promise(function (resolve, reject) {
+        var ret = new Promise(function (resolve, reject) {
             console.log('>>', cmd);
             _this.serialport.write(cmd + '\n');
             _this.waitingQueue.push(function (err) {
@@ -312,6 +338,19 @@ var Grbl = (function (_super) {
                 resolve();
             });
         });
+        if (cmd === '$H') {
+            // command "?" is not usable in homing
+            var prevState = this.status.state;
+            this.status.state = exports.STATE_HOME;
+            this.stopQueryStatus();
+            this.emit("statuschange", this.status);
+            this.emit("status", this.status);
+            ret = ret.then(function () {
+                _this.status.state = prevState;
+                _this.startQueryStatus();
+            });
+        }
+        return ret;
     };
     Grbl.prototype.realtimeCommand = function (cmd) {
         this.serialport.write(cmd);
@@ -352,9 +391,12 @@ var Grbl = (function (_super) {
             this.emit("startup", result);
         }
         else if (result instanceof GrblLineParserResultAlarm) {
-            this.lastAlarm = result;
+            // command "?" is not usable in alarm,
+            // so set state by hand
             this.status.state = exports.STATE_ALARM;
+            this.lastAlarm = result;
             this.emit("alarm", result);
+            this.emit("statuschange", this.status);
             this.emit("status", this.status);
         }
         else if (result instanceof GrblLineParserResultFeedback) {

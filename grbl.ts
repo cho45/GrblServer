@@ -28,48 +28,80 @@ interface GrblPosition {
 }
 
 export class GrblLineParserResult {
+	raw: string;
+	constructor(raw: string) {
+		this.raw = raw;
+	}
+
+	toObject(copy: { [key: string]: any }):{ [key: string]: any } {
+		var ret: { [key: string]: any } = {};
+		Object.keys(this).forEach( (key: string)=> {
+			ret[key] = (<any>this)[key];
+		});
+		if (copy) {
+			Object.keys(copy).forEach( (key: string)=> {
+				ret[key] = copy[key];
+			});
+		}
+		return ret;
+	}
 }
 
 export class GrblLineParserResultStartup extends GrblLineParserResult {
 	version: GrblVersion;
-	constructor(version: GrblVersion) {
-		super();
-		this.version = version;
+	static parse(line: string) {
+		if (!MESSAGE_STARTUP.test(line)) return null;
+		var ret = new this(line);
+		ret.version = <GrblVersion>{
+			major: +RegExp.$1,
+			minor: RegExp.$2,
+		};
+		return ret;
 	}
 }
 
 export class GrblLineParserResultOk extends GrblLineParserResult {
+	static parse(line: string) {
+		if (!MESSAGE_OK.test(line)) return null;
+		return new this(line);
+	}
 }
 
 export class GrblLineParserResultError extends GrblLineParserResult {
 	message: string;
-	constructor(message: string) {
-		super();
-		this.message = message;
+	static parse(line: string) {
+		if (!MESSAGE_ERROR.test(line)) return null;
+		var ret = new this(line);
+		ret.message = RegExp.$1;
+		return ret;
 	}
 }
 
 export class GrblLineParserResultAlarm extends GrblLineParserResult {
 	message: string;
-	constructor(message: string) {
-		super();
-		this.message = message;
+	static parse(line: string) {
+		if (!MESSAGE_ALARM.test(line)) return null;
+		var ret = new this(line);
+		ret.message = RegExp.$1;
+		return ret;
 	}
 }
 
 export class GrblLineParserResultFeedback extends GrblLineParserResult {
 	message: string;
-	constructor(message: string) {
-		super();
-		this.message = message;
+	static parse(line: string) {
+		if (!MESSAGE_FEEDBACK.test(line)) return null;
+		var ret = new this(line);
+		ret.message = RegExp.$1;
+		return ret;
 	}
 }
 
 export class GrblLineParserResultDollar extends GrblLineParserResult {
-	message: string;
-	constructor(message: string) {
-		super();
-		this.message = message;
+	static parse(line: string) {
+		if (!MESSAGE_DOLLAR.test(line)) return null;
+		var ret = new this(line);
+		return ret;
 	}
 }
 
@@ -79,6 +111,60 @@ export class GrblLineParserResultStatus extends GrblLineParserResult {
 	workingPosition: GrblPosition;
 	plannerBufferCount: number;
 	rxBufferCount: number;
+
+	static parse(line: string) {
+		if (!MESSAGE_STATUS.test(line)) return null;
+
+		var ret = new this(line);
+
+		let params = RegExp.$1.split(/,/);
+		ret.state = params.shift();
+
+		let map : { [name: string]:Array<string>; } = {};
+		let current: string;
+		for (let i = 0, len = params.length; i < len; i++) {
+			let param: string = params[i];
+			if (/^(.+):(.+)/.test(param)) {
+				current = RegExp.$1;
+				param = RegExp.$2;
+				map[current] = new Array<string>();
+			}
+			if (!current) {
+				throw "Illegal status format: " + line;
+			}
+
+			map[current].push(param);
+		}
+
+		ret.machinePosition = <GrblPosition>{
+			x: +map['MPos'][0],
+			y: +map['MPos'][1],
+			z: +map['MPos'][2],
+		};
+
+		ret.workingPosition = <GrblPosition>{
+			x: +map['WPos'][0],
+			y: +map['WPos'][1],
+			z: +map['WPos'][2],
+		};
+
+		if (map.hasOwnProperty('Buf')) {
+			ret.plannerBufferCount = +map['Buf'][0];
+		}
+
+		if (map.hasOwnProperty('RX')) {
+			ret.rxBufferCount = +map['RX'][0];
+		}
+
+		return ret;
+	}
+
+	constructor(raw: string) {
+		super(raw);
+		this.state = STATE_IDLE;
+		this.machinePosition = { x: 0, y: 0, z: 0};
+		this.workingPosition = { x: 0, y: 0, z: 0};
+	}
 
 	equals(other: GrblLineParserResultStatus): boolean {
 		var ret = 
@@ -102,17 +188,17 @@ export class GrblLineParser {
 
 	parse(line: string): GrblLineParserResult {
 		const parsers = [
-			this.parseStatus,
-			this.parseOk,
-			this.parseError,
-			this.parseAlarm,
-			this.parseFeedback,
-			this.parseDollar,
-			this.parseStartup
+			GrblLineParserResultStatus,
+			GrblLineParserResultOk,
+			GrblLineParserResultError,
+			GrblLineParserResultAlarm,
+			GrblLineParserResultFeedback,
+			GrblLineParserResultDollar,
+			GrblLineParserResultStartup
 		];
 
-		for (let i = 0, it; (it = parsers[i]); i++) {
-			var result = it.call(this, line);
+		for (let i = 0, it: { parse: (line: string)=> GrblLineParserResult }; (it = parsers[i]); i++) {
+			var result = it.parse(line);
 			if (result) {
 				return result;
 			}
@@ -121,95 +207,15 @@ export class GrblLineParser {
 		console.log("unknown message: " + line);
 		return null;
 	}
-
-	parseStartup(line: string): GrblLineParserResult {
-		if (!MESSAGE_STARTUP.test(line)) return false;
-		return new GrblLineParserResultStartup(<GrblVersion>{
-			major: +RegExp.$1,
-			minor: RegExp.$2,
-		});
-	}
-
-	parseOk(line): GrblLineParserResult {
-		if (!MESSAGE_OK.test(line)) return false;
-		return new GrblLineParserResultOk();
-	}
-
-	parseError(line): GrblLineParserResult {
-		if (!MESSAGE_ERROR.test(line)) return false;
-		return new GrblLineParserResultError(RegExp.$1);
-	}
-
-	parseAlarm(line): GrblLineParserResult {
-		if (!MESSAGE_ALARM.test(line)) return false;
-		return new GrblLineParserResultAlarm(RegExp.$1);
-	}
-
-	parseFeedback(line): GrblLineParserResult {
-		if (!MESSAGE_FEEDBACK.test(line)) return false;
-		return new GrblLineParserResultFeedback(RegExp.$1);
-	}
-
-	parseDollar(line: string): GrblLineParserResult {
-		if (!MESSAGE_DOLLAR.test(line)) return false;
-		return new GrblLineParserResultDollar(line);
-	}
-
-	parseStatus(line: string): GrblLineParserResult {
-		if (!MESSAGE_STATUS.test(line)) return false;
-
-		var ret = new GrblLineParserResultStatus();
-
-		let params = RegExp.$1.split(/,/);
-		ret.state = params.shift();
-
-		let map = {};
-		let current: string;
-		for (let i = 0, len = params.length; i < len; i++) {
-			let param: string = params[i];
-			if (/^(.+):(.+)/.test(param)) {
-				current = RegExp.$1;
-				param = RegExp.$2;
-				map[current] = new Array<number>();
-			}
-			if (!current) {
-				throw "Illegal status format: " + line;
-			}
-
-			map[current].push(param);
-		}
-
-		ret.machinePosition = <GrblPosition>{
-			x: +map['MPos'][0],
-			y: +map['MPos'][1],
-			z: +map['MPos'][2],
-		};
-
-		ret.workingPosition = <GrblPosition>{
-			x: +map['WPos'][0],
-			y: +map['WPos'][1],
-			z: +map['WPos'][2],
-		};
-
-		if (map['Buf']) {
-			ret.plannerBufferCount = +map['Buf'][0];
-		}
-
-		if (map['RX']) {
-			ret.rxBufferCount = +map['RX'][0];
-		}
-
-		return ret;
-	}
 }
 
 export interface SerialPort {
 	// node-serialport compatible
-	open(cb: (err: any) => void);
-	on(ev: string, cb: (e: any) => void);
-	write(d: string);
-	write(d: string, cb: (err: any, results: any) => void);
-	close(cb: (err: any) => void);
+	open(cb: (err: any) => void): any;
+	on(ev: string, cb: (e: any) => void): any;
+	write(d: string): any;
+	write(d: string, cb: (err: any, results: any) => void): any;
+	close(cb: (err: any) => void): any;
 }
 
 
@@ -224,12 +230,12 @@ export class Grbl extends events.EventEmitter {
 	parser : GrblLineParser;
 	isOpened: boolean;
 	isClosing: boolean;
-	timer: NodeJS.Timer;
+	statusQueryTimer: NodeJS.Timer;
 	waitingQueue: Array< (err: any) => void >;
 
 	constructor(serialport: SerialPort) {
 		super();
-		this.status = new GrblLineParserResultStatus();
+		this.status = new GrblLineParserResultStatus(null);
 		this.serialport = serialport;
 		this.parser = new GrblLineParser();
 		this.isOpened = false;
@@ -237,9 +243,11 @@ export class Grbl extends events.EventEmitter {
 	}
 
 	open():Promise<any> {
-		this.on("startup", (r) => {
+		this.on("startup", (r: GrblLineParserResultStartup) => {
 			this.waitingQueue = [];
+			this.stopQueryStatus();
 			this.realtimeCommand("?");
+			this.startQueryStatus();
 		});
 
 		return new Promise( (resolve, reject) => {
@@ -266,22 +274,25 @@ export class Grbl extends events.EventEmitter {
 					this.destroy();
 				});
 
-				this.startTimer();
-
-				this.once("startup", (r) => {
+				this.once("startup", (r: GrblLineParserResultStartup) => {
 					resolve();
 				});
 			});
 		});
 	}
 
-	startTimer() {
-		this.timer = setTimeout( () => {
+	startQueryStatus() {
+		this.statusQueryTimer = setTimeout( () => {
 			this.getStatus();
 			if (this.isOpened) {
-				this.startTimer();
+				this.startQueryStatus();
 			}
 		}, 1/10 * 1000);
+	}
+
+	stopQueryStatus() {
+		clearTimeout(this.statusQueryTimer);
+		this.statusQueryTimer = null;
 	}
 
 	close():Promise<any> {
@@ -299,7 +310,7 @@ export class Grbl extends events.EventEmitter {
 	destroy() {
 		if (this.isOpened) {
 			this.isOpened = false;
-			clearTimeout(this.timer);
+			this.stopQueryStatus();
 		}
 	}
 
@@ -309,9 +320,8 @@ export class Grbl extends events.EventEmitter {
 				reject('Must called in idle state');
 			}
 
-			var results = [];
-			var listener;
-			listener = (e) => {
+			var results: Array<GrblLineParserResultDollar> = [];
+			var listener = (e: GrblLineParserResultDollar) => {
 				results.push(e);
 			};
 			this.on("dollar", listener);
@@ -325,19 +335,20 @@ export class Grbl extends events.EventEmitter {
 
 	getStatus():Promise<any> {
 		return new Promise( (resolve, reject) => {
-			if (this.status.state !== STATE_ALARM) {
-				this.once("status", (res) => {
+			if (this.status.state !== STATE_ALARM &&
+				this.status.state !== STATE_HOME ) {
+				this.once("status", (res: GrblLineParserResultStatus) => {
 					resolve(res);
 				});
 				this.realtimeCommand("?");
 			} else {
-				reject();
+				reject("state is alarm or homing");
 			}
 		});
 	}
 
 	command(cmd: string):Promise<any> {
-		return new Promise( (resolve, reject) => {
+		var ret = new Promise( (resolve, reject) => {
 			console.log('>>', cmd);
 			this.serialport.write(cmd + '\n');
 			this.waitingQueue.push( (err: any) => {
@@ -345,6 +356,22 @@ export class Grbl extends events.EventEmitter {
 				resolve();
 			});
 		});
+
+		if (cmd === '$H') {
+			// command "?" is not usable in homing
+			var prevState = this.status.state;
+			this.status.state = STATE_HOME;
+			this.stopQueryStatus();
+			this.emit("statuschange", this.status);
+			this.emit("status", this.status);
+
+			ret = ret.then( (): any => {
+				this.status.state = prevState;
+				this.startQueryStatus();
+			} );
+		}
+
+		return ret;
 	}
 
 	realtimeCommand(cmd: string) {
@@ -385,9 +412,12 @@ export class Grbl extends events.EventEmitter {
 			this.emit("startup", result);
 		} else
 		if (result instanceof GrblLineParserResultAlarm) {
-			this.lastAlarm = result;
+			// command "?" is not usable in alarm,
+			// so set state by hand
 			this.status.state = STATE_ALARM;
+			this.lastAlarm = result;
 			this.emit("alarm", result);
+			this.emit("statuschange", this.status);
 			this.emit("status", this.status);
 		} else
 		if (result instanceof GrblLineParserResultFeedback) {

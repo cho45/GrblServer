@@ -167,6 +167,7 @@ Polymer({
 	processNotification : function (res) {
 		console.log('processNotification', res);
 		var self = this;
+		console.log(res);
 		if (res.type === 'init') {
 			console.log('init');
 			self.set('error', res.lastFeedback || res.lastAlarm);
@@ -176,7 +177,7 @@ Polymer({
 		} else
 		if (res.type === 'startup') {
 			self.initialize();
-			self.commandHistory.push('<< Grbl ' + res.version.major + res.version.minor);
+			self.commandHistory.push('<< ' + res.raw);
 		} else
 		if (res.type === 'status') {
 			self.set('status.state', res.status.state || 'Unknown');
@@ -185,12 +186,12 @@ Polymer({
 		} else
 		if (res.type === 'alarm') {
 			self.set('error', res.message);
-			self.commandHistory.push('<< ALARM:' + res.message);
+			self.commandHistory.push('<< ' + res.raw);
 			alert(res.message);
 		} else
 		if (res.type === 'feedback') {
 			self.set('error', res.message);
-			self.commandHistory.push('<< [' + res.message + ']');
+			self.commandHistory.push('<< ' + res.raw);
 		} else
 		if (res.type === 'gcode') {
 			self.set('gcode', res.gcode);
@@ -247,7 +248,7 @@ Polymer({
 			then(function (r) {
 				if (r) {
 					for (var i = 0, it; (it = r[i]); i++) {
-						self.commandHistory.push('<< ' + it.message);
+						self.commandHistory.push('<< ' + it.raw);
 					}
 				}
 				self.commandHistory.push('<< ok');
@@ -339,8 +340,6 @@ Polymer({
 			0: 'workingPosition',
 			1: 'machinePosition'
 		}[this.positioningSystem];
-
-		console.log(this.status);
 
 		var number;
 		try {
