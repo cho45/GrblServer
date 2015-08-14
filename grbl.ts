@@ -204,7 +204,7 @@ export class GrblLineParser {
 			}
 		}
 
-		console.log("unknown message: " + line);
+		// console.log("unknown message: " + line);
 		return null;
 	}
 }
@@ -233,6 +233,8 @@ export class Grbl extends events.EventEmitter {
 	statusQueryTimer: NodeJS.Timer;
 	waitingQueue: Array< (err: any) => void >;
 
+	DEBUG: boolean;
+
 	constructor(serialport: SerialPort) {
 		super();
 		this.status = new GrblLineParserResultStatus(null);
@@ -240,6 +242,7 @@ export class Grbl extends events.EventEmitter {
 		this.parser = new GrblLineParser();
 		this.isOpened = false;
 		this.waitingQueue = [];
+		this.DEBUG = false;
 	}
 
 	open():Promise<any> {
@@ -349,7 +352,7 @@ export class Grbl extends events.EventEmitter {
 
 	command(cmd: string):Promise<any> {
 		var ret = new Promise( (resolve, reject) => {
-			console.log('>>', cmd);
+			if (this.DEBUG) console.log('>>', cmd);
 			this.serialport.write(cmd + '\n');
 			this.waitingQueue.push( (err: any) => {
 				if (err) return reject(err);
@@ -384,7 +387,7 @@ export class Grbl extends events.EventEmitter {
 
 	processData(data: string) {
 		data = data.replace(/\s+$/, '');
-		console.log('<<', data);
+		if (this.DEBUG) console.log('<<', data);
 		if (!data) return;
 
 		this.emit("raw", data);

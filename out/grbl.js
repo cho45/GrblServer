@@ -209,7 +209,7 @@ var GrblLineParser = (function () {
                 return result;
             }
         }
-        console.log("unknown message: " + line);
+        // console.log("unknown message: " + line);
         return null;
     };
     return GrblLineParser;
@@ -225,6 +225,7 @@ var Grbl = (function (_super) {
         this.parser = new GrblLineParser();
         this.isOpened = false;
         this.waitingQueue = [];
+        this.DEBUG = false;
     }
     Grbl.prototype.open = function () {
         var _this = this;
@@ -330,7 +331,8 @@ var Grbl = (function (_super) {
     Grbl.prototype.command = function (cmd) {
         var _this = this;
         var ret = new Promise(function (resolve, reject) {
-            console.log('>>', cmd);
+            if (_this.DEBUG)
+                console.log('>>', cmd);
             _this.serialport.write(cmd + '\n');
             _this.waitingQueue.push(function (err) {
                 if (err)
@@ -360,7 +362,8 @@ var Grbl = (function (_super) {
     };
     Grbl.prototype.processData = function (data) {
         data = data.replace(/\s+$/, '');
-        console.log('<<', data);
+        if (this.DEBUG)
+            console.log('<<', data);
         if (!data)
             return;
         this.emit("raw", data);
