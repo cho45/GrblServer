@@ -229,6 +229,10 @@
 		[disabled] {
 			opacity: 0.3;
 		}
+
+		.feedback {
+			font-size: 80%;
+		}
 	</style>
 	<template>
 		<div class="layout horizontal">
@@ -239,9 +243,9 @@
 						<iron-icon icon="{{conditional(isConnected, 'image:flash-on', 'image:flash-off')}}"></iron-icon>
 						<span>{{status.state}}</span>
 					</div>
-					<div class="" style="padding: 0 16px">
+					<div class="feedback" style="padding: 0 16px">
 						<template is="dom-if" if="{{equals(status.state, 'Alarm')}}">
-							<div class="feedback" style="font-weight: bold">
+							<div class="" style="font-weight: bold">
 								<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
 								Grbl is locked. Unlock by:
 							</div>
@@ -256,7 +260,7 @@
 							</paper-button>
 						</template>
 						<template is="dom-if" if="{{error}}">
-							<div class="error" style="font-weight: bold">
+							<div class="" style="font-weight: bold">
 								<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
 								<span>{{error}}</span>
 							</div>
@@ -423,7 +427,10 @@
 						<div style="padding: 16px">
 							<div id="command-history">
 								<template is="dom-repeat" items="{{commandHistory}}">
-									<div class="line">{{item}}</div>
+									<div class="line">
+										<span>{{item.prefix}}</span>
+										<span>{{item.value}}</span>
+									</div>
 								</template>
 							</div>
 						</div>

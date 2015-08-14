@@ -17,7 +17,7 @@ Polymer({
 
 		commandTab: {
 			type: Number,
-			value: 1
+			value: 0
 		},
 
 		positioningSystem: {
@@ -59,6 +59,11 @@ Polymer({
 		commandHistory: {
 			type: Array,
 			value: []
+		},
+
+		commandHistoryIndex: {
+			type: Number,
+			value: 0
 		},
 
 		error: {
@@ -177,7 +182,7 @@ Polymer({
 		} else
 		if (res.type === 'startup') {
 			self.initialize();
-			self.commandHistory.push('<< ' + res.raw);
+			self.addCommandHistory('<<', res.raw);
 		} else
 		if (res.type === 'status') {
 			self.set('status.state', res.status.state || 'Unknown');
@@ -186,12 +191,12 @@ Polymer({
 		} else
 		if (res.type === 'alarm') {
 			self.set('error', res.message);
-			self.commandHistory.push('<< ' + res.raw);
+			self.addCommandHistory('<<', res.raw);
 			alert(res.message);
 		} else
 		if (res.type === 'feedback') {
 			self.set('error', res.message);
-			self.commandHistory.push('<< ' + res.raw);
+			self.addCommandHistory('<<', res.raw);
 		} else
 		if (res.type === 'gcode') {
 			self.set('gcode', res.gcode);
@@ -213,8 +218,6 @@ Polymer({
 		if (res.type === 'gcode.done') {
 			alert('Done');
 		}
-
-		self.cleanupCommandHistory();
 
 		if (self.error == "'$H'|'$X' to unlock") {
 			self.set('error', '');
@@ -242,27 +245,27 @@ Polymer({
 
 	command : function (command) {
 		var self = this;
-		self.commandHistory.push('>> ' + command);
-		self.cleanupCommandHistory();
+		self.addCommandHistory('>>', command);
 		self.request('command', { command: command }).
 			then(function (r) {
 				if (r) {
 					for (var i = 0, it; (it = r[i]); i++) {
-						self.commandHistory.push('<< ' + it.raw);
+						self.addCommandHistory('<<', it.raw);
 					}
 				}
-				self.commandHistory.push('<< ok');
-				self.cleanupCommandHistory();
+				self.addCommandHistory('<<', 'ok');
 			}, function (e) {
-				self.commandHistory.push('<< error:' + e.message);
-				self.cleanupCommandHistory();
+				self.addCommandHistory('<<', 'error:' + e.message);
 			});
 	},
 
-	cleanupCommandHistory : function () {
+	addCommandHistory : function (prefix, value) {
 		var self = this;
-		while (self.commandHistory.length > 50) self.commandHistory.shift();
-		self.set('commandHistory', self.commandHistory.slice(0));
+		self.push('commandHistory', {
+			prefix: prefix,
+			value: value
+		});
+		while (self.commandHistory.length > 100) self.shift('commandHistory');
 		self.async(function () {
 			var history = document.getElementById('command-history');
 			history.scrollTop = history.scrollHeight;
@@ -329,10 +332,30 @@ Polymer({
 	},
 
 	commandAny : function (e) {
-		if (e.keyIdentifier !== 'Enter') return;
-		var value = e.target.value;
-		e.target.value = "";
-		this.command(value);
+		var self = this;
+		if (e.keyIdentifier === 'Enter') {
+			var value = e.target.value;
+			e.target.value = "";
+			self.commandHistoryIndex = 0;
+			self.command(value);
+		} else
+		if (e.keyIdentifier === 'Up') {
+			var history = self.commandHistory.filter(function (x) { return x.prefix === '>>' }).reverse();
+			self.commandHistoryIndex++;
+			if (self.commandHistoryIndex > history.length) {
+				self.commandHistoryIndex = history.length;
+			}
+			try {
+				e.target.value = history[self.commandHistoryIndex-1].value;
+			} catch (e) { }
+		} else
+		if (e.keyIdentifier === 'Down') {
+			var history = self.commandHistory.filter(function (x) { return x.prefix === '>>' }).reverse(); // no warnings
+			if (self.commandHistoryIndex > 0) self.commandHistoryIndex--;
+			try {
+				e.target.value = history[self.commandHistoryIndex-1].value;
+			} catch (e) { }
+		}
 	},
 
 	formatCoords : function (axis) {
