@@ -113,7 +113,6 @@ var GrblServer = (function () {
             maxReceivedMessageSize: 10 * 1024 * 1024,
             autoAcceptConnections: false
         });
-        console.log(this.wsServer);
         this.wsServer.on('request', function (req) {
             if (!req.remoteAddress.match(/^((::ffff:)?(127\.|10\.|192\.168\.)|::1)/)) {
                 req.reject();
