@@ -1,8 +1,0 @@
-#!/bin/sh
-
-cd /home/pi/app/GrblServer
-
-exec 2>&1
-exec setuidgid pi \
-	node out/server.js
-

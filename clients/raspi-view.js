@@ -303,14 +303,6 @@ var grblGCodeBody = blessed.list({
 	}
 });
 
-//setInterval(function () {
-//	grblGCodeBody.add(new Date()+" "+grblGCodeBody.height);
-//	while (grblGCodeBody.items.length > grblGCodeBody.height) {
-//		grblGCodeBody.shiftItem();
-//	}
-//	grblGCodeBody.select(2);
-//}, 1000);
-
 screen.key(['C-c'], function (ch, key) {
   return process.exit(0);
 });
@@ -318,7 +310,7 @@ screen.key(['C-c'], function (ch, key) {
 screen.render();
 
 (function openWebSocket() {
-	var client = new WebSocket('ws://192.168.0.251:8080/');
+	var client = new WebSocket('ws://localhost:8080/');
 	serverStatus.setContent('Connecting...');
 	screen.render();
 	client.onopen = function () {
@@ -327,17 +319,13 @@ screen.render();
 	};
 	client.onerror = function () {
 		serverStatus.setContent('Error');
-		setTimeout(function () {
-			openWebSocket();
-		}, 1000);
 		screen.render();
 	};
 	client.onclose = function () {
+		client = null;
 		serverStatus.setContent('Disconnected');
-		setTimeout(function () {
-			openWebSocket();
-		}, 1000);
 		screen.render();
+		setTimeout(openWebSocket, 1000);
 	};
 	client.onmessage = function (e) {
 		var res = JSON.parse(e.data);
