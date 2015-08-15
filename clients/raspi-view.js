@@ -3,6 +3,7 @@
 
 var blessed = require('blessed');
 var WebSocket = require('websocket').w3cwebsocket; // no warnings
+var _ = require('underscore');
 
 
 // Note:: 320x240px TFT -> 40x15
@@ -259,50 +260,50 @@ if (1) {
 	});
 }
 
-var grblGCodeContainer = blessed.box({
-	parent: screen,
-	top: 8,
-	left: 0,
-	width: '100%',
-	height: 10
-});
-
-var grblGCodeLabel = blessed.box({
-	parent: grblGCodeContainer,
-	top: 0,
-	left: 0,
-	width: '100%',
-	height: 1,
-	content: 'Exec:'
-});
-
-var grblGCodeLabelName = blessed.box({
-	parent: grblGCodeLabel,
-	top: 0,
-	left: 6,
-	width: '100%-6',
-	height: 1,
-	content: ''
-});
-
-var grblGCodeBody = blessed.list({
-	parent: grblGCodeContainer,
-	top: 1,
-	left: 0,
-	width: '100%',
-	height: '100%-1',
-	style: {
-		item: {
-			fg: 'white',
-			bg: 'black'
-		},
-		selected: {
-			fg: 'black',
-			bg: 'white'
-		}
-	}
-});
-
+//var grblGCodeContainer = blessed.box({
+//	parent: screen,
+//	top: 8,
+//	left: 0,
+//	width: '100%',
+//	height: 10
+//});
+//
+//var grblGCodeLabel = blessed.box({
+//	parent: grblGCodeContainer,
+//	top: 0,
+//	left: 0,
+//	width: '100%',
+//	height: 1,
+//	content: 'Exec:'
+//});
+//
+//var grblGCodeLabelName = blessed.box({
+//	parent: grblGCodeLabel,
+//	top: 0,
+//	left: 6,
+//	width: '100%-6',
+//	height: 1,
+//	content: ''
+//});
+//
+//var grblGCodeBody = blessed.list({
+//	parent: grblGCodeContainer,
+//	top: 1,
+//	left: 0,
+//	width: '100%',
+//	height: '100%-1',
+//	style: {
+//		item: {
+//			fg: 'white',
+//			bg: 'black'
+//		},
+//		selected: {
+//			fg: 'black',
+//			bg: 'white'
+//		}
+//	}
+//});
+//
 screen.key(['C-c'], function (ch, key) {
   return process.exit(0);
 });
@@ -312,19 +313,19 @@ screen.render();
 (function openWebSocket() {
 	var client = new WebSocket('ws://localhost:8080/');
 	serverStatus.setContent('Connecting...');
-	screen.render();
+	render();
 	client.onopen = function () {
 		serverStatus.setContent('Connected');
-		screen.render();
+		render();
 	};
 	client.onerror = function () {
 		serverStatus.setContent('Error');
-		screen.render();
+		render();
 	};
 	client.onclose = function () {
 		client = null;
 		serverStatus.setContent('Disconnected');
-		screen.render();
+		render();
 		setTimeout(openWebSocket, 1000);
 	};
 	client.onmessage = function (e) {
@@ -341,7 +342,7 @@ screen.render();
 				grblStatusError.setContent(res.lastFeedback || res.lastAlarm);
 				grblStatus.setContent(res.status.state);
 				updatePosition(res.status.workingPosition, res.status.machinePosition);
-				screen.render();
+				render();
 			} else
 			if (res.type === 'startup') {
 			} else
@@ -356,22 +357,28 @@ screen.render();
 				grblStatusError.setContent(res.message);
 			} else
 			if (res.type === 'gcode') {
-				grblGCodeBody.setItems(res.gcode.sent.concat(res.gcode.remain));
-				grblGCodeBody.select(res.gcode.sent.length);
-				grblGCodeLabelName.setContent(res.gcode.name);
+//				grblGCodeBody.setItems(res.gcode.sent.concat(res.gcode.remain));
+//				grblGCodeBody.select(res.gcode.sent.length);
+//				grblGCodeLabelName.setContent(res.gcode.name);
 			} else
 			if (res.type === 'gcode.start') {
 				// self.set('gcode.startedTime', res.time);
 			} else
 			if (res.type === 'gcode.progress') {
-				grblGCodeBody.down();
+//				grblGCodeBody.down();
 			} else
 			if (res.type === 'gcode.done') {
-				grblGCodeBody.down();
+//				grblGCodeBody.down();
 			}
-			screen.render();
+			render();
 		}
 	};
+
+	function render() {
+		_.throttle(function () {
+			screen.render();
+		}, 1000);
+	}
 
 	function updatePosition(working, machine) {
 		grblCoordsWorkingXValue.setContent(working.x.toFixed(3));

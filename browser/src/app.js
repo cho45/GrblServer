@@ -95,6 +95,7 @@ Polymer({
 			inputFile.onchange = function () {
 				var files = inputFile.files;
 				self.uploadFile(files[0]);
+				inputFile.value = "";
 			};
 
 			document.body.addEventListener("drop", function (e) {
