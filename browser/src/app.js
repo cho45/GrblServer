@@ -124,10 +124,6 @@ Polymer({
 			self.set('status.state', 'Unknown');
 			self.set('error', e);
 			console.log(e);
-
-			setTimeout(function () {
-				self.openWebSocket();
-			}, 3000);
 		};
 		self.connection.onclose = function (e) {
 			self.set('status.state', 'Unknown');
@@ -136,7 +132,7 @@ Polymer({
 
 			setTimeout(function () {
 				self.openWebSocket();
-			}, 3000);
+			}, 1000);
 		};
 		self.connection.onmessage = function (e) {
 			var res = JSON.parse(e.data);
