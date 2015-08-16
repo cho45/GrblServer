@@ -116,19 +116,20 @@ Polymer({
 
 	openWebSocket : function () {
 		var self = this;
-		self.connection = new WebSocket('ws://' + location.host);
+		self.connection = new WebSocket('ws://' + (localStorage["grblServer"] || location.host));
 		self.connection.onopen = function (e) {
 			self.isConnected = true;
 		};
 		self.connection.onerror = function (e) {
+			console.log('onerror', e);
 			self.set('status.state', 'Unknown');
 			self.set('error', e);
-			console.log(e);
 		};
-		self.connection.onclose = function (e) {
+		self.connection.onclose = function  (e) {
+			console.log('onclose', e);
 			self.set('status.state', 'Unknown');
 			self.set('error', 'Disconnected');
-			console.log(e);
+			self.isConnected = false;
 
 			setTimeout(function () {
 				self.openWebSocket();
@@ -154,9 +155,6 @@ Polymer({
 					self.processNotification(res.result);
 				}
 			}
-		};
-		self.connection.onclose = function  (e) {
-			self.isConnected = false;
 		};
 	},
 

@@ -90,14 +90,15 @@ Polymer({
 			self.isConnected = true;
 		};
 		self.connection.onerror = function (e) {
+			console.log('onerror', e);
 			self.set('status.state', 'Unknown');
 			self.set('error', e);
-			console.log(e);
 		};
 		self.connection.onclose = function (e) {
+			console.log('onclose', e);
 			self.set('status.state', 'Unknown');
 			self.set('error', 'Disconnected');
-			console.log(e);
+			self.isConnected = false;
 
 			setTimeout(function () {
 				self.openWebSocket();
@@ -123,9 +124,6 @@ Polymer({
 					self.processNotification(res.result);
 				}
 			}
-		};
-		self.connection.onclose = function  (e) {
-			self.isConnected = false;
 		};
 	},
 
