@@ -71,6 +71,11 @@ Polymer({
 			value: ''
 		},
 
+		lastAlarm: {
+			type: String,
+			value: ''
+		},
+
 		gcode: {
 			type: Object,
 			value: null
@@ -83,6 +88,9 @@ Polymer({
 	ready : function () {
 		var self = this;
 		console.log('ready');
+
+		self.alarmDialog = document.getElementById('alarm');
+		document.body.appendChild(self.alarmDialog);
 
 		self.async(function () {
 			var uploadFile = document.getElementById('upload-file');
@@ -217,6 +225,12 @@ Polymer({
 			self.set('status.state', res.status.state || 'Unknown');
 			self.set('status.workingPosition', res.status.workingPosition);
 			self.set('status.machinePosition', res.status.machinePosition);
+
+			self.set('lastAlarm', res.lastAlarm);
+			if (self.status.state == 'Alarm') {
+				self.alarmDialog.refit();
+				self.alarmDialog.open();
+			}
 		} else
 		if (res.type === 'startup') {
 			self.initialize();
@@ -230,7 +244,10 @@ Polymer({
 		if (res.type === 'alarm') {
 			self.set('error', res.message);
 			self.addCommandHistory('<<', res.raw);
-			alert(res.message);
+
+			self.set('lastAlarm', res.message);
+			self.alarmDialog.refit();
+			self.alarmDialog.open();
 		} else
 		if (res.type === 'feedback') {
 			self.set('error', res.message);

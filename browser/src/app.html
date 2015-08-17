@@ -586,6 +586,14 @@
 				</iron-pages>
 			</paper-material>
 		</div>
+
+		<paper-dialog id="alarm" modal style="min-width: 400px;">
+			<h2>ALARM</h2>
+			<p>{{lastAlarm}}</p>
+			<div class="buttons">
+				<paper-button dialog-confirm autofocus>Tap me to close</paper-button>
+			</div>
+		</paper-dialog>
 	</template>
 </dom-module>
 
