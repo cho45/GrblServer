@@ -52,6 +52,10 @@
 			visibility: hidden;
 		}
 
+		.coords-container {
+			width: 320px;
+		}
+
 		.coords {
 			font-size: 24px;
 			line-height: 24px;
@@ -92,6 +96,11 @@
 			font-size: 12px;
 		}
 
+		.jog table {
+			width: 300px;
+			margin: 8px auto;
+		}
+
 		.jog iron-icon {
 			width: 32px;
 			height: 32px;
@@ -104,6 +113,11 @@
 
 		.axis-label {
 			color: #999;
+		}
+
+		.status-container {
+			width: 800px;
+			margin: 0 auto;
 		}
 
 		.status {
@@ -231,30 +245,116 @@
 		}
 
 		.feedback {
+			padding: 0 16px;
 			font-size: 80%;
+		}
+
+		.actions {
+			padding: 16px;
+		}
+
+		.preset-positions {
+			text-align: center;
+			padding: 16px;
+		}
+
+		@media (max-width: 900px) {
+			:host {
+				font-size: 12px;
+			}
+
+			paper-button {
+				font-size: 10px;
+			}
+
+			paper-button iron-icon {
+				width: 16px;
+				height: 16px;
+				margin-top: -2px;
+			}
+
+			.status-container {
+				width: 100%;
+			}
+
+			.status .title {
+				padding: 6px;
+				font-size: 10px;
+			}
+
+			.coords-container {
+				width: 100%;
+			}
+
+			.coords {
+				font-size: 11px;
+				line-height: 11px;
+			}
+
+			.coords th,
+			.coords td {
+				padding: 0px 5px;
+			}
+
+			.coords iron-icon {
+				width: 16px;
+				height: 16px;
+			}
+
+			.coords paper-button {
+				font-size: 10px;
+				background: #fff;
+			}
+
+			.jog iron-icon {
+				width: 24px;
+				height: 24px;
+			}
+
+			paper-material.actions {
+				position: fixed;
+				bottom: 0;
+				width: 100%;
+				left: 0;
+				margin: 0;
+				background: #fff;
+				box-sizing: border-box;
+				z-index: 999;
+
+				@apply(--shadow-elevation-4dp);
+			}
+
+			paper-material.actions[disabled] {
+				opacity: 1;
+				/* display: none; */
+			}
+
+			.preset-positions {
+				padding: 6px;
+			}
 		}
 	</style>
 	<template>
-		<div class="layout horizontal">
-		<paper-material elevation="0" style="width: 800px; margin: 0 auto" class="layout vertical">
+		<div class="layout horizontal wrap">
+		<paper-material elevation="0" class="layout vertical status-container">
 			<paper-material class="status layout horizontal" elevation="1">
 				<div class="flex">
 					<div class$="{{sprintf('title %s', status.state)}}">
 						<iron-icon icon="{{conditional(isConnected, 'image:flash-on', 'image:flash-off')}}"></iron-icon>
 						<span>{{status.state}}</span>
 					</div>
-					<div class="feedback" style="padding: 0 16px">
+					<div class="feedback">
 						<template is="dom-if" if="{{equals(status.state, 'Alarm')}}">
 							<div class="" style="font-weight: bold">
 								<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
 								Grbl is locked. Unlock by:
 							</div>
-							<paper-button on-click="commandUnlock">
+							<paper-button on-tap="commandUnlock">
 								<iron-icon icon="icons:lock-open"></iron-icon>
 								Unlock
 							</paper-button>
 							or
-							<paper-button on-click="commandHoming">
+							<paper-button on-tap="commandHoming">
 								<iron-icon icon="icons:home"></iron-icon>
 								Homing
 							</paper-button>
@@ -268,35 +368,35 @@
 					</div>
 				</div>
 			</paper-material>
-			<div class="layout horizontal" id="coords" disabled$="{{equals(status.state, 'Unknown')}}">
-				<paper-material elevation="1" style="width: 320px" class$="{{conditional(positioningSystem, 'machine', 'working')}}">
+			<div class="layout horizontal wrap" id="coords" disabled$="{{equals(status.state, 'Unknown')}}">
+				<paper-material elevation="1" class$="{{conditional(positioningSystem, 'coords-container machine', 'coords-container working')}}">
 					<table class="coords">
 						<tr>
 							<th class="axis">X</th>
 							<td class="number">{{formatCoords('x', status.workingPosition.x, status.machinePosition.x, positioningSystem)}}</td>
-							<td class="reset"><paper-button data-axis="x" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button data-axis="x" on-tap="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Y</th>
 							<td class="number">{{formatCoords('y', status.workingPosition.y, status.machinePosition.y, positioningSystem)}}</td>
-							<td class="reset"><paper-button data-axis="y" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button data-axis="y" on-tap="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Z</th>
 							<td class="number">{{formatCoords('z', status.workingPosition.z, status.machinePosition.z, positioningSystem)}}</td>
-							<td class="reset"><paper-button data-axis="z" on-click="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button data-axis="z" on-tap="resetToZero"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 					</table>
 					<paper-tabs class="system" selected="{{positioningSystem}}" noink no-slide align-bottom>
 						<paper-tab>Working</paper-tab>
 						<paper-tab>Machine</paper-tab>
 					</paper-tabs>
-					<div style="text-align: center; padding: 16px">
-						<paper-button on-click="commandHoming">
+					<div class="preset-positions">
+						<paper-button on-tap="commandHoming">
 							<iron-icon icon="icons:home"></iron-icon>
 							Homing
 						</paper-button>
-						<paper-button on-click="commandReturn">
+						<paper-button on-tap="commandReturn">
 							<iron-icon icon="hardware:keyboard-return"></iron-icon>
 							Return to zero
 						</paper-button>
@@ -304,33 +404,33 @@
 				</paper-material>
 				<div class="flex layout vertical">
 					<div class="jog flex">
-						<table style="width: 300px; margin: 8px auto">
+						<table>
 							<tr>
 								<td>
 								</td>
 								<td>
-									<paper-button raised data-axis="y" data-direction="+1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+									<paper-button raised data-axis="y" data-direction="+1" on-tap="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 										<div class="axis-label">+Y</div>
 									</paper-button>
 								</td>
 								<td>
 								</td>
 								<td>
-									<paper-button raised data-axis="z" data-direction="+1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+									<paper-button raised data-axis="z" data-direction="+1" on-tap="commandMove"><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 										<div class="axis-label">+Z</div>
 									</paper-button>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									<paper-button raised data-axis="x" data-direction="-1" on-click="commandMove"><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
+									<paper-button raised data-axis="x" data-direction="-1" on-tap="commandMove"><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
 										<span class="axis-label" style="margin-right: 10px">-X</span>
 									</paper-button>
 								</td>
 								<td>
 								</td>
 								<td>
-									<paper-button raised data-axis="x" data-direction="+1" on-click="commandMove">
+									<paper-button raised data-axis="x" data-direction="+1" on-tap="commandMove">
 										<span class="axis-label" style="margin-left: 10px">+X</span>
 										<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
 								</td>
@@ -341,14 +441,14 @@
 								<td>
 								</td>
 								<td>
-									<paper-button raised data-axis="y" data-direction="-1" on-click="commandMove">
+									<paper-button raised data-axis="y" data-direction="-1" on-tap="commandMove">
 										<div class="axis-label">-Y</div>
 										<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 								</td>
 								<td>
 								</td>
 								<td>
-									<paper-button raised data-axis="z" data-direction="-1" on-click="commandMove">
+									<paper-button raised data-axis="z" data-direction="-1" on-tap="commandMove">
 										<div class="axis-label">-Z</div>
 										<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 								</td>
@@ -383,24 +483,24 @@
 					</div>
 				</div>
 			</div>
-			<paper-material class="" style="padding: 16px;" disabled$="{{equals(status.state, 'Unknown')}}">
+			<paper-material class="actions" disabled$="{{equals(status.state, 'Unknown')}}">
 				<div class="layout horizontal">
 					<div class="flex">
 						<template is="dom-if" if="{{equals(status.state, 'Hold')}}">
-							<paper-button class="action-resume" on-click="commandResume">
+							<paper-button class="action-resume" on-tap="commandResume">
 								<iron-icon icon="av:play-arrow"></iron-icon>
 								Resume
 							</paper-button>
 						</template>
 						<template is="dom-if" if="{{!equals(status.state, 'Hold')}}">
-							<paper-button class="action-pause" on-click="commandPause">
+							<paper-button class="action-pause" on-tap="commandPause">
 								<iron-icon icon="av:pause"></iron-icon>
 								Pause
 							</paper-button>
 						</template>
 					</div>
 					<div class="flex" style="text-align: right">
-						<paper-button class="action-reset" on-click="commandReset">
+						<paper-button class="action-reset" on-tap="commandReset">
 							<iron-icon icon="icons:cancel"></iron-icon>
 							Reset
 						</paper-button>
@@ -448,7 +548,7 @@
 						<template is="dom-if" if="{{gcode}}">
 							<template is="dom-if" if="{{!gcode.startedTime}}">
 								<div style="vertical-align: baseline">
-									<paper-button class="action-resume" on-click="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
+									<paper-button class="action-resume" on-tap="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
 										<iron-icon icon="av:play-arrow"></iron-icon>
 										Execute
 									</paper-button>
@@ -457,7 +557,7 @@
 							<div class="layout horizontal">
 								<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
 								<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
-									<paper-icon-button icon="icons:clear" on-click="commandClearUploadedFile" title="Clear uploaded file"></paper-icon-button>
+									<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file"></paper-icon-button>
 								</div>
 								<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly></paper-input>
 								<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly></paper-input>

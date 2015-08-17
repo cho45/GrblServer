@@ -30,8 +30,6 @@ var time = blessed.box({
 	width: 10,
 	content: '[00:00:00]',
 	style: {
-		fg: 'white',
-		bg: 'black'
 	}
 });
 
@@ -50,7 +48,7 @@ setInterval(function () {
 
 var serverStatus = blessed.box({
 	parent: serverStatusContainer,
-	width: '100%',
+	width: 12,
 	top: 0,
 	left: 11,
 	content: 'Disconnected',
@@ -60,28 +58,27 @@ var serverStatus = blessed.box({
 
 var grblStatus = blessed.box({
 	parent: screen,
-	width: '100%',
-	top: 1,
-	left: 0,
+	width: 15,
+	top: 0,
+	left: 24,
 	content: 'Status: Unknown',
 	style: {
-		fg: 'white',
-		bg: 'black'
 	}
 });
 
 var grblStatusError = blessed.box({
-	parent: grblStatus,
-	width: '100%-10',
-	top: 0,
-	left: 16,
+	parent: screen,
+	width: '100%',
+	height: 2,
+	top: 1,
+	left: 0,
 	content: ''
 });
 
 var grblCoordsContainer = blessed.box({
 	parent: screen,
-	top: 2,
-	left: 0,
+	top: 4,
+	left: 5,
 	width: 30,
 	height: 6,
 	style: {
@@ -90,7 +87,7 @@ var grblCoordsContainer = blessed.box({
 	}
 });
 
-if (1) {
+do {
 	var grblCoordsWorkingContainer = blessed.box({
 		parent: grblCoordsContainer,
 		width: 15,
@@ -173,9 +170,9 @@ if (1) {
 		align: 'right',
 		content: '100.000'
 	});
-}
+} while (0);
 
-if (1) {
+do {
 	var grblCoordsMachineContainer = blessed.box({
 		parent: grblCoordsContainer,
 		width: 15,
@@ -258,7 +255,7 @@ if (1) {
 		align: 'right',
 		content: '100.000'
 	});
-}
+} while (0);
 
 //var grblGCodeContainer = blessed.box({
 //	parent: screen,
@@ -340,7 +337,7 @@ screen.render();
 
 			if (res.type === 'init') {
 				grblStatusError.setContent(res.lastFeedback || res.lastAlarm);
-				grblStatus.setContent(res.status.state);
+				grblStatus.setContent('Status: ' + res.status.state);
 				updatePosition(res.status.workingPosition, res.status.machinePosition);
 				render();
 			} else
