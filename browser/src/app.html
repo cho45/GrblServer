@@ -23,6 +23,7 @@
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
 <dom-module id="my-app">
 	<style is="custom-style">
@@ -594,6 +595,10 @@
 				<paper-button dialog-confirm autofocus>Tap me to close</paper-button>
 			</div>
 		</paper-dialog>
+
+		<paper-toast id="feedback" duration="10000"></paper-toast>
+		<paper-toast id="gcodeDone" text="G-code Sent" duration="10000"></paper-toast>
+
 	</template>
 </dom-module>
 

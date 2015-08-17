@@ -221,7 +221,7 @@ Polymer({
 		console.log(res);
 		if (res.type === 'init') {
 			console.log('init');
-			self.set('error', res.lastFeedback || res.lastAlarm);
+			self.set('error', res.lastAlarm);
 			self.set('status.state', res.status.state || 'Unknown');
 			self.set('status.workingPosition', res.status.workingPosition);
 			self.set('status.machinePosition', res.status.machinePosition);
@@ -231,6 +231,10 @@ Polymer({
 				self.alarmDialog.refit();
 				self.alarmDialog.open();
 			}
+
+			var feeback = document.getElementById('feedback');
+			feedback.text = res.lastFeedback;
+			feedback.show();
 		} else
 		if (res.type === 'startup') {
 			self.initialize();
@@ -250,7 +254,9 @@ Polymer({
 			self.alarmDialog.open();
 		} else
 		if (res.type === 'feedback') {
-			self.set('error', res.message);
+			var feeback = document.getElementById('feedback'); // no warnings
+			feedback.text = res.message;
+			feedback.show();
 			self.addCommandHistory('<<', res.raw);
 		} else
 		if (res.type === 'gcode') {
@@ -271,7 +277,7 @@ Polymer({
 			});
 		} else
 		if (res.type === 'gcode.done') {
-			alert('Done');
+			document.getElementById('gcodeDone').show();
 		}
 
 		if (self.error == "'$H'|'$X' to unlock") {
