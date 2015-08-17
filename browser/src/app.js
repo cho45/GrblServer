@@ -109,6 +109,38 @@ Polymer({
 			document.body.addEventListener("dragover", function (e) {
 				e.preventDefault();
 			}, false);
+
+			Array.prototype.forEach.call(document.querySelectorAll(".jog paper-button"), function (button) {
+				var axis = button.getAttribute('data-axis');
+				var direction = +button.getAttribute('data-direction');
+
+				var touch = false;
+
+				var move = function () {
+					var step = self.jogStep * direction;
+					return Promise.all([
+						// move
+						self.request('command', { command: 'G21 G91 G0 ' + axis.toUpperCase() + step }),
+						// sync
+						self.request('command', { command: 'G4 P0.01' })
+					]).then(function () {
+						if (touch) {
+							return move();
+						}
+					});
+				};
+
+				button.addEventListener("touchstart", function (e) {
+					e.preventDefault();
+					console.log(axis, direction);
+					touch = true;
+					move();
+				});
+				button.addEventListener("touchend", function (e) {
+					e.preventDefault();
+					touch = false;
+				});
+			});
 		});
 
 		this.openWebSocket();
@@ -241,7 +273,7 @@ Polymer({
 	command : function (command) {
 		var self = this;
 		self.addCommandHistory('>>', command);
-		self.request('command', { command: command }).
+		return self.request('command', { command: command }).
 			then(function (r) {
 				if (r) {
 					for (var i = 0, it; (it = r[i]); i++) {
