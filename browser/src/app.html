@@ -259,6 +259,10 @@
 		}
 
 		@media (max-width: 900px) {
+			body {
+				padding-bottom: 100px;
+			}
+
 			:host {
 				font-size: 12px;
 			}
@@ -321,7 +325,7 @@
 				box-sizing: border-box;
 				z-index: 999;
 
-				@apply(--shadow-elevation-4dp);
+				box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.32);
 			}
 
 			paper-material.actions[disabled] {
@@ -457,7 +461,7 @@
 					</div>
 					<div class="flex">
 						<paper-material style="padding: 16px; text-align: center;">
-							<paper-menu-button style="padding: 0">
+							<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right">
 								<paper-button class="dropdown-trigger" style="text-transform: none">
 									<iron-icon icon="av:fast-forward"></iron-icon>
 									Feed Rate: <span>{{jogFeedRate}}</span> mm/min
@@ -468,7 +472,7 @@
 									</template>
 								</paper-menu>
 							</paper-menu-button>
-							<paper-menu-button style="padding: 0">
+							<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right">
 								<paper-button class="dropdown-trigger" style="text-transform: none">
 									<iron-icon icon="image:straighten"></iron-icon>
 									Step: <span>{{jogStep}}</span> mm
