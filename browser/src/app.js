@@ -149,7 +149,7 @@ Polymer({
 					button.addEventListener("touchend", touchend);
 				} else {
 					button.addEventListener("mousedown", touchstart);
-					button.addEventListener("mousedown", touchend);
+					button.addEventListener("mouseup", touchend);
 				}
 			});
 		});
