@@ -425,6 +425,14 @@ Polymer({
 		this.set('jogStep', value);
 	},
 
+	progressStyle : function () {
+		try {
+			return "width: " + (this.gcode.sent / (this.gcode.sent + this.gcode.remain) * 100) + "%";
+		} catch (e) {
+			return "visibility: hidden";
+		}
+	},
+
 	bind: function (id) { return id },
 	equals: function (a, b) { return a == b },
 	conditional: function (bool, a, b) { return bool ? a : b; },

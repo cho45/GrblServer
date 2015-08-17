@@ -258,13 +258,11 @@
 			padding: 16px;
 		}
 
-		@media (max-width: 900px) {
-			body {
-				padding-bottom: 100px;
-			}
+		@media (max-width: 1280px) {
 
 			:host {
 				font-size: 12px;
+				padding-bottom: 100px;
 			}
 
 			paper-button {
@@ -335,6 +333,10 @@
 
 			.preset-positions {
 				padding: 6px;
+			}
+
+			.command-container {
+				margin-bottom: 100px;
 			}
 		}
 	</style>
@@ -515,10 +517,10 @@
 						</template>
 					</div>
 				</div>
-				<paper-progress value="10" style="width: 100%"></paper-progress>
+				<paper-progress value="10" style$="{{progressStyle(gcode.*))}}"></paper-progress>
 			</paper-material>
 		</paper-material>
-			<paper-material class="flex" style="" disabled$="{{equals(status.state, 'Unknown')}}">
+			<paper-material class="flex command-container" disabled$="{{equals(status.state, 'Unknown')}}">
 				<paper-tabs selected="{{commandTab}}" noink no-slide>
 					<paper-tab>Command Line</paper-tab>
 					<paper-tab>Upload File</paper-tab>
