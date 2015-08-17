@@ -130,16 +130,27 @@ Polymer({
 					});
 				};
 
-				button.addEventListener("touchstart", function (e) {
+				var touchstart = function (e) {
+					console.log('start');
 					e.preventDefault();
 					console.log(axis, direction);
 					touch = true;
 					move();
-				});
-				button.addEventListener("touchend", function (e) {
+				};
+
+				var touchend = function (e) {
+					console.log('end');
 					e.preventDefault();
 					touch = false;
-				});
+				};
+
+				if (typeof ontouchstart !== "undefined") {
+					button.addEventListener("touchstart", touchstart);
+					button.addEventListener("touchend", touchend);
+				} else {
+					button.addEventListener("mousedown", touchstart);
+					button.addEventListener("mousedown", touchend);
+				}
 			});
 		});
 
