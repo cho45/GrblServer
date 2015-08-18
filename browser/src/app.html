@@ -518,7 +518,7 @@
 							</template>
 						</div>
 					</div>
-					<paper-progress value="10" style$="{{progressStyle(gcode.*))}}"></paper-progress>
+					<paper-progress value="{{progress(gcode.sent.length, gcode.remain.length, gcode.*)}}"></paper-progress>
 				</paper-material>
 			</paper-material>
 			<paper-material class="flex command-container" disabled$="{{equals(status.state, 'Unknown')}}">

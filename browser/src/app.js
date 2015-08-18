@@ -201,7 +201,7 @@ Polymer({
 				}
 			} else {
 				if (res.error) {
-					self.set('error', [res.error.code, res.error.message, JSON.stringify(res.error.data)].join(' : '));
+					self.set('error', [res.error.code, res.error.message, res.error.data.message].join(' : '));
 				} else {
 					self.processNotification(res.result);
 				}
@@ -491,12 +491,8 @@ Polymer({
 		this.set('jogStep', value);
 	},
 
-	progressStyle : function () {
-		try {
-			return "width: " + (this.gcode.sent / (this.gcode.sent + this.gcode.remain) * 100) + "%";
-		} catch (e) {
-			return "visibility: hidden";
-		}
+	progress : function () {
+		return (this.gcode.sent.length / (this.gcode.total) * 100);
 	},
 
 	bind: function (id) { return id },
