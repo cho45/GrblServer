@@ -359,7 +359,7 @@ var GrblServer = (function () {
             console.log('Error on grbl: ' + e);
             _this.sendBroadcastMessage({
                 id: null,
-                error: new JSONRPCErrorGrblError(e)
+                error: new JSONRPCErrorGrblError(e.message)
             });
             setTimeout(function () {
                 _this.openSerialPort();
@@ -410,7 +410,7 @@ var GrblServer = (function () {
             console.log('Error on sending gcode:' + e);
             _this.sendBroadcastMessage({
                 id: null,
-                error: new JSONRPCErrorGrblError(e)
+                error: new JSONRPCErrorGrblError(e.message)
             });
         });
     };

@@ -348,8 +348,8 @@ Polymer({
 
 
 	commandReturn : function () {
-		this.command('G90 G0 Z0');
 		this.command('G90 G0 X0 Y0');
+		this.command('G90 G0 Z0');
 	},
 
 	commandMove : function (e) {

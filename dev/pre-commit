@@ -1,0 +1,7 @@
+#!/bin/sh
+
+make tsc
+
+git add out
+
+exit 0

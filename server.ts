@@ -428,7 +428,7 @@ class GrblServer {
 			console.log('Error on grbl: ' + e);
 			this.sendBroadcastMessage({
 				id: null,
-				error: new JSONRPCErrorGrblError(e),
+				error: new JSONRPCErrorGrblError(e.message),
 			});
 			setTimeout( () => {
 				this.openSerialPort();
@@ -482,7 +482,7 @@ class GrblServer {
 				console.log('Error on sending gcode:' + e);
 				this.sendBroadcastMessage({
 					id: null,
-					error: new JSONRPCErrorGrblError(e),
+					error: new JSONRPCErrorGrblError(e.message),
 				});
 			});
 	}
