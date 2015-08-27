@@ -75,6 +75,8 @@ Jogging by smartphone's browser
 
 ### Setup
 
+Ensure that NodeJS has been installed on the Rapsberry Pi (https://learn.adafruit.com/node-embedded-development/installing-node-dot-js)
+
 Clone GrblServer on Raspberry Pi:
 
 	mkdir app
