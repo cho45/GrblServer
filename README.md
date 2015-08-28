@@ -113,3 +113,8 @@ GrblServer is written in TypeScript.
 browser client is written JavaScript with Polymer
 
 	cd browser/
+	
+LICENSE
+=======
+
+MIT: http://cho45.github.com/mit-license
