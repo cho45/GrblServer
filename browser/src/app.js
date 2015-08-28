@@ -201,7 +201,7 @@ Polymer({
 				}
 			} else {
 				if (res.error) {
-					self.set('error', [res.error.code, res.error.message, res.error.data.message].join(' : '));
+					self.set('error', [res.error.code, res.error.message, res.error.data].join(' : '));
 				} else {
 					self.processNotification(res.result);
 				}
@@ -232,9 +232,11 @@ Polymer({
 				self.alarmDialog.open();
 			}
 
-			var feeback = document.getElementById('feedback');
-			feedback.text = res.lastFeedback;
-			feedback.show();
+			if (res.lastFeedback) {
+				var feeback = document.getElementById('feedback');
+				feedback.text = res.lastFeedback;
+				feedback.show();
+			}
 		} else
 		if (res.type === 'startup') {
 			self.initialize();

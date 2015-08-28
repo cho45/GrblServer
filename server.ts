@@ -424,11 +424,11 @@ class GrblServer {
 			});
 		});
 
-		this.grbl.on('error', (e: GrblLineParserResultError) => {
+		this.grbl.on('error', (e: GrblLineParserResultError | string) => {
 			console.log('Error on grbl: ' + e);
 			this.sendBroadcastMessage({
 				id: null,
-				error: new JSONRPCErrorGrblError(e.message),
+				error: new JSONRPCErrorGrblError(typeof e === "string" ? e : e.message),
 			});
 			setTimeout( () => {
 				this.openSerialPort();

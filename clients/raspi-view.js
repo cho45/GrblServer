@@ -329,7 +329,8 @@ screen.render();
 		var res = JSON.parse(e.data);
 		if (res.id === null) {
 			if (res.error) {
-				grblStatusError.setContent('Error:' + [res.error.code, res.error.message, res.error.data.message].join(' : '));
+				console.log(res);
+				grblStatusError.setContent('Error:' + [res.error.code, res.error.message, res.error.data].join(' : '));
 				return;
 			}
 

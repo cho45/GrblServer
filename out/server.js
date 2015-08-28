@@ -359,7 +359,7 @@ var GrblServer = (function () {
             console.log('Error on grbl: ' + e);
             _this.sendBroadcastMessage({
                 id: null,
-                error: new JSONRPCErrorGrblError(e.message)
+                error: new JSONRPCErrorGrblError(typeof e === "string" ? e : e.message)
             });
             setTimeout(function () {
                 _this.openSerialPort();
