@@ -27,6 +27,10 @@ interface GrblPosition {
 	z : number;
 }
 
+export interface GrblError {
+	message: string;
+}
+
 export class GrblLineParserResult {
 	raw: string;
 	constructor(raw: string) {
@@ -256,7 +260,7 @@ export class Grbl extends events.EventEmitter {
 		return new Promise( (resolve, reject) => {
 			this.serialport.open( (err) => {
 				if (err) {
-					this.emit('error', 'error on opening serialport');
+					this.emit('error', <GrblError>{ message: 'error on opening serialport' });
 					reject(err);
 					return;
 				}
@@ -268,12 +272,12 @@ export class Grbl extends events.EventEmitter {
 				});
 				this.serialport.on("close", () => {
 					if (!this.isClosing) {
-						this.emit('error', 'unexpected close on the serialport');
+						this.emit('error', <GrblError>{ message: 'unexpected close on the serialport' });
 					}
 					this.destroy();
 				});
 				this.serialport.on("error", (err) => {
-					this.emit('error', 'unexpected error on the serialport');
+					this.emit('error', <GrblError>{ message: 'unexpected error on the serialport' });
 					this.destroy();
 				});
 

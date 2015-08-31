@@ -16,6 +16,7 @@ import {
 	GrblLineParserResultFeedback,
 	GrblLineParserResultDollar,
 	GrblLineParserResultStatus,
+	GrblError,
 } from './grbl';
 import http = require('http');
 import serialport = require("serialport");
@@ -424,11 +425,11 @@ class GrblServer {
 			});
 		});
 
-		this.grbl.on('error', (e: GrblLineParserResultError | string) => {
+		this.grbl.on('error', (e: GrblError) => {
 			console.log('Error on grbl: ' + e);
 			this.sendBroadcastMessage({
 				id: null,
-				error: new JSONRPCErrorGrblError(typeof e === "string" ? e : e.message),
+				error: new JSONRPCErrorGrblError(e.message),
 			});
 			setTimeout( () => {
 				this.openSerialPort();

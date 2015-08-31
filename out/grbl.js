@@ -238,7 +238,7 @@ var Grbl = (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.serialport.open(function (err) {
                 if (err) {
-                    _this.emit('error', 'error on opening serialport');
+                    _this.emit('error', { message: 'error on opening serialport' });
                     reject(err);
                     return;
                 }
@@ -249,12 +249,12 @@ var Grbl = (function (_super) {
                 });
                 _this.serialport.on("close", function () {
                     if (!_this.isClosing) {
-                        _this.emit('error', 'unexpected close on the serialport');
+                        _this.emit('error', { message: 'unexpected close on the serialport' });
                     }
                     _this.destroy();
                 });
                 _this.serialport.on("error", function (err) {
-                    _this.emit('error', 'unexpected error on the serialport');
+                    _this.emit('error', { message: 'unexpected error on the serialport' });
                     _this.destroy();
                 });
                 _this.once("startup", function (r) {
