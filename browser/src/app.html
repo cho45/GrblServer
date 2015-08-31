@@ -596,6 +596,17 @@
 			</div>
 		</paper-dialog>
 
+		<paper-dialog id="upload" modal style="min-width: 400px;">
+			<h2>{{upload.status}}</h2>
+			<p>
+				<span>{{upload.name}}</span>:
+				<span>{{upload.size}}</span> bytes
+			</p>
+			<p>
+				<paper-progress value="{{upload.progress}}" style="width: 100%"></paper-progress>
+			</p>
+		</paper-dialog>
+
 		<paper-toast id="feedback" duration="10000"></paper-toast>
 		<paper-toast id="gcodeDone" text="G-code Sent" duration="10000"></paper-toast>
 

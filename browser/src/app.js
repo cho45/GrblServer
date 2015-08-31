@@ -79,6 +79,11 @@ Polymer({
 		gcode: {
 			type: Object,
 			value: null
+		},
+
+		upload: {
+			type: Object,
+			value: {}
 		}
 	},
 
@@ -92,6 +97,9 @@ Polymer({
 		self.alarmDialog = document.getElementById('alarm');
 		document.body.appendChild(self.alarmDialog);
 
+		self.uploadDialog = document.getElementById('upload');
+		document.body.appendChild(self.uploadDialog);
+
 		self.async(function () {
 			var uploadFile = document.getElementById('upload-file');
 			var inputFile = uploadFile.querySelector('input[type=file]');
@@ -99,6 +107,17 @@ Polymer({
 			uploadFile.onclick = function () {
 				inputFile.click();
 			};
+
+
+//			self.uploadDialog.refit();
+//			self.uploadDialog.open();
+//			self.set('upload.name', 'foobar.txt');
+//			self.set('upload.size', 1000);
+//			self.set('upload.status', 'Loading...');
+//			self.set('upload.progress', 0);
+//			setInterval(function () {
+//				self.set('upload.progress', self.upload.progress+1);
+//			}, 100);
 
 			inputFile.onchange = function () {
 				var files = inputFile.files;
@@ -122,10 +141,11 @@ Polymer({
 				var axis = button.getAttribute('data-axis');
 				var direction = +button.getAttribute('data-direction');
 
-				var touch = false;
+				var touch = false, moving = false;
 
 				var move = function () {
 					var step = self.jogStep * direction;
+					moving = true;
 					return Promise.all([
 						// move
 						self.request('command', { command: 'G21 G91 G0 ' + axis.toUpperCase() + step }),
@@ -134,16 +154,21 @@ Polymer({
 					]).then(function () {
 						if (touch) {
 							return move();
+						} else {
+							moving = false;
 						}
 					});
 				};
 
 				var touchstart = function (e) {
-					console.log('start');
-					e.preventDefault();
-					console.log(axis, direction);
-					touch = true;
-					move();
+					// ignore multiple taps while moving
+					if (!moving) {
+						console.log('start');
+						e.preventDefault();
+						console.log(axis, direction);
+						touch = true;
+						move();
+					}
 				};
 
 				var touchend = function (e) {
@@ -442,32 +467,59 @@ Polymer({
 		console.log('uploadFile');
 		console.log(file.name, file.size);
 
+		self.uploadDialog.refit();
+		self.uploadDialog.open();
+		self.set('upload.name', file.name);
+		self.set('upload.size', file.size);
+		self.set('upload.status', 'Loading...');
+		self.set('upload.progress', 0);
+
 		var reader = new FileReader();
 		reader.onload = function (e) {
+			self.set('upload.status', 'Uploading...');
+			self.set('upload.progress', 0);
+
+			var interval;
+
 			self.request("upload", {
 				name: file.name,
 				size: file.size,
 				gcode: reader.result 
 			}).
 				then(function () {
-					alert('uploaded');
 				}, function (e) {
 					alert(e);
+				}).
+				then(function () {
+					self.uploadDialog.close();
+					clearInterval(interval);
 				});
+
+			var total = self.connection.bufferedAmount;
+			interval = setInterval(function () {
+				var remain = self.connection.bufferedAmount;
+				var uploaded = total - remain;
+				var percent = Math.round(upload / total) * 100;
+				self.set('upload.progress', percent);
+			}, 100);
 		};
 		reader.onerror = function (e) {
 			console.log(e);
 			alert(e);
+			self.uploadDialog.close();
 		};
 		reader.onabort = function (e) {
 			console.log(e);
 			alert(e);
+			self.uploadDialog.close();
 		};
 		reader.onloadstart = function (e) {
 			console.log('onloadstart');
 		};
 		reader.onprogress = function (e) {
 			console.log('onprogress');
+			var percent = Math.round((e.loaded / e.total) * 100);
+			self.set('upload.progress', percent);
 		};
 		reader.onloadend = function (e) {
 			console.log('onloadend');
