@@ -1,7 +1,7 @@
 //#!tsc --target ES5 --module commonjs sketch.ts && node sketch.js
 var serialport = require("serialport");
 var sp = new serialport.SerialPort('/dev/tty.usbserial-DJ00345C', {
-    baudrate: 2400
+    baudrate: 2400,
 }, false);
 sp.on('error', function (e) {
     console.log(e);

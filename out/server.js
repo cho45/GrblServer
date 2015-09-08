@@ -81,7 +81,7 @@ var GrblServer = (function () {
         this.config = {
             serverPort: config.get('serverPort'),
             serialPort: config.get('serialPort'),
-            serialBaud: config.get('serialBaud')
+            serialBaud: config.get('serialBaud'),
         };
         console.log('Launching with this config: ');
         console.log(this.config);
@@ -143,7 +143,7 @@ var GrblServer = (function () {
                     catch (e) {
                         _this.sendMessage(connection, {
                             id: null,
-                            error: JSONRPCErrorParseError
+                            error: JSONRPCErrorParseError,
                         });
                     }
                     console.log('request ', req.method);
@@ -151,7 +151,7 @@ var GrblServer = (function () {
                     if (!method) {
                         _this.sendMessage(connection, {
                             id: req.id,
-                            error: JSONRPCErrorMethodNotFound
+                            error: JSONRPCErrorMethodNotFound,
                         });
                     }
                     method.call(_this, req.params || {}).
@@ -170,7 +170,7 @@ var GrblServer = (function () {
                 catch (e) {
                     _this.sendMessage(connection, {
                         id: null,
-                        error: JSONRPCErrorInternalError
+                        error: JSONRPCErrorInternalError,
                     });
                 }
             });
@@ -194,7 +194,7 @@ var GrblServer = (function () {
                 type: 'init',
                 lastAlarm: this.grbl.lastAlarm ? this.grbl.lastAlarm.message : null,
                 lastFeedback: this.grbl.lastFeedback ? this.grbl.lastFeedback.message : null,
-                status: this.grbl.status
+                status: this.grbl.status,
             }
         });
         if (this.gcode) {
@@ -202,7 +202,7 @@ var GrblServer = (function () {
                 id: null,
                 result: {
                     type: 'gcode',
-                    gcode: this.gcode
+                    gcode: this.gcode,
                 }
             });
         }
@@ -229,7 +229,7 @@ var GrblServer = (function () {
                 id: null,
                 result: {
                     type: 'gcode',
-                    gcode: _this.gcode
+                    gcode: _this.gcode,
                 }
             });
             resolve();
@@ -245,7 +245,7 @@ var GrblServer = (function () {
                     id: null,
                     result: {
                         type: 'gcode.start',
-                        time: _this.gcode.startedTime
+                        time: _this.gcode.startedTime,
                     }
                 });
                 resolve();
@@ -256,14 +256,14 @@ var GrblServer = (function () {
                     id: null,
                     result: {
                         type: 'gcode',
-                        gcode: _this.gcode
+                        gcode: _this.gcode,
                     }
                 });
             }
             else {
                 resolve({
                     type: 'gcode',
-                    gcode: _this.gcode
+                    gcode: _this.gcode,
                 });
             }
         });
@@ -318,14 +318,14 @@ var GrblServer = (function () {
             _this.sendBroadcastMessage({
                 id: null,
                 result: res.toObject({
-                    type: 'startup'
-                })
+                    type: 'startup',
+                }),
             });
             _this.sendBroadcastMessage({
                 id: null,
                 result: {
                     type: 'gcode',
-                    gcode: null
+                    gcode: null,
                 }
             });
         });
@@ -343,23 +343,23 @@ var GrblServer = (function () {
             _this.sendBroadcastMessage({
                 id: null,
                 result: res.toObject({
-                    type: 'alarm'
-                })
+                    type: 'alarm',
+                }),
             });
         });
         this.grbl.on('feedback', function (res) {
             _this.sendBroadcastMessage({
                 id: null,
                 result: res.toObject({
-                    type: 'feedback'
-                })
+                    type: 'feedback',
+                }),
             });
         });
         this.grbl.on('error', function (e) {
             console.log('Error on grbl: ' + e);
             _this.sendBroadcastMessage({
                 id: null,
-                error: new JSONRPCErrorGrblError(e.message)
+                error: new JSONRPCErrorGrblError(e.message),
             });
             setTimeout(function () {
                 _this.openSerialPort();
@@ -399,7 +399,7 @@ var GrblServer = (function () {
             id: null,
             result: {
                 type: 'gcode.progress',
-                gcode: code
+                gcode: code,
             }
         });
         this.grbl.command(code).
@@ -410,7 +410,7 @@ var GrblServer = (function () {
             console.log('Error on sending gcode:' + e);
             _this.sendBroadcastMessage({
                 id: null,
-                error: new JSONRPCErrorGrblError(e.message)
+                error: new JSONRPCErrorGrblError(e.message),
             });
         });
     };

@@ -50,7 +50,7 @@ var GrblLineParserResultStartup = (function (_super) {
         var ret = new this(line);
         ret.version = {
             major: +RegExp.$1,
-            minor: RegExp.$2
+            minor: RegExp.$2,
         };
         return ret;
     };
@@ -160,12 +160,12 @@ var GrblLineParserResultStatus = (function (_super) {
         ret.machinePosition = {
             x: +map['MPos'][0],
             y: +map['MPos'][1],
-            z: +map['MPos'][2]
+            z: +map['MPos'][2],
         };
         ret.workingPosition = {
             x: +map['WPos'][0],
             y: +map['WPos'][1],
-            z: +map['WPos'][2]
+            z: +map['WPos'][2],
         };
         if (map.hasOwnProperty('Buf')) {
             ret.plannerBufferCount = +map['Buf'][0];

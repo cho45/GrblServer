@@ -70,12 +70,12 @@ var GrblClient = (function (_super) {
             var id = _this.id++;
             _this.requests[id] = {
                 resolve: resolve,
-                reject: reject
+                reject: reject,
             };
             _this.connection.sendUTF(JSON.stringify({
                 id: id,
                 method: req.method,
-                params: req.params
+                params: req.params,
             }));
         });
     };

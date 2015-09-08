@@ -5,7 +5,7 @@ test: tsc
 
 .PHONY: tsc
 tsc:
-	tsc --rootDir . --outDir out --module commonjs *.ts
+	tsc --target ES5 --rootDir . --outDir out --module commonjs *.ts
 
 .PHONY: server
 server: tsc
@@ -13,7 +13,7 @@ server: tsc
 
 .PHONY: watch
 watch:
-	tsc --rootDir . --outDir out --module commonjs --watch *.ts
+	tsc --target ES5 --rootDir . --outDir out --module commonjs --watch *.ts
 
 
 .PHONY: clean
