@@ -183,11 +183,12 @@ export namespace gcode {
 
 			'G20' : () => {
 				// throw "does not support inch";
+				this.state.set(States.UNIT_MODE, UnitMode.INCH);
 				this.blockSub = () => {};
 			},
 
 			'G21' : () => {
-				// nothing to do
+				this.state.set(States.UNIT_MODE, UnitMode.MM);
 				this.blockSub = () => {};
 			},
 
@@ -293,7 +294,7 @@ export namespace gcode {
 			},
 
 			'G93' : () => {
-				// TODO does no supported yet
+				// TODO not supported yet
 				this.state.set(States.FEED_RATE_MODE, FeedRateMode.INVERSE_TIME);
 			},
 
@@ -302,15 +303,15 @@ export namespace gcode {
 			},
 
 			'I' : () => {
-				this.state.set(States.I, this.code.value);
+				this.state.setLengthValue(States.I, this.code.value);
 			},
 
 			'J' : () => {
-				this.state.set(States.J, this.code.value);
+				this.state.setLengthValue(States.J, this.code.value);
 			},
 
 			'K' : () => {
-				this.state.set(States.K, this.code.value);
+				this.state.setLengthValue(States.K, this.code.value);
 			},
 
 			'M' : () => {
@@ -383,7 +384,7 @@ export namespace gcode {
 			},
 
 			'R' : () => {
-				this.state.set(States.R, this.code.value);
+				this.state.setLengthValue(States.R, this.code.value);
 			},
 
 			'S' : () => {
@@ -452,14 +453,6 @@ export namespace gcode {
 			x2:number, y2:number, z2:number,
 			feedRate: number
 		) {
-			if (!(
-				this.lastMotion.x === x1 &&
-				this.lastMotion.y === y1 &&
-				this.lastMotion.z === z1
-				)) {
-				throw "invalid argument (does not match to last motion)";
-			}
-
 			var line = new Motion(this.lastMotion);
 			line.type = type;
 			line.x = x2;
@@ -556,6 +549,7 @@ export namespace gcode {
 
 	enum States {
 		MOTION = <any>'MOTION',
+		UNIT_MODE = <any>'UNIT_MODE',
 		DISTANCE_MODE = <any>'DISTANCE_MODE',
 		LINE_NUMBER = <any>'LINE_NUMBER',
 		FEED_RATE_MODE = <any>'FEED_RATE_MODE',
@@ -581,6 +575,11 @@ export namespace gcode {
 		G1 = <any>'G1',
 		G2 = <any>'G2',
 		G3 = <any>'G3',
+	}
+
+	enum UnitMode {
+		MM = <any>'MM',
+		INCH = <any>'INCH',
 	}
 
 	enum DistanceMode {
@@ -621,6 +620,7 @@ export namespace gcode {
 				this._values[States.Z] = 0;
 
 				this._values[States.MOTION] = MotionMode.UNDEFINED;
+				this._values[States.UNIT_MODE] = UnitMode.MM;
 				this._values[States.DISTANCE_MODE] = DistanceMode.ABSOLUTE;
 				this._values[States.PLANE] = PlaneMode.XY;
 				this._values[States.FEED_RATE_MODE] = FeedRateMode.UNITS_PER_MINUTE;
@@ -640,6 +640,13 @@ export namespace gcode {
 		setAxisValue(name: States, value: number) {
 			if (this.get(States.DISTANCE_MODE) === DistanceMode.RELATIVE) {
 				value += this.get(name);
+			}
+			this.setLengthValue(name, value);
+		}
+
+		setLengthValue(name: States, value: number) {
+			if (this.get(States.UNIT_MODE) === UnitMode.INCH) {
+				value = value * 25.4;
 			}
 			this.set(name, value);
 		}

@@ -14,6 +14,9 @@ var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
+document.body.ondblclick = function () {
+	controls.reset();
+};
 
 
 var xhr = new XMLHttpRequest();
@@ -22,6 +25,7 @@ xhr.onload = function () {
 	var text = xhr.responseText;
 
 	var ctx = new gcode.Context();
+	ctx.rapidFeedRate = 800;
 	var lines = text.split(/\n/);
 	for (var i = 0, len = lines.length; i < len; i++) {
 		ctx.executeBlock(gcode.Block.parse(lines[i]));
@@ -73,7 +77,7 @@ xhr.onload = function () {
 		duration += motion.duration;
 	}
 
-	console.log('duration', duration);
+	console.log('duration', duration, 'sec', duration / 60, 'min');
 
 	geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
 	geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );

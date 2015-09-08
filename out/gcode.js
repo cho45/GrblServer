@@ -97,10 +97,11 @@ var gcode;
                 },
                 'G20': function () {
                     // throw "does not support inch";
+                    _this.state.set(States.UNIT_MODE, UnitMode.INCH);
                     _this.blockSub = function () { };
                 },
                 'G21': function () {
-                    // nothing to do
+                    _this.state.set(States.UNIT_MODE, UnitMode.MM);
                     _this.blockSub = function () { };
                 },
                 'G28': function () {
@@ -180,20 +181,20 @@ var gcode;
                     _this.blockSub = function () { };
                 },
                 'G93': function () {
-                    // TODO does no supported yet
+                    // TODO not supported yet
                     _this.state.set(States.FEED_RATE_MODE, FeedRateMode.INVERSE_TIME);
                 },
                 'G94': function () {
                     _this.state.set(States.FEED_RATE_MODE, FeedRateMode.UNITS_PER_MINUTE);
                 },
                 'I': function () {
-                    _this.state.set(States.I, _this.code.value);
+                    _this.state.setLengthValue(States.I, _this.code.value);
                 },
                 'J': function () {
-                    _this.state.set(States.J, _this.code.value);
+                    _this.state.setLengthValue(States.J, _this.code.value);
                 },
                 'K': function () {
-                    _this.state.set(States.K, _this.code.value);
+                    _this.state.setLengthValue(States.K, _this.code.value);
                 },
                 'M': function () {
                     var handler = _this.handlers[_this.code.name];
@@ -249,7 +250,7 @@ var gcode;
                     _this.state.set(States.P, _this.code.value);
                 },
                 'R': function () {
-                    _this.state.set(States.R, _this.code.value);
+                    _this.state.setLengthValue(States.R, _this.code.value);
                 },
                 'S': function () {
                     _this.state.set(States.S, _this.code.value);
@@ -311,11 +312,6 @@ var gcode;
             return elapsed;
         };
         Context.prototype.drawLine = function (type, x1, y1, z1, x2, y2, z2, feedRate) {
-            if (!(this.lastMotion.x === x1 &&
-                this.lastMotion.y === y1 &&
-                this.lastMotion.z === z1)) {
-                throw "invalid argument (does not match to last motion)";
-            }
             var line = new Motion(this.lastMotion);
             line.type = type;
             line.x = x2;
@@ -398,6 +394,7 @@ var gcode;
     var States;
     (function (States) {
         States[States["MOTION"] = 'MOTION'] = "MOTION";
+        States[States["UNIT_MODE"] = 'UNIT_MODE'] = "UNIT_MODE";
         States[States["DISTANCE_MODE"] = 'DISTANCE_MODE'] = "DISTANCE_MODE";
         States[States["LINE_NUMBER"] = 'LINE_NUMBER'] = "LINE_NUMBER";
         States[States["FEED_RATE_MODE"] = 'FEED_RATE_MODE'] = "FEED_RATE_MODE";
@@ -424,6 +421,11 @@ var gcode;
         MotionMode[MotionMode["G2"] = 'G2'] = "G2";
         MotionMode[MotionMode["G3"] = 'G3'] = "G3";
     })(MotionMode || (MotionMode = {}));
+    var UnitMode;
+    (function (UnitMode) {
+        UnitMode[UnitMode["MM"] = 'MM'] = "MM";
+        UnitMode[UnitMode["INCH"] = 'INCH'] = "INCH";
+    })(UnitMode || (UnitMode = {}));
     var DistanceMode;
     (function (DistanceMode) {
         DistanceMode[DistanceMode["ABSOLUTE"] = 'ABSOLUTE'] = "ABSOLUTE";
@@ -458,6 +460,7 @@ var gcode;
                 this._values[States.Y] = 0;
                 this._values[States.Z] = 0;
                 this._values[States.MOTION] = MotionMode.UNDEFINED;
+                this._values[States.UNIT_MODE] = UnitMode.MM;
                 this._values[States.DISTANCE_MODE] = DistanceMode.ABSOLUTE;
                 this._values[States.PLANE] = PlaneMode.XY;
                 this._values[States.FEED_RATE_MODE] = FeedRateMode.UNITS_PER_MINUTE;
@@ -474,6 +477,12 @@ var gcode;
         State.prototype.setAxisValue = function (name, value) {
             if (this.get(States.DISTANCE_MODE) === DistanceMode.RELATIVE) {
                 value += this.get(name);
+            }
+            this.setLengthValue(name, value);
+        };
+        State.prototype.setLengthValue = function (name, value) {
+            if (this.get(States.UNIT_MODE) === UnitMode.INCH) {
+                value = value * 25.4;
             }
             this.set(name, value);
         };
