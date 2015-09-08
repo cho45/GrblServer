@@ -367,7 +367,7 @@ var gcode;
             var radius = Math.sqrt(Math.pow(centerX - x1, 2) + Math.pow(centerY - y1, 2));
             var angle1 = (Math.atan2((y1 - centerY), (x1 - centerX)) + Math.PI * 2) % (Math.PI * 2);
             var angle2 = (Math.atan2((y2 - centerY), (x2 - centerX)) + Math.PI * 2) % (Math.PI * 2);
-            if (angle2 < angle1) {
+            if (angle2 <= angle1) {
                 angle2 += Math.PI * 2;
             }
             // calculate ccw angle
