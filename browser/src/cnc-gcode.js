@@ -78,6 +78,7 @@ Polymer({
 
 		self.renderer.setSize(width, height);
 		self.renderer.setPixelRatio( window.devicePixelRatio );
+		self.render();
 	},
 
 	render : function () {

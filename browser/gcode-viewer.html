@@ -65,6 +65,10 @@
 					this.value = "";
 				};
 			});
+
+			window.addEventListener('resize', function(e) {
+				document.getElementById('cnc-gcode').refit();
+			});
 		</script>
 	</body>
 </html>
