@@ -46,7 +46,6 @@ var gcode;
                     handler();
                 },
                 'G0': function () {
-                    console.log('G0');
                     _this.state.set(States.MOTION, MotionMode.G0);
                     _this.blockSub = function () {
                         _this.drawLine("G0", _this.lastMotion.x, _this.lastMotion.y, _this.lastMotion.z, _this.state.get(States.X), _this.state.get(States.Y), _this.state.get(States.Z), _this.rapidFeedRate || Infinity);
@@ -284,7 +283,7 @@ var gcode;
             configurable: true
         });
         Context.prototype.executeBlock = function (block) {
-            var elapsed = 0;
+            var motionIndex = this.motions.length - 1;
             this.prevState = this.state;
             this.state = new State(this.prevState);
             this.blockSub = null;
@@ -309,6 +308,12 @@ var gcode;
                 this.blockSub = null;
             }
             this.state.clearModeless();
+            var elapsed = 0;
+            if (motionIndex > 0) {
+                for (var i = motionIndex, it = void 0; (it = this.motions[i]); i++) {
+                    elapsed += it.duration;
+                }
+            }
             return elapsed;
         };
         Context.prototype.drawLine = function (type, x1, y1, z1, x2, y2, z2, feedRate) {
@@ -324,7 +329,6 @@ var gcode;
             var _this = this;
             var isClockWise = type === 'G2';
             var drawLine;
-            console.log(plain);
             if (plain === PlaneMode.XZ) {
                 _a = [x1, z1, y1], x1 = _a[0], y1 = _a[1], z1 = _a[2];
                 _b = [x2, z2, y2], x2 = _b[0], y2 = _b[1], z2 = _b[2];
