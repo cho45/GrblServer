@@ -132,9 +132,6 @@ Polymer({
 		var self = this;
 		if (self.path) {
 			self.scene.remove(self.path);
-			for (var key in self.path.geometry.attributes) if (self.path.geometry.attributes.hasOwnProperty(key)) {
-				self.path.geometry.attributes[key].dispose();
-			}
 			self.path.geometry.dispose();
 		}
 

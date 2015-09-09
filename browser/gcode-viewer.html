@@ -13,11 +13,40 @@
 				padding: 0;
 				margin: 0;
 			}
+
+			#actions {
+				position: absolute;
+				bottom: 0;
+				right: 0;
+				left: 0;
+				text-align: center;
+				z-index: 999;
+				padding: 10px
+			}
+
+			#actions button {
+				padding: 10px;
+				font-size: 16px;
+			}
 		</style>
 	</head>
 	<body class="fullbleed">
-		<cnc-gcode style="width: 100%; height: 100%" id="cnc-gcode"/>
+		<cnc-gcode style="width: 100%; height: 100%" id="cnc-gcode"></cnc-gcode>
+		<div id="actions">
+			<button onclick="document.querySelector('#file').click()">Load</button>
+			<input type="file" id="file" style="display: none"/>
+		</div>
 		<script>
+
+			function loadFile (file) {
+				var reader = new FileReader();
+				reader.onload = function (e) {
+					var gcode = document.getElementById('cnc-gcode');
+					gcode.loadGCode(reader.result);
+				};
+				reader.readAsText(file, 'UTF-8');
+			}
+
 			window.addEventListener('WebComponentsReady', function(e) {
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', '../sketch/test.gcode', true);
@@ -28,6 +57,13 @@
 					gcode.loadGCode(text);
 				};
 				xhr.send();
+
+
+				document.querySelector('#file').onchange = function () {
+					var files = this.files;
+					loadFile(files[0]);
+					this.value = "";
+				};
 			});
 		</script>
 	</body>
