@@ -10,14 +10,6 @@ controls.panSpeed = 1;
 controls.addEventListener("change", render);
 
 
-var renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio( window.devicePixelRatio );
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
-document.body.ondblclick = function () {
-	controls.reset();
-};
-
 
 var xhr = new XMLHttpRequest();
 xhr.open('GET', './test.gcode', true);
@@ -34,7 +26,20 @@ xhr.onload = function () {
 	// done and render
 
 	var geometry = new THREE.BufferGeometry();
-	var material = new THREE.LineBasicMaterial({
+//	var material = new THREE.LineBasicMaterial({
+//		vertexColors: THREE.VertexColors,
+//		linewidth: 2
+//	});
+
+
+	var material = new THREE.ShaderMaterial({
+		uniforms:       {},
+		attributes:     {},
+		vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+		fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+		blending:       THREE.AdditiveBlending,
+		depthTest:      false,
+		transparent:    true,
 		vertexColors: THREE.VertexColors,
 		linewidth: 2
 	});
@@ -121,12 +126,61 @@ xhr.onload = function () {
 //		colors[i * 6 + 1] = colors[i * 6 + 4] = 0;
 //		colors[i * 6 + 2] = colors[i * 6 + 5] = 0;
 //		attr.needsUpdate = true;
-//	}, 100);
+//		render();
+//	}, 1);
 };
 xhr.send();
 
+var renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio( window.devicePixelRatio );
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+document.body.ondblclick = function () {
+	controls.reset();
+};
+
+
+var cameras = [
+	{
+		left: 0,
+		bottom: 0,
+		width: 0.5,
+		height: 0.5,
+		eye: [ 0, 100, 200 ],
+		direction: [ 0, 1, 0 ]
+	},
+	{
+		left: 0.5,
+		bottom: 0,
+		width: 0.5,
+		height: 0.5,
+		eye: [ 0, 0, 200 ],
+		direction: [ -1, 0, 0 ]
+	}
+];
+
+for (var i = 0, it; (it = cameras[i]); i++) {
+	it.camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 0, 1000 );
+}
 
 function render () {
+//	var left   = 0;
+//	var bottom = window.innerHeight / 2;
+//	var width  = window.innerWidth;
+//	var height = window.innerHeight / 2;
+//
+//	// main camera
+//	// renderer.setSize();
+//	renderer.setViewport(left, bottom, width, height);
+//	renderer.setScissor(left, bottom, width, height);
+//	renderer.enableScissorTest(true);
+//	camera.aspect = width / height;
+//	camera.updateProjectionMatrix();
+//	renderer.render(scene, camera);
+//
+//	for (var i = 0, it; (it = cameras[i]); i++) {
+//		
+//	}
 	renderer.render(scene, camera);
 }
 

@@ -64,7 +64,6 @@ export namespace gcode {
 			},
 
 			'G0' : () => {
-				console.log('G0');
 				this.state.set(States.MOTION, MotionMode.G0);
 
 				this.blockSub = () => {
@@ -414,7 +413,7 @@ export namespace gcode {
 		}
 
 		executeBlock(block: Block):number {
-			var elapsed = 0;
+			var motionIndex = this.motions.length - 1;
 
 			this.prevState = this.state;
 			this.state = new State(this.prevState);
@@ -443,6 +442,13 @@ export namespace gcode {
 			}
 
 			this.state.clearModeless();
+
+			var elapsed = 0;
+			if (motionIndex > 0) {
+				for (let i = motionIndex, it: Motion; (it = this.motions[i]); i++) {
+					elapsed += it.duration;
+				}
+			}
 
 			return elapsed;
 		}
@@ -475,7 +481,6 @@ export namespace gcode {
 			var isClockWise = type === 'G2';
 
 			var drawLine : ( type: string, x1:number, y1:number, z1:number, x2:number, y2:number, z2:number, feedRate: number )=> void;
-			console.log(plain);
 			if (plain === PlaneMode.XZ) {
 				[x1, y1, z1] = [x1, z1, y1];
 				[x2, y2, z2] = [x2, z2, y2];

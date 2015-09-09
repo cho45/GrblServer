@@ -16,6 +16,31 @@
 		</style>
 	</head>
 	<body>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			varying vec3 vColor;
+			varying vec3 vPos;
+
+			void main() {
+				vPos = position;
+				vColor = color;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			varying vec3 vColor;
+			varying vec3 vPos;
+
+			void main() {
+				if (vPos.z < -0.0) {
+					gl_FragColor = vec4(vColor, 0.5);
+				} else {
+					gl_FragColor = vec4(vColor, 0.2);
+				}
+			}
+		</script>
+
 		<script src="./three.min.js"></script>
 		<script src="./TrackballControls.js"></script>
 		<script>var exports = this</script>

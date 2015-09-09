@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<title>G-code Viewer</title>
+		<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+		<link rel="import" href="src/cnc-gcode.html">
+		<style>
+			html, body {
+				height: 100%;
+				width: 100%;
+				padding: 0;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body class="fullbleed">
+		<cnc-gcode style="width: 100%; height: 100%" id="cnc-gcode"/>
+		<script>
+			window.addEventListener('WebComponentsReady', function(e) {
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', '../sketch/test.gcode', true);
+				xhr.onload = function () {
+					var text = xhr.responseText;
+
+					var gcode = document.getElementById('cnc-gcode');
+					gcode.loadGCode(text);
+				};
+				xhr.send();
+			});
+		</script>
+	</body>
+</html>
