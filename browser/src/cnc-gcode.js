@@ -1,6 +1,10 @@
 Polymer({
 	is: "cnc-gcode",
 	properties: {
+		view: {
+			type: String,
+			value: 'top'
+		}
 	},
 
 	created : function () {
@@ -189,17 +193,51 @@ Polymer({
 
 		geometry.computeBoundingBox();
 
-		self.controls.target0.x = self.controls.position0.x = (Math.abs(geometry.boundingBox.max.x) - Math.abs(geometry.boundingBox.min.x)) / 2;
-		self.controls.target0.y = self.controls.position0.y = (Math.abs(geometry.boundingBox.max.y) - Math.abs(geometry.boundingBox.min.y)) / 2;
-		self.controls.position0.z =  Math.max(geometry.boundingBox.max.y - geometry.boundingBox.min.y, geometry.boundingBox.max.x - geometry.boundingBox.min.x) / 2 / Math.tan(Math.PI * self.camera.fov / 360);
-		self.controls.reset();
-
 		self.path = new THREE.Line( geometry, material );
 		self.scene.add(self.path);
+
+		self.resetCamera();
 	},
 
-	reset : function () {
-		this.controls.reset();
+	resetCamera : function () {
+		var self = this;
+		var box = self.path ? self.path.geometry.boundingBox : {
+			max : new THREE.Vector3( 10,  10,  10),
+			min : new THREE.Vector3(-10, -10, -10)
+		};
+		self.controls.target0.x = self.controls.position0.x = (Math.abs(box.max.x) - Math.abs(box.min.x)) / 2;
+		self.controls.target0.y = self.controls.position0.y = (Math.abs(box.max.y) - Math.abs(box.min.y)) / 2;
+		self.controls.target0.z = self.controls.position0.z = (Math.abs(box.max.z) - Math.abs(box.min.z)) / 2;
+		({
+			'top' : function () {
+				self.controls.position0.z =  Math.max(box.max.y - box.min.y, box.max.x - box.min.x) / 2 / Math.tan(Math.PI * self.camera.fov / 360);
+				self.controls.up0.set(0, 1, 0);
+				self.controls.reset();
+			},
+			'left' : function () {
+				self.controls.position0.x =  -Math.max(box.max.z - box.min.z, box.max.y - box.min.y) / 2 / Math.tan(Math.PI * self.camera.fov / 360);
+				self.controls.up0.set(0, 0, 1);
+				self.controls.reset();
+			},
+			'front' : function () {
+				self.controls.position0.y =  -Math.max(box.max.z - box.min.z, box.max.x - box.min.x) / 2 / Math.tan(Math.PI * self.camera.fov / 360);
+				self.controls.up0.set(0, 0, 1);
+				self.controls.reset();
+			},
+			'down' : function () {
+				self.controls.position0.x =  Math.max(box.max.z - box.min.z, box.max.y - box.min.y) / 2 / Math.tan(Math.PI * self.camera.fov / 360);
+				self.controls.position0.y =  -Math.max(box.max.z - box.min.z, box.max.x - box.min.x) / 2 / Math.tan(Math.PI * self.camera.fov / 360);
+				self.controls.position0.z =  Math.max(box.max.y - box.min.y, box.max.x - box.min.x) / 2 / Math.tan(Math.PI * self.camera.fov / 360);
+				self.controls.up0.set(0, 0, 1);
+				self.controls.reset();
+			}
+		})[this.view]();
+	},
+
+	changeView : function () {
+		var views = ['top', 'left', 'front', 'down'];
+		this.view = views[ (views.indexOf(this.view) + 1) % views.length ];
+		this.resetCamera();
 	}
 });
 

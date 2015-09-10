@@ -186,6 +186,13 @@ Polymer({
 					button.addEventListener("mouseup", touchend);
 				}
 			});
+
+			document.querySelector('.command-container iron-pages').addEventListener('iron-resize', function (e) {
+				var viewer = document.getElementById('viewer');
+				if (viewer) {
+					viewer.refit();
+				}
+			});
 		});
 
 		this.openWebSocket();
@@ -292,6 +299,10 @@ Polymer({
 			for (var key in self.gcode) if (self.gcode.hasOwnProperty(key)) {
 				self.notifyPath('gcode.' + key, self.gcode[key]);
 			}
+			self.async(function () {
+				var viewer = document.getElementById('viewer');
+				viewer.loadGCode(res.gcode.sent.concat(res.gcode.remain).join("\n"));
+			});
 		} else
 		if (res.type === 'gcode.start') {
 			self.set('gcode.startedTime', res.time);

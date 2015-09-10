@@ -69,6 +69,20 @@
 			window.addEventListener('resize', function(e) {
 				document.getElementById('cnc-gcode').refit();
 			});
+
+			document.body.addEventListener("drop", function (e) {
+				e.preventDefault();
+				var files = e.dataTransfer.files;
+				loadFile(files[0]);
+			}, false);
+
+			document.body.addEventListener("dragenter", function (e) {
+				e.preventDefault();
+			}, false);
+
+			document.body.addEventListener("dragover", function (e) {
+				e.preventDefault();
+			}, false);
 		</script>
 	</body>
 </html>

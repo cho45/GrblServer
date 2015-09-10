@@ -24,6 +24,7 @@
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="./cnc-gcode.html">
 
 <dom-module id="my-app">
 	<style is="custom-style">
@@ -553,34 +554,42 @@
 							</div>
 						</template>
 						<template is="dom-if" if="{{gcode}}">
-							<template is="dom-if" if="{{!gcode.startedTime}}">
-								<div style="vertical-align: baseline">
-									<paper-button class="action-resume" on-tap="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
-										<iron-icon icon="av:play-arrow"></iron-icon>
-										Execute
-									</paper-button>
+							<div class="layout horizontal wrap">
+								<div class="flex">
+									<div class="layout horizontal">
+										<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
+										<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
+											<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file"></paper-icon-button>
+										</div>
+										<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly></paper-input>
+										<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly></paper-input>
+									</div>
+									<div class="layout horizontal">
+										<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly></paper-input>
+										<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly></paper-input>
+										<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly></paper-input>
+									</div>
+									<template is="dom-if" if="{{!gcode.startedTime}}">
+										<div style="vertical-align: baseline; text-align: right">
+											<paper-button class="action-resume" on-tap="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
+												<iron-icon icon="av:play-arrow"></iron-icon>
+												Execute
+											</paper-button>
+										</div>
+									</template>
+
+									<div style="padding: 10px">
+										<cnc-gcode id="viewer" style="height: 300px"></cnc-gcode>
+									</div>
 								</div>
-							</template>
-							<div class="layout horizontal">
-								<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
-								<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
-									<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file"></paper-icon-button>
+								<div class="flex gcode" id="gcode-list" style="overflow-y: scroll; height: 430px; position: relative; padding: 10px">
+									<template is="dom-repeat" items="{{gcode.sent}}">
+										<div class="line sent">{{item}}</div>
+									</template>
+									<template is="dom-repeat" items="{{gcode.remain}}">
+										<div class="line remain">{{item}}</div>
+									</template>
 								</div>
-								<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly></paper-input>
-								<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly></paper-input>
-							</div>
-							<div class="layout horizontal">
-								<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly></paper-input>
-								<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly></paper-input>
-								<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly></paper-input>
-							</div>
-							<div id="gcode-list" class="gcode" style="overflow-y: scroll; height: 240px; position: relative">
-								<template is="dom-repeat" items="{{gcode.sent}}">
-									<div class="line sent">{{item}}</div>
-								</template>
-								<template is="dom-repeat" items="{{gcode.remain}}">
-									<div class="line remain">{{item}}</div>
-								</template>
 							</div>
 						</template>
 					</div>
