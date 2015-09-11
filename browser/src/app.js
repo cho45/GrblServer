@@ -20,11 +20,6 @@ Polymer({
 			value: 0
 		},
 
-		positioningSystem: {
-			type: Number,
-			value: 0
-		},
-
 		jogStep : {
 			type: Number,
 			value: 1
@@ -458,18 +453,8 @@ Polymer({
 		}
 	},
 
-	formatCoords : function (axis) {
-		var system = {
-			0: 'workingPosition',
-			1: 'machinePosition'
-		}[this.positioningSystem];
-
-		var number;
-		try {
-			number = this.status[system][axis];
-		} catch (e) {
-			number = 0;
-		}
+	formatCoords : function (number) {
+		if (!number) number = 0;
 		return sprintf('%s%03.3f', number < 0 ? '' : '+', number);
 	},
 

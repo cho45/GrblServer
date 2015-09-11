@@ -8,6 +8,30 @@ Polymer({
 	},
 
 	created : function () {
+		var self = this;
+		self.scene = new THREE.Scene();
+		self.camera = new THREE.PerspectiveCamera( 75, 3/2, 0.1, 1000 );
+		self.camera.position.z = 100;
+
+
+		self.renderer = new THREE.WebGLRenderer({ antialias: true });
+		self.renderer.setPixelRatio( window.devicePixelRatio );
+
+		var arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 10, 0x990000, 3, 3);
+		arrowX.line.material.linewidth = 5;
+		self.scene.add(arrowX);
+		var arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 10, 0x009900, 3, 3);
+		arrowY.line.material.linewidth = 5;
+		self.scene.add(arrowY);
+		var arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 10, 0x000099, 3, 3);
+		arrowZ.line.material.linewidth = 5;
+		self.scene.add(arrowZ);
+
+		var helper = new THREE.GridHelper( 200, 10 );
+		helper.setColors( 0x999999, 0x444444 );
+		helper.position.y = 0;
+		helper.rotation.x = Math.PI / 2;
+		self.scene.add( helper );
 	},
 
 	ready : function () {
@@ -17,45 +41,20 @@ Polymer({
 		var self = this;
 		var container = document.getElementById('container');
 
-		var scene = new THREE.Scene();
-		var camera = new THREE.PerspectiveCamera( 75, 3/2, 0.1, 1000 );
-		camera.position.z = 100;
+		container.appendChild( self.renderer.domElement );
 
-		var controls = new THREE.TrackballControls(camera, container);
-		controls.dynamicDampingFactor = 0.5;
-		controls.rotateSpeed = 2;
-		controls.zoomSpeed = 1;
-		controls.panSpeed = 1;
-		controls.addEventListener("change", function () {
+		self.controls = new THREE.TrackballControls(self.camera, container);
+		self.controls.dynamicDampingFactor = 0.5;
+		self.controls.rotateSpeed = 2;
+		self.controls.zoomSpeed = 1;
+		self.controls.panSpeed = 1;
+		self.controls.addEventListener("change", function () {
 			self.render();
 		});
 
 
-		var renderer = new THREE.WebGLRenderer({ antialias: true });
-		renderer.setPixelRatio( window.devicePixelRatio );
-		container.appendChild( renderer.domElement );
-
-		var arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 10, 0x990000, 3, 3);
-		arrowX.line.material.linewidth = 5;
-		scene.add(arrowX);
-		var arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 10, 0x009900, 3, 3);
-		arrowY.line.material.linewidth = 5;
-		scene.add(arrowY);
-		var arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 10, 0x000099, 3, 3);
-		arrowZ.line.material.linewidth = 5;
-		scene.add(arrowZ);
-
-		var helper = new THREE.GridHelper( 200, 10 );
-		helper.setColors( 0x999999, 0x444444 );
-		helper.position.y = 0;
-		helper.rotation.x = Math.PI / 2;
-		scene.add( helper );
-
-		self.scene = scene;
-		self.camera = camera;
-		self.renderer = renderer;
-		self.controls = controls;
 		self.refit();
+		self.resetCamera();
 		self.render();
 
 		self.dispatchEvent(new CustomEvent("cnc-gcode-initialized", {
@@ -63,13 +62,14 @@ Polymer({
 		}));
 
 		requestAnimationFrame(function render () {
-			controls.update();
+			self.controls.update();
 			requestAnimationFrame(render);
 		});
 	},
 
 	refit : function () {
 		var self = this;
+		if (!self.camera) return;
 
 		var container = document.getElementById('container');
 		console.log('creating three.js view for', container, container.offsetWidth, container.offsetHeight);
@@ -77,6 +77,7 @@ Polymer({
 		var width = container.offsetWidth;
 		var height = container.offsetHeight;
 
+		console.log(self.camera);
 		self.camera.aspect = width / height;
 		self.camera.updateProjectionMatrix();
 
@@ -201,6 +202,7 @@ Polymer({
 
 	resetCamera : function () {
 		var self = this;
+		if (!self.controls) return;
 		var box = self.path ? self.path.geometry.boundingBox : {
 			max : new THREE.Vector3( 10,  10,  10),
 			min : new THREE.Vector3(-10, -10, -10)

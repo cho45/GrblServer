@@ -197,15 +197,13 @@ var GrblServer = (function () {
                 status: this.grbl.status,
             }
         });
-        if (this.gcode) {
-            this.sendMessage(connection, {
-                id: null,
-                result: {
-                    type: 'gcode',
-                    gcode: this.gcode,
-                }
-            });
-        }
+        this.sendMessage(connection, {
+            id: null,
+            result: {
+                type: 'gcode',
+                gcode: this.gcode,
+            }
+        });
     };
     GrblServer.prototype.sendMessage = function (connection, response) {
         connection.sendUTF(JSON.stringify(response));
@@ -218,10 +216,10 @@ var GrblServer = (function () {
     GrblServer.prototype.service_upload = function (params) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            //			if (this.grbl.status.state !== STATE_IDLE) {
-            //				reject(new JSONRPCErrorNotIdleError(this.grbl.status.state));
-            //				return;
-            //			}
+            if (_this.gcode) {
+                reject(new JSONRPCErrorNotIdleError(_this.grbl.status.state));
+                return;
+            }
             // load new gcode
             _this.gcode = new GCode(params.name, params.gcode);
             console.log('New gcode uploaded: ', _this.gcode.remain.length, 'lines');
@@ -379,16 +377,17 @@ var GrblServer = (function () {
     };
     GrblServer.prototype.sendOneLine = function () {
         var _this = this;
-        if (this.canceling) {
-            this.canceling = false;
+        if (!this.gcode) {
             return;
         }
         if (!this.gcode.remain.length) {
+            this.gcode.finishedTime = new Date().getTime();
             // done
             this.sendBroadcastMessage({
                 id: null,
                 result: {
-                    type: 'gcode.done'
+                    type: 'gcode.done',
+                    gcode: code,
                 }
             });
             return;

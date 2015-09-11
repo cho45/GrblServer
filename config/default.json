@@ -1,5 +1,5 @@
 {
 	"serverPort": 8080,
-	"serialPort": "/dev/tty.usbserial-AL011AVX",
+	"serialPort": "/dev/ttyUSB0",
 	"serialBaud": 115200
 }

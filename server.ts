@@ -99,6 +99,7 @@ class GCode {
 	total: number;
 	createdTime: number;
 	startedTime : number;
+	finishedTime : number;
 	constructor(name: string, gcode: string) {
 		this.name   = name;
 		this.sent   = [];
@@ -115,7 +116,6 @@ class GrblServer {
 	grbl : Grbl;
 	config: GrblServerConfig;
 
-	canceling: boolean;
 	gcode: GCode;
 
 	start() {
@@ -256,15 +256,13 @@ class GrblServer {
 			}
 		});
 
-		if (this.gcode) {
-			this.sendMessage(connection, {
-				id: null,
-				result: {
-					type: 'gcode',
-					gcode: this.gcode,
-				}
-			});
-		}
+		this.sendMessage(connection, {
+			id: null,
+			result: {
+				type: 'gcode',
+				gcode: this.gcode,
+			}
+		});
 	}
 
 	sendMessage(connection: websocket.connection, response: JSONRPCResponse) {
@@ -279,10 +277,10 @@ class GrblServer {
 
 	service_upload(params: any): Promise<any> {
 		return new Promise( (resolve, reject) => {
-//			if (this.grbl.status.state !== STATE_IDLE) {
-//				reject(new JSONRPCErrorNotIdleError(this.grbl.status.state));
-//				return;
-//			}
+			if (this.gcode) {
+				reject(new JSONRPCErrorNotIdleError(this.grbl.status.state));
+				return;
+			}
 
 			// load new gcode
 			this.gcode = new GCode(params.name, params.gcode);
@@ -451,17 +449,18 @@ class GrblServer {
 	}
 
 	sendOneLine() {
-		if (this.canceling) {
-			this.canceling = false;
+		if (!this.gcode) {
 			return;
 		}
 
 		if (!this.gcode.remain.length) {
+			this.gcode.finishedTime = new Date().getTime();
 			// done
 			this.sendBroadcastMessage({
 				id: null,
 				result: {
-					type: 'gcode.done'
+					type: 'gcode.done',
+					gcode: code,
 				}
 			});
 			return;
