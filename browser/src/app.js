@@ -80,6 +80,11 @@ Polymer({
 		upload: {
 			type: Object,
 			value: {}
+		},
+
+		isBatchMode: {
+			type: Boolean,
+			computed: 'computeBatchMode(gcode.startedTime, gcode.finishedTime, gcode)'
 		}
 	},
 
@@ -244,9 +249,8 @@ Polymer({
 	},
 
 	processNotification : function (res) {
-		console.log('processNotification', res);
+		// console.log('processNotification', res);
 		var self = this;
-		console.log(res);
 		if (res.type === 'init') {
 			console.log('init');
 			self.set('error', res.lastAlarm);
@@ -290,13 +294,24 @@ Polymer({
 			self.addCommandHistory('<<', res.raw);
 		} else
 		if (res.type === 'gcode') {
-			self.set('gcode', res.gcode);
-			for (var key in self.gcode) if (self.gcode.hasOwnProperty(key)) {
-				self.notifyPath('gcode.' + key, self.gcode[key]);
+			if (res.gcode) {
+				self.set('gcode', {});
+				for (var key in res.gcode) if (res.gcode.hasOwnProperty(key)) {
+					self.set('gcode.' + key, res.gcode[key]);
+				}
+			} else {
+				for (var key in res.gcode) if (res.gcode.hasOwnProperty(key)) {
+					self.set('gcode.' + key, null);
+				}
+				self.set('gcode', null);
 			}
 			self.async(function () {
 				var viewer = document.getElementById('viewer');
-				viewer.loadGCode(res.gcode.sent.concat(res.gcode.remain).join("\n"));
+				if (res.gcode) {
+					viewer.loadGCode(res.gcode.sent.concat(res.gcode.remain).join("\n"));
+				} else {
+					viewer.loadGCode("");
+				}
 			});
 		} else
 		if (res.type === 'gcode.start') {
@@ -311,6 +326,7 @@ Polymer({
 			});
 		} else
 		if (res.type === 'gcode.done') {
+			self.set('gcode.finishedTime', res.time);
 			document.getElementById('gcodeDone').show();
 		}
 
@@ -540,6 +556,18 @@ Polymer({
 		})[0].getAttribute('data-value');
 
 		this.set('jogStep', value);
+	},
+
+	computeBatchMode : function (started, finished, gcode) {
+		var ret = false;
+		if (started) {
+			ret = true;
+			if (finished) {
+				ret = false;
+			}
+		}
+		console.log('isBatchMode', started, finished, ret);
+		return ret;
 	},
 
 	progress : function () {

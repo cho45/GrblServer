@@ -423,17 +423,17 @@
 						<tr>
 							<th class="axis">X</th>
 							<td class="number">{{formatCoords(status.workingPosition.x)}}</td>
-							<td class="reset"><paper-button data-axis="x" on-tap="resetToZero" disabled="{{gcode.startedTime}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button data-axis="x" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Y</th>
 							<td class="number">{{formatCoords(status.workingPosition.y)}}</td>
-							<td class="reset"><paper-button data-axis="y" on-tap="resetToZero" disabled="{{gcode.startedTime}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button data-axis="y" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Z</th>
 							<td class="number">{{formatCoords(status.workingPosition.z)}}</td>
-							<td class="reset"><paper-button data-axis="z" on-tap="resetToZero" disabled="{{gcode.startedTime}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button data-axis="z" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 
 						<tr>
@@ -466,28 +466,28 @@
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{gcode.startedTime}}" raised data-axis="y" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+										<paper-button disabled="{{isBatchMode}}" raised data-axis="y" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 											<div class="axis-label">+Y</div>
 										</paper-button>
 									</td>
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{gcode.startedTime}}" raised data-axis="z" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+										<paper-button disabled="{{isBatchMode}}" raised data-axis="z" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 											<div class="axis-label">+Z</div>
 										</paper-button>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<paper-button disabled="{{gcode.startedTime}}" raised data-axis="x" data-direction="-1" ><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
+										<paper-button disabled="{{isBatchMode}}" raised data-axis="x" data-direction="-1" ><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
 											<span class="axis-label" style="margin-right: 10px">-X</span>
 										</paper-button>
 									</td>
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{gcode.startedTime}}" raised data-axis="x" data-direction="+1" >
+										<paper-button disabled="{{isBatchMode}}" raised data-axis="x" data-direction="+1" >
 											<span class="axis-label" style="margin-left: 10px">+X</span>
 											<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
 									</td>
@@ -498,21 +498,21 @@
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{gcode.startedTime}}" raised data-axis="y" data-direction="-1" >
+										<paper-button disabled="{{isBatchMode}}" raised data-axis="y" data-direction="-1" >
 											<div class="axis-label">-Y</div>
 											<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 									</td>
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{gcode.startedTime}}" raised data-axis="z" data-direction="-1" >
+										<paper-button disabled="{{isBatchMode}}" raised data-axis="z" data-direction="-1" >
 											<div class="axis-label">-Z</div>
 											<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 									</td>
 								</tr>
 							</table>
 							<div>
-								<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right" disabled="{{gcode.startedTime}}">
+								<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right" disabled="{{isBatchMode}}">
 									<paper-button class="dropdown-trigger" style="text-transform: none">
 										<iron-icon icon="image:straighten"></iron-icon>
 										Step: <span>{{jogStep}}</span> mm
@@ -527,11 +527,11 @@
 						</div>
 						<div class="flex">
 							<div class="preset-positions">
-								<paper-button on-tap="commandHoming" disabled="{{gcode.startedTime}}">
+								<paper-button on-tap="commandHoming" disabled="{{isBatchMode}}">
 									<iron-icon icon="icons:home"></iron-icon>
 									Homing
 								</paper-button>
-								<paper-button on-tap="commandReturn" disabled="{{gcode.startedTime}}">
+								<paper-button on-tap="commandReturn" disabled="{{isBatchMode}}">
 									<iron-icon icon="hardware:keyboard-return"></iron-icon>
 									Return to zero
 								</paper-button>
@@ -557,7 +557,7 @@
 					<iron-pages class="flex layout vertical" selected="{{commandTab}}">
 						<div class="flex layout vertical" style="height: 100%">
 							<div style="padding: 0 16px">
-								<paper-input disabled="{{gcode.startedTime}}" label="Command" placeholder="G28" on-keydown="commandAny"></paper-input>
+								<paper-input disabled="{{isBatchMode}}" label="Command" placeholder="G28" on-keydown="commandAny"></paper-input>
 							</div>
 							<div class="flex" style="position: relative">
 								<div style="position: absolute; top: 0; left: 16px; right: 16px; bottom: 0; overflow-y: scroll">
@@ -585,7 +585,7 @@
 							<template is="dom-if" if="{{gcode}}">
 								<div class="layout horizontal">
 									<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
-									<template is="dom-if" if="{{!gcode.startedTime}}">
+									<template is="dom-if" if="{{!isBatchMode}}">
 										<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
 											<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file"></paper-icon-button>
 										</div>

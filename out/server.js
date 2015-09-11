@@ -60,6 +60,8 @@ var JSONRPCErrorNotIdleError = (function (_super) {
 })(JSONRPCErrorServerError);
 var GCode = (function () {
     function GCode(name, gcode) {
+        this.startedTime = null;
+        this.finishedTime = null;
         this.name = name;
         this.sent = [];
         this.remain = gcode.split(/\n/);
@@ -387,7 +389,7 @@ var GrblServer = (function () {
                 id: null,
                 result: {
                     type: 'gcode.done',
-                    gcode: code,
+                    time: this.gcode.finishedTime,
                 }
             });
             return;

@@ -94,12 +94,12 @@ class JSONRPCErrorNotIdleError extends JSONRPCErrorServerError {
 
 class GCode {
 	name : string;
-	sent : Array<string>
-	remain: Array<string>
+	sent : Array<string>;
+	remain: Array<string>;
 	total: number;
 	createdTime: number;
-	startedTime : number;
-	finishedTime : number;
+	startedTime : number = null;
+	finishedTime : number = null;
 	constructor(name: string, gcode: string) {
 		this.name   = name;
 		this.sent   = [];
@@ -460,7 +460,7 @@ class GrblServer {
 				id: null,
 				result: {
 					type: 'gcode.done',
-					gcode: code,
+					time: this.gcode.finishedTime,
 				}
 			});
 			return;
