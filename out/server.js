@@ -80,13 +80,13 @@ var GrblServer = (function () {
         this.openSerialPort();
     };
     GrblServer.prototype.loadConfig = function () {
-        this.config = {
+        this.serverConfig = {
             serverPort: config.get('serverPort'),
             serialPort: config.get('serialPort'),
             serialBaud: config.get('serialBaud'),
         };
         console.log('Launching with this config: ');
-        console.log(this.config);
+        console.log(this.serverConfig);
     };
     GrblServer.prototype.startHttp = function () {
         var _this = this;
@@ -95,14 +95,14 @@ var GrblServer = (function () {
         this.httpServer = http.createServer(function (req, res) {
             if (req.url === '/config') {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(_this.config));
+                res.end(JSON.stringify(_this.serverConfig));
             }
             else {
                 fileServer.serve(req, res);
             }
         });
-        this.httpServer.listen(this.config.serverPort, function () {
-            console.log('Server is listening on port ' + _this.config.serverPort);
+        this.httpServer.listen(this.serverConfig.serverPort, function () {
+            console.log('Server is listening on port ' + _this.serverConfig.serverPort);
         });
     };
     GrblServer.prototype.startWebSocket = function () {
@@ -269,15 +269,11 @@ var GrblServer = (function () {
         });
     };
     GrblServer.prototype.service_config = function (params) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            _this.grbl.getConfig().
-                then(resolve, reject);
-        });
+        return Promise.resolve(this.grblConfig);
     };
     GrblServer.prototype.service_command = function (params) {
         if (params.command === '$$') {
-            return this.grbl.getConfig();
+            return this.getConfig();
         }
         else {
             return this.grbl.command(params.command);
@@ -307,8 +303,8 @@ var GrblServer = (function () {
     GrblServer.prototype.openSerialPort = function () {
         var _this = this;
         console.log('openSerialPort');
-        var sp = new serialport.SerialPort(this.config.serialPort, {
-            baudrate: this.config.serialBaud,
+        var sp = new serialport.SerialPort(this.serverConfig.serialPort, {
+            baudrate: this.serverConfig.serialBaud,
             parser: serialport.parsers.readline("\n")
         }, false);
         this.grbl = new grbl_1.Grbl(sp);
@@ -371,10 +367,33 @@ var GrblServer = (function () {
     };
     GrblServer.prototype.initializeGrbl = function () {
         this.gcode = null;
-        this.grbl.getConfig().
-            then(function (res) {
-            console.log(res);
-        }, function (e) {
+        this.getConfig();
+    };
+    GrblServer.prototype.getConfig = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.grbl.getConfig().
+                then(function (res) {
+                var results = {};
+                for (var i = 0, it; (it = res[i]); i++) {
+                    var match = it.raw.match(/([^=]+)=([^\s]+)/);
+                    if (!match) {
+                        console.log('unexpected line: ', it);
+                        return;
+                    }
+                    results[match[1]] = match[2];
+                }
+                _this.grblConfig = results;
+                _this.sendBroadcastMessage({
+                    id: null,
+                    result: {
+                        type: 'config',
+                        config: _this.grblConfig
+                    }
+                });
+                resolve(res);
+            }, function (e) {
+            });
         });
     };
     GrblServer.prototype.sendOneLine = function () {

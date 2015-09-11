@@ -164,16 +164,13 @@ Polymer({
 				var touchstart = function (e) {
 					// ignore multiple taps while moving
 					if (!moving) {
-						console.log('start');
 						e.preventDefault();
-						console.log(axis, direction);
 						touch = true;
 						move();
 					}
 				};
 
 				var touchend = function (e) {
-					console.log('end');
 					e.preventDefault();
 					touch = false;
 				};
@@ -221,7 +218,6 @@ Polymer({
 		};
 		self.connection.onmessage = function (e) {
 			var res = JSON.parse(e.data);
-			console.log(res);
 			if (res.id !== null) {
 				var callback = self._callbacks[res.id];
 				if (!callback) {
@@ -274,6 +270,10 @@ Polymer({
 			self.initialize();
 			self.addCommandHistory('<<', res.raw);
 		} else
+		if (res.type === 'config') {
+			console.log(res.config);
+			self.set('config', res.config);
+		} else
 		if (res.type === 'status') {
 			self.set('status.state', res.status.state || 'Unknown');
 			self.set('status.workingPosition', res.status.workingPosition);
@@ -300,7 +300,7 @@ Polymer({
 					self.set('gcode.' + key, res.gcode[key]);
 				}
 			} else {
-				for (var key in res.gcode) if (res.gcode.hasOwnProperty(key)) {
+				for (var key in self.gcode) if (self.gcode.hasOwnProperty(key)) {
 					self.set('gcode.' + key, null);
 				}
 				self.set('gcode', null);
@@ -338,7 +338,7 @@ Polymer({
 	request : function (method, params) {
 		var self = this;
 
-		console.log(method, params);
+		// console.log(method, params);
 
 		return new Promise(function (resolve, reject) {
 			var id = self._id++;
@@ -408,7 +408,6 @@ Polymer({
 		})[0];
 		var axis = target.getAttribute('data-axis');
 		var direction = +target.getAttribute('data-direction');
-		console.log(axis, direction);
 
 		var step = this.jogStep * direction;
 		this.command('G21 G91 G0 ' + axis.toUpperCase() + step);
@@ -540,18 +539,8 @@ Polymer({
 		reader.readAsText(file, 'UTF-8');
 	},
 
-	changeFeedRate : function (e) {
-		var value = Polymer.dom(e).path.filter(function (i) {
-			console.log(i);
-			return i.getAttribute && i.getAttribute('data-value');
-		})[0].getAttribute('data-value');
-
-		this.set('jogFeedRate', value);
-	},
-
 	changeStep : function (e) {
 		var value = Polymer.dom(e).path.filter(function (i) {
-			console.log(i);
 			return i.getAttribute && i.getAttribute('data-value');
 		})[0].getAttribute('data-value');
 
@@ -566,7 +555,6 @@ Polymer({
 				ret = false;
 			}
 		}
-		console.log('isBatchMode', started, finished, ret);
 		return ret;
 	},
 

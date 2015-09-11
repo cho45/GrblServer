@@ -29,6 +29,40 @@ interface GrblServerConfig {
 	serverPort: number;
 };
 
+interface GrblConfig {
+	'$0': string;
+	'$1': string;
+	'$2': string;
+	'$3': string;
+	'$4': string;
+	'$5': string;
+	'$6': string;
+	'$10': string;
+	'$11': string;
+	'$12': string;
+	'$13': string;
+	'$20': string;
+	'$21': string;
+	'$22': string;
+	'$23': string;
+	'$24': string;
+	'$25': string;
+	'$26': string;
+	'$27': string;
+	'$100': string;
+	'$101': string;
+	'$102': string;
+	'$110': string;
+	'$111': string;
+	'$112': string;
+	'$120': string;
+	'$121': string;
+	'$122': string;
+	'$130': string;
+	'$131': string;
+	'$132': string;
+}
+
 interface JSONRPCRequest {
 	method: string;
 	params: any;
@@ -114,7 +148,9 @@ class GrblServer {
 	wsServer : websocket.server;
 	sessions : Array<websocket.connection>;
 	grbl : Grbl;
-	config: GrblServerConfig;
+
+	grblConfig: GrblConfig;
+	serverConfig: GrblServerConfig;
 
 	gcode: GCode;
 
@@ -126,13 +162,13 @@ class GrblServer {
 	}
 
 	loadConfig() {
-		this.config = <GrblServerConfig>{
+		this.serverConfig = <GrblServerConfig>{
 			serverPort: config.get('serverPort'),
 			serialPort: config.get('serialPort'),
 			serialBaud: config.get('serialBaud'),
 		};
 		console.log('Launching with this config: ');
-		console.log(this.config);
+		console.log(this.serverConfig);
 	}
 
 	startHttp() {
@@ -142,14 +178,14 @@ class GrblServer {
 		this.httpServer = http.createServer( (req, res) => {
 			if (req.url === '/config') {
 				res.writeHead(200, { 'Content-Type': 'application/json' });
-				res.end(JSON.stringify(this.config));
+				res.end(JSON.stringify(this.serverConfig));
 			} else {
 				fileServer.serve(req, res);
 			}
 		});
 
-		this.httpServer.listen(this.config.serverPort, () => {
-			console.log('Server is listening on port ' + this.config.serverPort);
+		this.httpServer.listen(this.serverConfig.serverPort, () => {
+			console.log('Server is listening on port ' + this.serverConfig.serverPort);
 		});
 	}
 
@@ -331,16 +367,13 @@ class GrblServer {
 		});
 	}
 
-	service_config(params: any): Promise<any> {
-		return new Promise( (resolve, reject) => {
-			this.grbl.getConfig().
-				then(resolve, reject);
-		});
+	service_config(params: any): Promise<GrblConfig> {
+		return Promise.resolve(this.grblConfig);
 	}
 
 	service_command(params: any): Promise<any> {
 		if (params.command === '$$') {
-			return this.grbl.getConfig();
+			return this.getConfig();
 		} else {
 			return this.grbl.command(params.command);
 		}
@@ -369,8 +402,8 @@ class GrblServer {
 
 	openSerialPort() {
 		console.log('openSerialPort');
-		var sp = new serialport.SerialPort(this.config.serialPort, {
-			baudrate: this.config.serialBaud,
+		var sp = new serialport.SerialPort(this.serverConfig.serialPort, {
+			baudrate: this.serverConfig.serialBaud,
 			parser: serialport.parsers.readline("\n")
 		}, false);
 
@@ -441,11 +474,35 @@ class GrblServer {
 
 	initializeGrbl() {
 		this.gcode = null;
-		this.grbl.getConfig().
-			then( (res) => {
-				console.log(res);
-			}, (e) => {
-			});
+		this.getConfig();
+	}
+
+	getConfig():Promise<GrblConfig> {
+		return new Promise( (resolve, reject) => {
+			this.grbl.getConfig().
+				then( (res) => {
+					var results: any = {};
+					for (var i = 0, it: GrblLineParserResultDollar; (it = res[i]); i++) {
+						var match: Array<any> = it.raw.match(/([^=]+)=([^\s]+)/)
+						if (!match) {
+							console.log('unexpected line: ', it);
+							return;
+						}
+						results[ match[1] ] = match[2];
+					}
+					this.grblConfig = results;
+					this.sendBroadcastMessage({
+						id: null,
+						result: {
+							type: 'config',
+							config: this.grblConfig
+						}
+					});
+
+					resolve(res);
+				}, (e) => {
+				});
+		});
 	}
 
 	sendOneLine() {

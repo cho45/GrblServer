@@ -143,7 +143,7 @@ Promise.resolve().
 }).
     then(function () {
     var promise = grbl.getConfig().then(function (config) {
-        assert.deepEqual(config, [{ raw: '$0=a' }, { raw: '$1=b' }]);
+        assert.deepEqual(config, { '$0': 'a', '$1': 'b' });
     });
     mock.mockResponse('$0=a\n');
     mock.mockResponse('$1=b\n');

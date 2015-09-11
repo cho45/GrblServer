@@ -321,7 +321,7 @@ export class Grbl extends events.EventEmitter {
 		}
 	}
 
-	getConfig():Promise<any> {
+	getConfig():Promise<Array<GrblLineParserResultDollar>> {
 		return new Promise( (resolve, reject) => {
 			if (this.status.state != STATE_IDLE) {
 				reject('Must called in idle state');

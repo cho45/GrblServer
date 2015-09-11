@@ -77,7 +77,6 @@ Polymer({
 		var width = container.offsetWidth;
 		var height = container.offsetHeight;
 
-		console.log(self.camera);
 		self.camera.aspect = width / height;
 		self.camera.updateProjectionMatrix();
 
