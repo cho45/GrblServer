@@ -138,11 +138,12 @@ Polymer({
 				e.preventDefault();
 			}, false);
 
+			var touch  = false;
 			Array.prototype.forEach.call(document.querySelectorAll(".jog paper-button"), function (button) {
 				var axis = button.getAttribute('data-axis');
 				var direction = +button.getAttribute('data-direction');
 
-				var touch = false, moving = false;
+				var moving = false;
 
 				var move = function () {
 					var step = self.jogStep * direction;
@@ -170,19 +171,23 @@ Polymer({
 					}
 				};
 
-				var touchend = function (e) {
-					e.preventDefault();
-					touch = false;
-				};
-
 				if (typeof ontouchstart !== "undefined") {
 					button.addEventListener("touchstart", touchstart);
-					button.addEventListener("touchend", touchend);
 				} else {
 					button.addEventListener("mousedown", touchstart);
-					button.addEventListener("mouseup", touchend);
 				}
 			});
+
+			var touchend = function (e) {
+				e.preventDefault();
+				touch = false;
+			};
+
+			if (typeof ontouchstart !== "undefined") {
+				window.addEventListener("touchend", touchend);
+			} else {
+				window.addEventListener("mouseup", touchend);
+			}
 
 			document.querySelector('.command-container iron-pages').addEventListener('iron-resize', function (e) {
 				var viewer = document.getElementById('viewer');

@@ -13,7 +13,6 @@
 <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../bower_components/paper-styles/paper-styles.html">
-<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
 <link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
@@ -369,12 +368,12 @@
 									<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
 									Grbl is locked. Unlock by:
 								</div>
-								<paper-button on-tap="commandUnlock">
+								<paper-button noink on-tap="commandUnlock">
 									<iron-icon icon="icons:lock-open"></iron-icon>
 									Unlock
 								</paper-button>
 								or
-								<paper-button on-tap="commandHoming">
+								<paper-button noink on-tap="commandHoming">
 									<iron-icon icon="icons:home"></iron-icon>
 									Homing
 								</paper-button>
@@ -391,23 +390,23 @@
 
 				<paper-material class="actions" disabled$="{{equals(status.state, 'Unknown')}}">
 					<template is="dom-if" if="{{equals(status.state, 'Hold')}}">
-						<paper-button class="action-resume" on-tap="commandResume">
+						<paper-button noink class="action-resume" on-tap="commandResume">
 							<iron-icon icon="av:play-arrow"></iron-icon>
 							Resume
 						</paper-button>
 					</template>
 					<template is="dom-if" if="{{!equals(status.state, 'Hold')}}">
-						<paper-button class="action-pause" on-tap="commandPause">
+						<paper-button noink class="action-pause" on-tap="commandPause">
 							<iron-icon icon="av:pause"></iron-icon>
 							Pause
 						</paper-button>
 					</template>
-					<paper-button class="action-reset" on-tap="commandReset">
+					<paper-button noink class="action-reset" on-tap="commandReset">
 						<iron-icon icon="icons:cancel"></iron-icon>
 						Reset
 					</paper-button>
 
-					<paper-button class="action-open-setting" on-tap="openSetting" style="margin-left: 16px">
+					<paper-button noink class="action-open-setting" on-tap="openSetting" style="margin-left: 16px">
 						<iron-icon icon="icons:settings"></iron-icon>
 						Settings
 					</paper-button>
@@ -424,17 +423,17 @@
 						<tr>
 							<th class="axis">X</th>
 							<td class="number">{{formatCoords(status.workingPosition.x)}}</td>
-							<td class="reset"><paper-button data-axis="x" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button noink data-axis="x" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Y</th>
 							<td class="number">{{formatCoords(status.workingPosition.y)}}</td>
-							<td class="reset"><paper-button data-axis="y" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button noink data-axis="y" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 						<tr>
 							<th class="axis">Z</th>
 							<td class="number">{{formatCoords(status.workingPosition.z)}}</td>
-							<td class="reset"><paper-button data-axis="z" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+							<td class="reset"><paper-button noink data-axis="z" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
 						</tr>
 
 						<tr>
@@ -467,28 +466,28 @@
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{isBatchMode}}" raised data-axis="y" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="y" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 											<div class="axis-label">+Y</div>
 										</paper-button>
 									</td>
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{isBatchMode}}" raised data-axis="z" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="z" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
 											<div class="axis-label">+Z</div>
 										</paper-button>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<paper-button disabled="{{isBatchMode}}" raised data-axis="x" data-direction="-1" ><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
+										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="x" data-direction="-1" ><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
 											<span class="axis-label" style="margin-right: 10px">-X</span>
 										</paper-button>
 									</td>
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{isBatchMode}}" raised data-axis="x" data-direction="+1" >
+										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="x" data-direction="+1" >
 											<span class="axis-label" style="margin-left: 10px">+X</span>
 											<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
 									</td>
@@ -499,14 +498,14 @@
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{isBatchMode}}" raised data-axis="y" data-direction="-1" >
+										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="y" data-direction="-1" >
 											<div class="axis-label">-Y</div>
 											<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 									</td>
 									<td>
 									</td>
 									<td>
-										<paper-button disabled="{{isBatchMode}}" raised data-axis="z" data-direction="-1" >
+										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="z" data-direction="-1" >
 											<div class="axis-label">-Z</div>
 											<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
 									</td>
@@ -514,7 +513,7 @@
 							</table>
 							<div>
 								<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right" disabled="{{isBatchMode}}">
-									<paper-button class="dropdown-trigger" style="text-transform: none">
+									<paper-button noink class="dropdown-trigger" style="text-transform: none">
 										<iron-icon icon="image:straighten"></iron-icon>
 										Step: <span>{{jogStep}}</span> mm
 									</paper-button>
@@ -528,11 +527,11 @@
 						</div>
 						<div class="flex">
 							<div class="preset-positions">
-								<paper-button on-tap="commandHoming" disabled="{{isBatchMode}}">
+								<paper-button noink on-tap="commandHoming" disabled="{{isBatchMode}}">
 									<iron-icon icon="icons:home"></iron-icon>
 									Homing
 								</paper-button>
-								<paper-button on-tap="commandReturn" disabled="{{isBatchMode}}">
+								<paper-button noink on-tap="commandReturn" disabled="{{isBatchMode}}">
 									<iron-icon icon="hardware:keyboard-return"></iron-icon>
 									Return to zero
 								</paper-button>
@@ -604,7 +603,7 @@
 								</template>
 								<template is="dom-if" if="{{!gcode.startedTime}}">
 									<div style="vertical-align: baseline; text-align: right">
-										<paper-button class="action-resume" on-tap="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
+										<paper-button noink class="action-resume" on-tap="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
 											<iron-icon icon="av:play-arrow"></iron-icon>
 											Execute
 										</paper-button>
@@ -639,7 +638,7 @@
 			<h2>ALARM</h2>
 			<p>{{lastAlarm}}</p>
 			<div class="buttons">
-				<paper-button dialog-confirm autofocus>Tap me to close</paper-button>
+				<paper-button noink dialog-confirm autofocus>Tap me to close</paper-button>
 			</div>
 		</paper-dialog>
 
