@@ -206,6 +206,18 @@ var GrblServer = (function () {
                 gcode: this.gcode,
             }
         });
+        if (this.grblConfig) {
+            this.sendMessage(connection, {
+                id: null,
+                result: {
+                    type: 'config',
+                    config: this.grblConfig
+                }
+            });
+        }
+        else {
+            this.getConfig();
+        }
     };
     GrblServer.prototype.sendMessage = function (connection, response) {
         connection.sendUTF(JSON.stringify(response));

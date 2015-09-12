@@ -299,6 +299,18 @@ class GrblServer {
 				gcode: this.gcode,
 			}
 		});
+
+		if (this.grblConfig) {
+			this.sendMessage(connection, {
+				id: null,
+				result: {
+					type: 'config',
+					config: this.grblConfig
+				}
+			});
+		} else {
+			this.getConfig();
+		}
 	}
 
 	sendMessage(connection: websocket.connection, response: JSONRPCResponse) {
