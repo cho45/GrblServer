@@ -10,6 +10,11 @@ Polymer({
 			}
 		},
 
+		config : {
+			type: Object,
+			value: null
+		},
+
 		isConnected: {
 			type: Boolean,
 			value: false
@@ -142,6 +147,8 @@ Polymer({
 			Array.prototype.forEach.call(document.querySelectorAll(".jog paper-button"), function (button) {
 				var axis = button.getAttribute('data-axis');
 				var direction = +button.getAttribute('data-direction');
+				if (!axis) return;
+				axis = axis.toUpperCase();
 
 				var moving = false;
 
@@ -150,12 +157,34 @@ Polymer({
 					moving = true;
 					return Promise.all([
 						// move
-						self.request('command', { command: 'G21 G91 G0 ' + axis.toUpperCase() + step }),
+						self.request('command', { command: 'G21 G91 G0 ' + axis + step }),
 						// sync
-						self.request('command', { command: 'G4 P0.01' })
+						self.request('command', { command: 'G4 P1' })
 					]).then(function () {
 						if (touch) {
-							return move();
+							// stop within interval sec
+							var interval = 0.3;
+							var maxFeed = Number(self.config[{
+								X: '$110',
+								Y: '$111',
+								Z: '$112'
+							}[axis]]);
+							console.log('maxFeed', maxFeed);
+							var maxStep = maxFeed * interval / 60;
+							if (self.jogStep > maxStep) {
+								step = maxStep * direction;
+							}
+							var feed = Math.abs(60 * step / interval);
+							self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
+							(function repeat () {
+								console.log('append queue');
+								if (touch) {
+									self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
+									setTimeout(repeat, interval * 1000);
+								} else {
+									moving = false;
+								}
+							})();
 						} else {
 							moving = false;
 						}
@@ -276,7 +305,7 @@ Polymer({
 			self.addCommandHistory('<<', res.raw);
 		} else
 		if (res.type === 'config') {
-			console.log(res.config);
+			console.log('update config', res.config);
 			self.set('config', res.config);
 		} else
 		if (res.type === 'status') {
@@ -343,7 +372,7 @@ Polymer({
 	request : function (method, params) {
 		var self = this;
 
-		// console.log(method, params);
+		console.log(method, params);
 
 		return new Promise(function (resolve, reject) {
 			var id = self._id++;
