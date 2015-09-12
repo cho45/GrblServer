@@ -1,7 +1,7 @@
 GrblServer
 ==========
 
-<img src="https://lh3.googleusercontent.com/iXY6JkBejdJkOzSoXMgJMYrVHPCVLNvBcH724zil-8iW=w548-h219-no"/>
+<img src="https://dl.dropboxusercontent.com/u/673746/Screenshots/out3.gif"/>
 
 GrblServer is a <a href="https://github.com/grbl/grbl">Grbl</a> interface for standalone gcode execute service which works with nodejs.
 
