@@ -307,6 +307,12 @@
 			border-left: 1px solid #ccc;
 		}
 
+		.uploaded-info paper-input {
+			--paper-input-container-input: {
+				font-size: 12px;
+			};
+		}
+
 		@media (max-width: 1280px) {
 
 			:host {
@@ -612,7 +618,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="flex layout vertical" style="padding: 16px">
+						<div class="flex layout vertical" style="padding: 0 16px">
 							<template is="dom-if" if="{{!gcode}}">
 								<div id="upload-file" style="self-center">
 									<div style="padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
@@ -623,7 +629,7 @@
 								</div>
 							</template>
 							<template is="dom-if" if="{{gcode}}">
-								<div class="layout horizontal">
+								<div class="layout horizontal uploaded-info">
 									<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
 									<template is="dom-if" if="{{!isBatchMode}}">
 										<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
@@ -631,6 +637,7 @@
 										</div>
 									</template>
 									<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly></paper-input>
+									<paper-input class="flex" label="Time" value="{{duration(gcode.total)}}" readonly></paper-input>
 									<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly></paper-input>
 								</div>
 								<!-- div class="layout horizontal">

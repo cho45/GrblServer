@@ -762,5 +762,8 @@ Polymer({
 		if (!epoch) return "";
 		var date = new Date(epoch);
 		return strftime(format, date);
+	},
+	duration: function (number) {
+		return Math.round(number / 60) + "min";
 	}
 });
