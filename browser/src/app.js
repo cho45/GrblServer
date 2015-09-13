@@ -30,6 +30,10 @@ Polymer({
 			value: 0
 		},
 
+		settings : {
+			type: Object
+		},
+
 		jogStep : {
 			type: Number,
 			value: 1
@@ -133,7 +137,7 @@ Polymer({
 //				self.set('upload.progress', self.upload.progress+1);
 //			}, 100);
 
-			// self.openSettings();
+			self.openSettings();
 
 			inputFile.onchange = function () {
 				var files = inputFile.files;
@@ -610,6 +614,69 @@ Polymer({
 			self.settingsDialog.refit();
 			self.settingsDialog.style.visibility = 'visible';
 		}, 10);
+	},
+
+	initializeDefaultSettings : function () {
+		this.settings = {
+			macros : [
+				{
+					id: '1',
+					label: "G28",
+					gcode: "G28"
+				}
+			],
+			connections : {
+				grbl : {
+					automatic: true,
+					address: ""
+				}
+			}
+		};
+	},
+
+	settingsAddMacro : function () {
+		this.set('currentEdittingMacro', {
+			label: '',
+			gcode: ''
+		});
+	},
+
+	settingsEditMacro : function (e) {
+		var target = Polymer.dom(e).path.filter(function (i) {
+			return i.getAttribute && i.getAttribute('data-item');
+		})[0];
+		var itemId = target.getAttribute('data-item');
+		var item = this.settings.macros.filter(function (i) { return i.id == itemId })[0];
+		this.set('currentEdittingMacro', item);
+	},
+
+	settingsSaveMacro : function () {
+		var item = this.currentEdittingMacro;
+		if (item.id) {
+			for (var i = 0, it; (it = this.settings.macros[i]); i++) {
+				if (it.id === item.id) {
+					this.splice('settings.macros', i, 1, item);
+					break;
+				}
+			}
+		} else {
+			item.id = Math.random().toString(32).substring(2);
+			this.push('settings.macros', item);
+		}
+		this.set('currentEdittingMacro', null);
+	},
+
+	settingsRemoveMacro : function () {
+		if (confirm('Sure to remove?')) {
+			var item = this.currentEdittingMacro;
+			for (var i = 0, it; (it = this.settings.macros[i]); i++) {
+				if (it.id === item.id) {
+					this.splice('settings.macros', i, 1);
+					break;
+				}
+			}
+			this.set('currentEdittingMacro', null);
+		}
 	},
 
 	progress : function () {

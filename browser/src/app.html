@@ -682,7 +682,12 @@
 			</p>
 		</paper-dialog>
 
-		<paper-dialog id="settings" modal style="min-width: 800px">
+		<paper-dialog id="settings" modal style="min-width: 900px">
+			<iron-localstorage
+				name="grbl-server-client-settings"
+				value="{{settings}}"
+				on-iron-localstorage-load-empty="initializeDefaultSettings"
+				></iron-localstorage>
 			<div class="layout horizontal" style="margin: 0">
 				<h2 class="flex" style="height: 48px; line-height: 48px; text-align: left; margin-left: -24px; padding-left: 24px">Settings</h2>
 				<paper-tabs class="flex-5" selected="{{settingsTab}}" noink no-slide style="margin-right: -24px;">
@@ -699,21 +704,29 @@
 							<div class="layout horizontal">
 								<h3 class="flex-3"> Current List </h3>
 								<div class="flex-1" style="text-align: right; padding: 5px">
-									<paper-icon-button icon="icons:add-box"></paper-icon-button>
+									<paper-icon-button icon="icons:add-box" on-tap="settingsAddMacro"></paper-icon-button>
 								</div>
 							</div>
-							<paper-button>foobar</paper-button>
+
+
+							<template is="dom-repeat" items="{{settings.macros}}">
+								<paper-button on-tap="settingsEditMacro" data-item$="{{item.id}}">{{item.label}}</paper-button>
+							</template>
+
 						</div>
 
 						<div class="edit flex">
-							<div class="layout horizontal">
-								<h3 class="flex">Edit</h3>
-								<div class="flex" style="text-align: right; padding: 5px">
-									<paper-icon-button icon="icons:cancel"></paper-icon-button>
+							<template is="dom-if" if="{{currentEdittingMacro}}">
+								<div class="layout horizontal">
+									<h3 class="flex">Edit</h3>
+									<div class="flex" style="text-align: right; padding: 5px">
+										<paper-icon-button icon="icons:cancel" on-tap="settingsRemoveMacro"></paper-icon-button>
+									</div>
 								</div>
-							</div>
-							<paper-input label="Label" placeholder=""></paper-input>
-							<paper-textarea label="Code" placeholder="" rows="5"></paper-textarea>
+								<paper-input label="Label" placeholder="" value="{{currentEdittingMacro.label}}"></paper-input>
+								<paper-textarea label="Code" placeholder="" rows="5" value="{{currentEdittingMacro.gcode}}"></paper-textarea>
+								<paper-button on-tap="settingsSaveMacro">Save</paper-button>
+							</template>
 						</div>
 					</div>
 					<!-- /Macros -->
