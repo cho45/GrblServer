@@ -244,12 +244,22 @@ Polymer({
 			});
 		});
 
-		this.openWebSocket();
+		self.async(function () {
+			self.openWebSocket();
+		});
 	},
 
 	openWebSocket : function () {
 		var self = this;
-		self.connection = new WebSocket('ws://' + (localStorage["grblServer"] || location.host));
+
+		console.log(self.settings);
+		var address = self.settings.grblServer.address;
+		if (self.settings.grblServer.addressAuto) {
+			address = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host;
+		}
+
+		console.log('open websocket with address: ' + address);
+		self.connection = new WebSocket(address);
 		self.connection.onopen = function (e) {
 			self.isConnected = true;
 		};
