@@ -102,6 +102,10 @@ Polymer({
 		}
 	},
 
+	observers: [
+		'_settingsChanged(settings.*)'
+	],
+
 	_id : 0,
 	_callbacks : {},
 
@@ -625,11 +629,9 @@ Polymer({
 					gcode: "G28"
 				}
 			],
-			connections : {
-				grbl : {
-					automatic: true,
-					address: ""
-				}
+			grblServer : {
+				address: "",
+				addressAuto: true
 			}
 		};
 	},
@@ -681,6 +683,15 @@ Polymer({
 
 	progress : function () {
 		return (this.gcode.sent.length / (this.gcode.total) * 100);
+	},
+
+	_settingsChanged : function (change) {
+		var self = this;
+		console.log('_settingsChanged', change);
+		if (change.path.indexOf('settings.grblServer') === 0) {
+			console.log('settings.grblServer is changed. close and reconnect');
+			self.connection.close();
+		}
 	},
 
 	bind: function (id) { return id },
