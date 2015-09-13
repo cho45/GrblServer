@@ -141,7 +141,7 @@ Polymer({
 //				self.set('upload.progress', self.upload.progress+1);
 //			}, 100);
 
-			self.openSettings();
+			// self.openSettings();
 
 			inputFile.onchange = function () {
 				var files = inputFile.files;
@@ -660,6 +660,19 @@ Polymer({
 		var itemId = target.getAttribute('data-item');
 		var item = this.settings.macros.filter(function (i) { return i.id == itemId })[0];
 		this.set('currentEdittingMacro', item);
+	},
+
+
+	settingsDoMacro : function (e) {
+		var target = Polymer.dom(e).path.filter(function (i) {
+			return i.getAttribute && i.getAttribute('data-item');
+		})[0];
+		var itemId = target.getAttribute('data-item');
+		var item = this.settings.macros.filter(function (i) { return i.id == itemId })[0];
+		var lines = item.gcode.split(/\n/);
+		for (var i = 0, len = lines.length; i < len; i++) {
+			this.command(lines[i]);
+		}
 	},
 
 	settingsSaveMacro : function () {

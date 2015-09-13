@@ -564,10 +564,9 @@
 									<iron-icon icon="hardware:keyboard-return"></iron-icon>
 									Return to zero
 								</paper-button>
-								<!-- paper-button on-tap="commandHoming">
-									<iron-icon icon="icons:home"></iron-icon>
-									G28
-								</paper-button -->
+								<template is="dom-repeat" items="{{settings.macros}}">
+									<paper-button on-tap="settingsDoMacro" data-item$="{{item.id}}">{{item.label}}</paper-button>
+								</template>
 							</div>
 						</div>
 
