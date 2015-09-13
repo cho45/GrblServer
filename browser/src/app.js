@@ -177,11 +177,11 @@ Polymer({
 						// move
 						self.request('command', { command: 'G21 G91 G0 ' + axis + step }),
 						// sync
-						self.request('command', { command: 'G4 P1' })
+						self.request('command', { command: 'G4 P0.5' })
 					]).then(function () {
 						if (touch) {
 							// stop within interval sec
-							var interval = 0.3;
+							var interval = 0.25;
 							var maxFeed = Number(self.config[{
 								X: '$110',
 								Y: '$111',
@@ -194,11 +194,18 @@ Polymer({
 							}
 							var feed = Math.abs(60 * step / interval);
 							self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
+							self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
+
+							var next = 0, time = new Date().getTime();
 							(function repeat () {
-								console.log('append queue');
+								var now = new Date().getTime();
+								var diff = next - (now - time);
+								next = interval * 1000 + diff;
+								console.log('append queue', now - time, diff, next);
 								if (touch) {
 									self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
-									setTimeout(repeat, interval * 1000);
+									time = now;
+									setTimeout(repeat, next);
 								} else {
 									moving = false;
 								}
