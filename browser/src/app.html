@@ -17,6 +17,7 @@
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
@@ -275,6 +276,34 @@
 			padding: 16px;
 		}
 
+		#settings {
+		}
+
+		#settings .body {
+			margin: 0;
+			padding: 0;
+		}
+
+		#settings .body > iron-pages > * {
+			padding: 0 24px;
+		}
+
+		#settings .body > iron-pages > .macros {
+			padding: 0;
+		}
+
+		#settings .body > iron-pages > .macros > * {
+			padding: 0 24px;
+		}
+
+		#settings .body > iron-pages > .macros .list {
+		}
+
+		#settings .body > iron-pages > .macros .edit {
+			background: #efefef;
+			border-left: 1px solid #ccc;
+		}
+
 		@media (max-width: 1280px) {
 
 			:host {
@@ -406,7 +435,7 @@
 						Reset
 					</paper-button>
 
-					<paper-button noink class="action-open-setting" on-tap="openSetting" style="margin-left: 16px">
+					<paper-button noink class="action-open-setting" on-tap="openSettings" style="margin-left: 16px">
 						<iron-icon icon="icons:settings"></iron-icon>
 						Settings
 					</paper-button>
@@ -651,6 +680,65 @@
 			<p>
 				<paper-progress value="{{upload.progress}}" style="width: 100%"></paper-progress>
 			</p>
+		</paper-dialog>
+
+		<paper-dialog id="settings" modal style="min-width: 800px">
+			<div class="layout horizontal" style="margin: 0">
+				<h2 class="flex" style="height: 48px; line-height: 48px; text-align: left; margin-left: -24px; padding-left: 24px">Settings</h2>
+				<paper-tabs class="flex-5" selected="{{settingsTab}}" noink no-slide style="margin-right: -24px;">
+					<paper-tab>Macros</paper-tab>
+					<paper-tab>Connection</paper-tab>
+					<paper-tab>Grbl</paper-tab>
+				</paper-tabs>
+			</div>
+			<div class="body">
+				<iron-pages class="flex layout vertical" selected="{{settingsTab}}" style="min-height: 400px">
+					<!-- Macros -->
+					<div class="macros flex layout horizontal">
+						<div class="list flex">
+							<div class="layout horizontal">
+								<h3 class="flex-3"> Current List </h3>
+								<div class="flex-1" style="text-align: right; padding: 5px">
+									<paper-icon-button icon="icons:add-box"></paper-icon-button>
+								</div>
+							</div>
+							<paper-button>foobar</paper-button>
+						</div>
+
+						<div class="edit flex">
+							<div class="layout horizontal">
+								<h3 class="flex">Edit</h3>
+								<div class="flex" style="text-align: right; padding: 5px">
+									<paper-icon-button icon="icons:cancel"></paper-icon-button>
+								</div>
+							</div>
+							<paper-input label="Label" placeholder=""></paper-input>
+							<paper-textarea label="Code" placeholder="" rows="5"></paper-textarea>
+						</div>
+					</div>
+					<!-- /Macros -->
+
+					<!-- Connection -->
+					<div class="flex vertical">
+						<h3>Grbl Server</h3>
+						<paper-input label="Server Address" placeholder="ws://"></paper-input>
+						<paper-checkbox checked>Automatic</paper-checkbox>
+					</div>
+					<!-- /Connection -->
+
+					<!-- Grbl -->
+					<div class="flex vertical">
+						<h3>Edit Grbl Settings</h3>
+						Not implemented
+					</div>
+					<!-- /Grbl -->
+				</iron-pages>
+
+			</div>
+
+			<div class="buttons">
+				<paper-button noink dialog-confirm autofocus>Close</paper-button>
+			</div>
 		</paper-dialog>
 
 		<paper-toast id="feedback" duration="10000"></paper-toast>

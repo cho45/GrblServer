@@ -25,6 +25,11 @@ Polymer({
 			value: 0
 		},
 
+		settingsTab: {
+			type: Number,
+			value: 0
+		},
+
 		jogStep : {
 			type: Number,
 			value: 1
@@ -106,6 +111,9 @@ Polymer({
 		self.uploadDialog = document.getElementById('upload');
 		document.body.appendChild(self.uploadDialog);
 
+		self.settingsDialog = document.getElementById('settings');
+		// document.body.appendChild(self.settingsDialog);
+
 		self.async(function () {
 			var uploadFile = document.getElementById('upload-file');
 			var inputFile = uploadFile.querySelector('input[type=file]');
@@ -124,6 +132,8 @@ Polymer({
 //			setInterval(function () {
 //				self.set('upload.progress', self.upload.progress+1);
 //			}, 100);
+
+			// self.openSettings();
 
 			inputFile.onchange = function () {
 				var files = inputFile.files;
@@ -590,6 +600,16 @@ Polymer({
 			}
 		}
 		return ret;
+	},
+
+	openSettings : function () {
+		var self = this;
+		self.settingsDialog.open();
+		self.settingsDialog.style.visibility = 'hidden';
+		self.async(function() {
+			self.settingsDialog.refit();
+			self.settingsDialog.style.visibility = 'visible';
+		}, 10);
 	},
 
 	progress : function () {
