@@ -199,13 +199,6 @@ var GrblServer = (function () {
                 status: this.grbl.status,
             }
         });
-        this.sendMessage(connection, {
-            id: null,
-            result: {
-                type: 'gcode',
-                gcode: this.gcode,
-            }
-        });
         if (this.grblConfig) {
             this.sendMessage(connection, {
                 id: null,
@@ -218,6 +211,13 @@ var GrblServer = (function () {
         else {
             this.getConfig();
         }
+        this.sendMessage(connection, {
+            id: null,
+            result: {
+                type: 'gcode',
+                gcode: this.gcode,
+            }
+        });
     };
     GrblServer.prototype.sendMessage = function (connection, response) {
         connection.sendUTF(JSON.stringify(response));

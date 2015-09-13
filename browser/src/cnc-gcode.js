@@ -4,6 +4,11 @@ Polymer({
 		view: {
 			type: String,
 			value: 'top'
+		},
+
+		rapidFeedRate: {
+			type: Number,
+			value: 0
 		}
 	},
 
@@ -120,7 +125,7 @@ Polymer({
 	loadGCode : function (raw) {
 		var self = this;
 		self.initContext();
-		self.context.rapidFeedRate = 800; // TODO attribute
+		self.context.rapidFeedRate = self.rapidFeedRate;
 
 		var duration = 0;
 		var lines = raw.split(/\n/);
@@ -129,11 +134,11 @@ Polymer({
 		}
 		console.log('duration', duration);
 
-		self.constuctPathObject();
+		self.constructPathObject();
 		self.render();
 	},
 
-	constuctPathObject : function () {
+	constructPathObject : function () {
 		var self = this;
 		if (self.path) {
 			self.scene.remove(self.path);

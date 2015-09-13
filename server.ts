@@ -292,14 +292,6 @@ class GrblServer {
 			}
 		});
 
-		this.sendMessage(connection, {
-			id: null,
-			result: {
-				type: 'gcode',
-				gcode: this.gcode,
-			}
-		});
-
 		if (this.grblConfig) {
 			this.sendMessage(connection, {
 				id: null,
@@ -311,6 +303,14 @@ class GrblServer {
 		} else {
 			this.getConfig();
 		}
+
+		this.sendMessage(connection, {
+			id: null,
+			result: {
+				type: 'gcode',
+				gcode: this.gcode,
+			}
+		});
 	}
 
 	sendMessage(connection: websocket.connection, response: JSONRPCResponse) {

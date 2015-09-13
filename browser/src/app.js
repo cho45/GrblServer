@@ -376,8 +376,25 @@ Polymer({
 			}
 			self.async(function () {
 				var viewer = document.getElementById('viewer');
+				viewer.rapidFeedRate = 800; // self.config['$110'];
 				if (res.gcode) {
-					viewer.loadGCode(res.gcode.sent.concat(res.gcode.remain).join("\n"));
+					viewer.initContext();
+
+					var total = 0;
+					var durations = [];
+					var lines = res.gcode.sent.concat(res.gcode.remain);
+					for (var i = 0, len = lines.length; i < len; i++) {
+						var duration = viewer.executeBlock(lines[i]);
+						total += duration;
+						durations.push(duration);
+					}
+
+					self.set('gcode.total', total);
+					self.set('gcode.durations', durations);
+					console.log('loaded gcode', 'total', total, 'durations', durations);
+					
+					viewer.constructPathObject();
+					viewer.render();
 				} else {
 					viewer.loadGCode("");
 				}
@@ -389,9 +406,11 @@ Polymer({
 		if (res.type === 'gcode.progress') {
 			self.push('gcode.sent', self.shift('gcode.remain'));
 			self.async(function () {
-				var container = document.getElementById('gcode-list');
+				var container = document.getElementById('gcode-list').parentNode;
 				var target = container.querySelector('.remain');
-				container.scrollTop = target.offsetTop - 100;
+				if (target) {
+					container.scrollTop = target.offsetTop - 100;
+				}
 			});
 		} else
 		if (res.type === 'gcode.done') {
@@ -712,7 +731,18 @@ Polymer({
 	},
 
 	progress : function () {
-		return (this.gcode.sent.length / (this.gcode.total) * 100);
+		if (!this.gcode) return 0;
+		try {
+			var sent = this.gcode.durations.slice(0, this.gcode.sent.length).reduce(function (i, r) {
+				return i + r;
+			});
+			var ret = sent / this.gcode.total * 100;
+			console.log('progress','sent', sent, 'total', this.gcode.total, '=', ret, '%');
+			return ret;
+		} catch (e) {
+			console.log(e);
+			return (this.gcode.sent.length / (this.gcode.total) * 100);
+		}
 	},
 
 	_settingsChanged : function (change) {

@@ -41,6 +41,9 @@
 			color: #fff;
 		}
 
+		paper-tabs iron-icon {
+			margin: 5px;
+		}
 
 		paper-button {
 			font-size: 12px;
@@ -565,7 +568,10 @@
 									Return to zero
 								</paper-button>
 								<template is="dom-repeat" items="{{settings.macros}}">
-									<paper-button on-tap="settingsDoMacro" data-item$="{{item.id}}">{{item.label}}</paper-button>
+									<paper-button on-tap="settingsDoMacro" data-item$="{{item.id}}" disabled="{{isBatchMode}}">
+										<iron-icon icon="icons:extension"></iron-icon>
+										<span>{{item.label}}</span>
+									</paper-button>
 								</template>
 							</div>
 						</div>
@@ -579,8 +585,14 @@
 			<div class="flex layout horizontal wrap">
 				<paper-material class="flex command-container layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
 					<paper-tabs selected="{{commandTab}}" noink no-slide>
-						<paper-tab>Command Line</paper-tab>
-						<paper-tab>Upload File</paper-tab>
+						<paper-tab>
+							<iron-icon icon="hardware:keyboard"></iron-icon>
+							Command Line
+						</paper-tab>
+						<paper-tab>
+							<iron-icon icon="icons:file-upload"></iron-icon>
+							Upload File
+						</paper-tab>
 					</paper-tabs>
 					<iron-pages class="flex layout vertical" selected="{{commandTab}}">
 						<div class="flex layout vertical" style="height: 100%">
