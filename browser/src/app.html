@@ -18,6 +18,7 @@
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input-container/paper-input-container.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
@@ -35,6 +36,10 @@
 			width: 1280px;
 			height: 100%;
 			margin: 0 auto;
+		}
+
+		h4 {
+			margin: 0;
 		}
 
 		.main-container {
@@ -310,6 +315,10 @@
 			border-left: 1px solid #ccc;
 		}
 
+		#settings .grbl-settings paper-input-container * {
+			font-size: 12px;
+		}
+
 		.uploaded-info paper-input {
 			--paper-input-container-input: {
 				font-size: 12px;
@@ -469,7 +478,7 @@
 			</div>
 
 			<div class="row">
-				<paper-material class$="{{conditional(positioningSystem, 'coords-container machine', 'coords-container working')}}">
+				<paper-material class$="{{conditional(positioningSystem, 'coords-container machine', 'coords-container working')}}" disabled$="{{equals(status.state, 'Unknown')}}">
 					<table class="coords">
 						<tr>
 							<th colspan="3" class="heading">Work</th>
@@ -692,7 +701,7 @@
 						</div>
 					</iron-pages>
 				</paper-material>
-				<paper-material class="flex preview layout vertical">
+				<paper-material class="flex preview layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
 					<div class="flex relative">
 						<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
 							<cnc-gcode id="viewer" style="width: 100%; height: 100%"></cnc-gcode>
@@ -744,7 +753,10 @@
 							</div>
 
 							<template is="dom-repeat" items="{{settings.macros}}">
-								<paper-button on-tap="settingsEditMacro" data-item$="{{item.id}}">{{item.label}}</paper-button>
+								<paper-button on-tap="settingsEditMacro" data-item$="{{item.id}}">
+									<iron-icon icon="icons:extension"></iron-icon>
+									<span>{{item.label}}</span>
+								</paper-button>
 							</template>
 
 						</div>
@@ -774,9 +786,33 @@
 					<!-- /Connection -->
 
 					<!-- Grbl -->
-					<div class="flex vertical">
+					<div class="flex vertical grbl-settings">
 						<h3>Edit Grbl Settings</h3>
-						Not implemented
+
+						<div class="layout horizontal wrap">
+							<!--
+							<div class="flex">
+								<h4>Basic Machine Settings</h4>
+								<paper-input-container always-float-label>
+									<label>Step Pulse</label>
+									<input is="iron-input"/>
+									<div suffix>us</div>
+								</paper-input-container>
+
+								<paper-input-container always-float-label>
+									<label>Step Idle Delay</label>
+									<input is="iron-input"/>
+									<div suffix>ms</div>
+								</paper-input-container>
+							</div>
+
+							<div class="flex">
+								<h4>Limits</h4>
+								<paper-checkbox checked="{{grblSettings.20}}"> Hard Limits</paper-checkbox>
+								<paper-checkbox checked="{{grblSettings.20}}"> Soft Limits</paper-checkbox>
+							</div>
+						-->
+						</div>
 					</div>
 					<!-- /Grbl -->
 				</iron-pages>

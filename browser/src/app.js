@@ -273,7 +273,8 @@ Polymer({
 		console.log('open websocket with address: ' + address);
 		self.connection = new WebSocket(address);
 		self.connection.onopen = function (e) {
-			self.isConnected = true;
+			// opened but wait initialize message
+			// so do nothing for this event
 		};
 		self.connection.onerror = function (e) {
 			console.log('onerror', e);
@@ -329,9 +330,11 @@ Polymer({
 			self.set('status.machinePosition', res.status.machinePosition);
 
 			self.set('lastAlarm', res.lastAlarm);
-			if (self.status.state == 'Alarm') {
-				self.alarmDialog.refit();
-				self.alarmDialog.open();
+			if (res.lastAlarm) {
+				if (self.status.state == 'Alarm') {
+					self.alarmDialog.refit();
+					self.alarmDialog.open();
+				}
 			}
 
 			if (res.lastFeedback) {
@@ -339,6 +342,8 @@ Polymer({
 				feedback.text = res.lastFeedback;
 				feedback.show();
 			}
+
+			self.isConnected = true;
 		} else
 		if (res.type === 'startup') {
 			self.initialize();

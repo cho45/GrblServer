@@ -7,6 +7,8 @@ export const STATE_HOME  = "Home";
 export const STATE_ALARM = "Alerm";
 export const STATE_CHECK = "Check";
 export const STATE_DOOR  = "Door";
+// Special state for disconnected
+export const STATE_UNKNOWN = "Unknown";
 
 const MESSAGE_STARTUP  = /^Grbl (\d\.\d)(.)/;
 const MESSAGE_OK       = /^ok$/;
@@ -27,7 +29,7 @@ interface GrblPosition {
 	z : number;
 }
 
-export interface GrblError {
+export interface GrblSerialPortError {
 	message: string;
 }
 
@@ -116,6 +118,8 @@ export class GrblLineParserResultStatus extends GrblLineParserResult {
 	plannerBufferCount: number;
 	rxBufferCount: number;
 
+	static UNKNOWN = new GrblLineParserResultStatus(null);
+
 	static parse(line: string) {
 		if (!MESSAGE_STATUS.test(line)) return null;
 
@@ -165,7 +169,7 @@ export class GrblLineParserResultStatus extends GrblLineParserResult {
 
 	constructor(raw: string) {
 		super(raw);
-		this.state = STATE_IDLE;
+		this.state = STATE_UNKNOWN;
 		this.machinePosition = { x: 0, y: 0, z: 0};
 		this.workingPosition = { x: 0, y: 0, z: 0};
 	}
@@ -241,7 +245,7 @@ export class Grbl extends events.EventEmitter {
 
 	constructor(serialport: SerialPort) {
 		super();
-		this.status = new GrblLineParserResultStatus(null);
+		this.status = GrblLineParserResultStatus.UNKNOWN;
 		this.serialport = serialport;
 		this.parser = new GrblLineParser();
 		this.isOpened = false;
@@ -260,7 +264,7 @@ export class Grbl extends events.EventEmitter {
 		return new Promise( (resolve, reject) => {
 			this.serialport.open( (err) => {
 				if (err) {
-					this.emit('error', <GrblError>{ message: 'error on opening serialport' });
+					this.emit('error', <GrblSerialPortError>{ message: 'error on opening serialport' });
 					reject(err);
 					return;
 				}
@@ -272,12 +276,12 @@ export class Grbl extends events.EventEmitter {
 				});
 				this.serialport.on("close", () => {
 					if (!this.isClosing) {
-						this.emit('error', <GrblError>{ message: 'unexpected close on the serialport' });
+						this.emit('error', <GrblSerialPortError>{ message: 'unexpected close on the serialport' });
 					}
 					this.destroy();
 				});
 				this.serialport.on("error", (err) => {
-					this.emit('error', <GrblError>{ message: 'unexpected error on the serialport' });
+					this.emit('error', <GrblSerialPortError>{ message: 'unexpected error on the serialport' });
 					this.destroy();
 				});
 
@@ -318,6 +322,8 @@ export class Grbl extends events.EventEmitter {
 		if (this.isOpened) {
 			this.isOpened = false;
 			this.stopQueryStatus();
+			this.status = GrblLineParserResultStatus.UNKNOWN;
+			this.emit("statuschange", this.status);
 		}
 	}
 

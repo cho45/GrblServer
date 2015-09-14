@@ -12,6 +12,8 @@ exports.STATE_HOME = "Home";
 exports.STATE_ALARM = "Alerm";
 exports.STATE_CHECK = "Check";
 exports.STATE_DOOR = "Door";
+// Special state for disconnected
+exports.STATE_UNKNOWN = "Unknown";
 var MESSAGE_STARTUP = /^Grbl (\d\.\d)(.)/;
 var MESSAGE_OK = /^ok$/;
 var MESSAGE_ERROR = /^error:(.+)$/;
@@ -133,7 +135,7 @@ var GrblLineParserResultStatus = (function (_super) {
     __extends(GrblLineParserResultStatus, _super);
     function GrblLineParserResultStatus(raw) {
         _super.call(this, raw);
-        this.state = exports.STATE_IDLE;
+        this.state = exports.STATE_UNKNOWN;
         this.machinePosition = { x: 0, y: 0, z: 0 };
         this.workingPosition = { x: 0, y: 0, z: 0 };
     }
@@ -187,6 +189,7 @@ var GrblLineParserResultStatus = (function (_super) {
             this.workingPosition.z === other.workingPosition.z;
         return ret;
     };
+    GrblLineParserResultStatus.UNKNOWN = new GrblLineParserResultStatus(null);
     return GrblLineParserResultStatus;
 })(GrblLineParserResult);
 exports.GrblLineParserResultStatus = GrblLineParserResultStatus;
@@ -220,7 +223,7 @@ var Grbl = (function (_super) {
     __extends(Grbl, _super);
     function Grbl(serialport) {
         _super.call(this);
-        this.status = new GrblLineParserResultStatus(null);
+        this.status = GrblLineParserResultStatus.UNKNOWN;
         this.serialport = serialport;
         this.parser = new GrblLineParser();
         this.isOpened = false;
@@ -293,6 +296,8 @@ var Grbl = (function (_super) {
         if (this.isOpened) {
             this.isOpened = false;
             this.stopQueryStatus();
+            this.status = GrblLineParserResultStatus.UNKNOWN;
+            this.emit("statuschange", this.status);
         }
     };
     Grbl.prototype.getConfig = function () {
