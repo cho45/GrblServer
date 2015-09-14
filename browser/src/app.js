@@ -96,6 +96,11 @@ Polymer({
 			value: {}
 		},
 
+		progress : {
+			type: Object,
+			computed: 'computeProgress(gcode.sent.length, gcode.remain.length, gcode.*)'
+		},
+
 		isBatchMode: {
 			type: Boolean,
 			computed: 'computeBatchMode(gcode.startedTime, gcode.finishedTime, gcode)'
@@ -730,19 +735,24 @@ Polymer({
 		}
 	},
 
-	progress : function () {
+	computeProgress : function () {
 		if (!this.gcode) return 0;
+		var progress = {
+		};
 		try {
-			var sent = this.gcode.durations.slice(0, this.gcode.sent.length).reduce(function (i, r) {
+			progress.sentTime = this.gcode.durations.slice(0, this.gcode.sent.length).reduce(function (i, r) {
 				return i + r;
 			});
-			var ret = sent / this.gcode.total * 100;
-			console.log('progress','sent', sent, 'total', this.gcode.total, '=', ret, '%');
-			return ret;
+			progress.remainTime = this.gcode.total - progress.sentTime;
+			progress.percentRaw = progress.sentTime / this.gcode.total * 100;
+			console.log('progress','total', this.gcode.total, '=', progress);
 		} catch (e) {
 			console.log(e);
-			return (this.gcode.sent.length / (this.gcode.total) * 100);
+			progress.percentRaw = (this.gcode.sent.length / (this.gcode.total) * 100);
 		}
+		progress.percent = Math.round(progress.percentRaw);
+		progress.elapsed = (new Date().getTime() - this.gcode.startedTime) / 1000;
+		return progress;
 	},
 
 	_settingsChanged : function (change) {

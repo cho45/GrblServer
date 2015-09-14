@@ -5,6 +5,7 @@
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="../bower_components/iron-icons/av-icons.html">
 <link rel="import" href="../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
@@ -36,6 +37,22 @@
 			margin: 0 auto;
 		}
 
+		.main-container {
+			height: 100%;
+			width: 100%;
+			padding: 0;
+			margin: 0;
+			@apply(--layout-vertical);
+		}
+
+		paper-material {
+			margin: 10px;
+		}
+
+		paper-tabs[align-bottom] {
+			box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.15);
+		}
+
 		paper-tabs {
 			background-color: #00bcd4;
 			color: #fff;
@@ -50,7 +67,55 @@
 			background: var(--paper-grey-100);
 		}
 
-		table tr {
+		.status {
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+
+		.status div {
+			display: inline-block;
+		}
+
+		.status .title {
+			height: 100%;
+			padding: 12px;
+			color: #fff;
+			background: var(--paper-blue-grey-300);
+			font-size: 14px;
+		}
+
+		.status .title.Idle {
+		}
+
+		.status .title.Alarm {
+			background: var(--paper-red-800);
+		}
+
+		.status .title.Run {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Hold {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Home {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Door {
+			background: var(--paper-yellow-800);
+		}
+
+		.status .title.Check {
+		}
+
+		.status .title iron-icon {
+			padding: 5px;
+			margin-top: -2px;
+		}
+
+		.status .value {
 		}
 
 		.coords-container {
@@ -63,6 +128,7 @@
 			line-height: 20px;
 			color: #333;
 			width: 100%;
+			border-spacing: 0;
 		}
 
 		.coords th,
@@ -137,69 +203,6 @@
 		.axis-label {
 			color: #999;
 		}
-
-		.status-container {
-			width: 800px;
-			margin: 0 auto;
-		}
-
-		.status {
-		}
-
-		.status div {
-			display: inline-block;
-		}
-
-		.status .title {
-			height: 100%;
-			padding: 12px;
-			color: #fff;
-			background: var(--paper-blue-grey-300);
-			font-size: 14px;
-		}
-
-		.status .title.Idle {
-		}
-
-		.status .title.Alarm {
-			background: var(--paper-red-800);
-		}
-
-		.status .title.Run {
-			background: var(--paper-yellow-800);
-		}
-
-		.status .title.Hold {
-			background: var(--paper-yellow-800);
-		}
-
-		.status .title.Home {
-			background: var(--paper-yellow-800);
-		}
-
-		.status .title.Door {
-			background: var(--paper-yellow-800);
-		}
-
-		.status .title.Check {
-		}
-
-		.status .title iron-icon {
-			padding: 5px;
-			margin-top: -2px;
-		}
-
-		.status .value {
-		}
-
-		paper-material {
-			margin: 10px;
-		}
-
-		paper-tabs[align-bottom] {
-			box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.15);
-		}
-
 
 		#command-history {
 			overflow-y: scroll;
@@ -313,11 +316,23 @@
 			};
 		}
 
-		@media (max-width: 1280px) {
+		@media (min-width: 1280px) {
+			.row {
+				@apply(--layout-horizontal);
+			}
 
+		}
+
+		@media (max-width: 1280px) {
 			:host {
+				width: 100%;
 				font-size: 12px;
 				padding-bottom: 100px;
+			}
+
+			paper-material {
+				margin: 0;
+				width: 100%;
 			}
 
 			paper-button {
@@ -330,13 +345,12 @@
 				margin-top: -2px;
 			}
 
-			.status-container {
-				width: 100%;
+			.status {
+				font-size: 10px;
 			}
 
 			.status .title {
 				padding: 6px;
-				font-size: 10px;
 			}
 
 			.coords-container {
@@ -344,8 +358,6 @@
 			}
 
 			.coords {
-				font-size: 11px;
-				line-height: 11px;
 			}
 
 			.coords th,
@@ -387,13 +399,18 @@
 			}
 
 			.command-container {
-				margin-bottom: 100px;
+				height: 100vh;
+			}
+
+			.preview {
+				height: 50vh;
+				width: 100vh;
 			}
 		}
 	</style>
 	<template>
-		<div class="layout vertical" style="height: 100%">
-			<div class="layout horizontal wrap">
+		<div class="main-container">
+			<div class="row">
 				<paper-material class="flex-9 self-stretch status layout horizontal" elevation="1">
 					<div class="flex">
 						<div class$="{{sprintf('title %s', status.state)}}">
@@ -451,7 +468,7 @@
 				</paper-material>
 			</div>
 
-			<div class="layout horizontal wrap">
+			<div class="row">
 				<paper-material class$="{{conditional(positioningSystem, 'coords-container machine', 'coords-container working')}}">
 					<table class="coords">
 						<tr>
@@ -497,7 +514,7 @@
 				</paper-material>
 
 				<paper-material class="flex macros" disabled$="{{equals(status.state, 'Unknown')}}">
-					<div class="layout horizontal">
+					<div class="row">
 						<div class="jog relative">
 							<table>
 								<tr>
@@ -588,7 +605,7 @@
 			</div>
 
 
-			<div class="flex layout horizontal wrap">
+			<div class="row flex">
 				<paper-material class="flex command-container layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
 					<paper-tabs selected="{{commandTab}}" noink no-slide>
 						<paper-tab>
@@ -621,7 +638,7 @@
 						<div class="flex layout vertical" style="padding: 0 16px">
 							<template is="dom-if" if="{{!gcode}}">
 								<div id="upload-file" style="self-center">
-									<div style="padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
+									<div style="margin-top: 50px; padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
 										Drag and Drop here
 										<div style="font-size: 50%">or click to open select dialogue</div>
 									</div>
@@ -633,20 +650,25 @@
 									<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
 									<template is="dom-if" if="{{!isBatchMode}}">
 										<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
-											<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file"></paper-icon-button>
+											<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file" disabled="{{isBatchMode}}"></paper-icon-button>
 										</div>
 									</template>
-									<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly></paper-input>
-									<paper-input class="flex" label="Time" value="{{duration(gcode.total)}}" readonly></paper-input>
-									<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly></paper-input>
+									<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly always-float-label></paper-input>
+									<paper-input class="flex" label="Time" value="{{duration(gcode.total)}}" readonly always-float-label></paper-input>
+									<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly always-float-label></paper-input>
 								</div>
 								<!-- div class="layout horizontal">
-									<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly></paper-input>
-									<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly></paper-input>
-									<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly></paper-input>
+									<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly always-float-label></paper-input>
+									<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly always-float-label></paper-input>
+									<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly always-float-label></paper-input>
 								</div -->
 								<template is="dom-if" if="{{gcode.startedTime}}">
-									<paper-progress value="{{progress(gcode.sent.length, gcode.remain.length, gcode.*)}}" style="width: 100%"></paper-progress>
+
+									<div style="font-size: 10px; color: #666; height: 10px; line-height: 10px; text-align: center">
+										<span>{{progress.percent}}</span>%
+										(<span>{{duration(progress.elapsed)}}</span> elapsed, <span>{{duration(progress.remainTime)}}</span> remain)
+									</div>
+									<paper-progress value="{{progress.percentRaw}}" style="display: block; width: 100%"></paper-progress>
 								</template>
 								<template is="dom-if" if="{{!gcode.startedTime}}">
 									<div style="vertical-align: baseline; text-align: right">
