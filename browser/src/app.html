@@ -27,6 +27,7 @@
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="./cnc-gcode.html">
+<link rel="import" href="./app-jog.html">
 
 <dom-module id="my-app">
 	<style is="custom-style">
@@ -184,29 +185,6 @@
 
 		.macros {
 			padding: 16px;
-		}
-
-		.jog {
-			font-size: 12px;
-		}
-
-		.jog table {
-			width: 300px;
-			margin: 8px auto;
-		}
-
-		.jog iron-icon {
-			width: 32px;
-			height: 32px;
-		}
-
-		.jog paper-button {
-			white-space: nowrap;
-			background: #fff;
-		}
-
-		.axis-label {
-			color: #999;
 		}
 
 		#command-history {
@@ -384,11 +362,6 @@
 				background: #fff;
 			}
 
-			.jog iron-icon {
-				width: 24px;
-				height: 24px;
-			}
-
 			paper-material.actions {
 				position: fixed;
 				bottom: 0;
@@ -524,57 +497,10 @@
 
 				<paper-material class="flex macros" disabled$="{{equals(status.state, 'Unknown')}}">
 					<div class="row">
-						<div class="jog relative">
-							<table>
-								<tr>
-									<td>
-									</td>
-									<td>
-										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="y" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
-											<div class="axis-label">+Y</div>
-										</paper-button>
-									</td>
-									<td>
-									</td>
-									<td>
-										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="z" data-direction="+1" ><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
-											<div class="axis-label">+Z</div>
-										</paper-button>
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="x" data-direction="-1" ><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
-											<span class="axis-label" style="margin-right: 10px">-X</span>
-										</paper-button>
-									</td>
-									<td>
-									</td>
-									<td>
-										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="x" data-direction="+1" >
-											<span class="axis-label" style="margin-left: 10px">+X</span>
-											<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
-									</td>
-									<td>
-									</td>
-								</tr>
-								<tr>
-									<td>
-									</td>
-									<td>
-										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="y" data-direction="-1" >
-											<div class="axis-label">-Y</div>
-											<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
-									</td>
-									<td>
-									</td>
-									<td>
-										<paper-button noink disabled="{{isBatchMode}}" raised data-axis="z" data-direction="-1" >
-											<div class="axis-label">-Z</div>
-											<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
-									</td>
-								</tr>
-							</table>
+						<div class="flex-2 jog">
+							<div style="height: 250px">
+								<my-app-jog id="jog" disabled="{{isBatchMode}}"></my-app-jog>
+							</div>
 							<div>
 								<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right" disabled="{{isBatchMode}}">
 									<paper-button noink class="dropdown-trigger" style="text-transform: none">
@@ -589,7 +515,7 @@
 								</paper-menu-button>
 							</div>
 						</div>
-						<div class="flex">
+						<div class="flex-3">
 							<div class="preset-positions">
 								<paper-button noink on-tap="commandHoming" disabled="{{isBatchMode}}">
 									<iron-icon icon="icons:home"></iron-icon>

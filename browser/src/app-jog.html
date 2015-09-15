@@ -1,0 +1,195 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-fit-behavior/iron-fit-behavior.html ">
+<link rel="import" href="../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/hardware-icons.html">
+<link rel="import" href="../bower_components/iron-icons/device-icons.html">
+<link rel="import" href="../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="../bower_components/iron-icons/av-icons.html">
+
+<dom-module id="my-app-jog">
+	<style is="custom-style">
+		:host {
+			display: block;
+			width: 100%;
+			height: 100%;
+			font-size: 5vh;
+			line-height: 5vh;
+		}
+
+		.jog-button-container {
+			position: relative;
+			width: 100%;
+			height: 100%;
+		}
+
+		.jog-button-container .button {
+			position: absolute;
+			width: 25%;
+			height: 33%;
+			padding: 5px;
+			box-sizing: border-box;
+		}
+
+		.jog-button-container .button paper-button ,
+		.jog-button-container .button paper-button /deep/ paper-material {
+			display: block;
+			width: 100%;
+			height: 100%;
+			border-box: border;
+			padding: 0;
+			margin: 0;
+		}
+
+		.jog-button-container .button .label {
+			display: inline-block;
+			position: relative;
+			top: 50%;
+			transform: translateY(-50%);
+			white-space: nowrap;
+		}
+
+		.jog-button-container .button .label .axis-label {
+			color: #ddd;
+			font-weight: bold;
+		}
+
+		.jog-button-container .button .label iron-icon {
+			width: 50%;
+			height: 50%;
+		}
+
+		#y-positive {
+			top: 0;
+			left: 25%;
+		}
+
+		#z-positive {
+			top: 0;
+			left: 75%;
+		}
+
+		#x-negative {
+			top: 33%;
+			left: 0;
+		}
+
+		#x-positive {
+			top: 33%;
+			left: 50%;
+		}
+
+		#y-negative {
+			top: 66%;
+			left: 25%;
+		}
+
+		#z-negative {
+			top: 66%;
+			left: 75%;
+		}
+	</style>
+	<template>
+		<div class="jog-button-container">
+			<div class="button" id="y-positive">
+				<paper-button disabled="[[disabled]]" raised data-axis="y" data-direction="+1" >
+					<div class="label">
+						<iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+						<div class="axis-label">+Y</div>
+					</div>
+				</paper-button>
+			</div>
+			<div class="button" id="z-positive">
+				<paper-button gcnoink disabled="[[disabled]]" raised data-axis="z" data-direction="+1" >
+					<div class="label">
+						<iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+						<div class="axis-label">+Z</div>
+					</div>
+				</paper-button>
+			</div>
+			<div class="button" id="x-negative">
+				<paper-button gcnoink disabled="[[disabled]]" raised data-axis="x" data-direction="-1" >
+					<div class="label">
+						<iron-icon icon="hardware:keyboard-arrow-left"></iron-icon> 
+						<span class="axis-label" style="margin-right: 10px">-X</span>
+					</div>
+				</paper-button>
+			</div>
+			<div class="button" id="x-positive">
+				<paper-button gcnoink disabled="[[disabled]]" raised data-axis="x" data-direction="+1" >
+					<div class="label">
+						<span class="axis-label" style="margin-left: 10px">+X</span>
+						<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon>
+					</div>
+				</paper-button>
+			</div>
+			<div class="button" id="y-negative">
+				<paper-button gcnoink disabled="[[disabled]]" raised data-axis="y" data-direction="-1" >
+					<div class="label">
+						<div class="axis-label">-Y</div>
+						<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon>
+					</div>
+				</paper-button>
+			</div>
+			<div class="button" id="z-negative">
+				<paper-button gcnoink disabled="[[disabled]]" raised data-axis="z" data-direction="-1" >
+					<div class="label">
+						<div class="axis-label">-Z</div>
+						<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon>
+					</div>
+				</paper-button>
+			</div>
+		</div>
+	</template>
+</dom-module>
+<script>
+(function() {
+	Polymer({
+		is: 'my-app-jog',
+
+		behaviors: [
+			Polymer.IronFitBehavior
+		],
+
+		properties: {
+			disabled: {
+				type: Boolean,
+				value: false
+			}
+		},
+
+		listeners: {
+			down: '_down',
+			up: '_up',
+		},
+
+		ready : function () {
+		},
+
+		attached : function () {
+			this.style.fontSize = this.offsetWidth / 4 * 0.1 + "px";
+			this.style.lineHeight = this.style.fontSize;
+		},
+
+		_down : function (e) {
+			var target = e.path.filter(function (i) {
+				return i.getAttribute && i.getAttribute('data-axis');
+			})[0];
+			if (!target) return;
+
+			var axis = target.getAttribute('data-axis').toUpperCase();
+			var direction = +target.getAttribute('data-direction');
+			this.fire('start', {
+				axis: axis,
+				direction: direction
+			});
+		},
+
+		_up : function (e) {
+			this.fire('end', {});
+		}
+	});
+})();
+</script>

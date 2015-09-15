@@ -166,18 +166,18 @@ Polymer({
 				e.preventDefault();
 			}, false);
 
-			var touch  = false;
-			Array.prototype.forEach.call(document.querySelectorAll(".jog paper-button"), function (button) {
-				var axis = button.getAttribute('data-axis');
-				var direction = +button.getAttribute('data-direction');
-				if (!axis) return;
-				axis = axis.toUpperCase();
+			var touch = false, moving = false;
+			self.$.jog.addEventListener('start', function (e) {
+				// ignore multiple taps while moving
+				if (!moving) {
+					e.preventDefault();
 
-				var moving = false;
+					var axis = e.detail.axis;
+					var direction = e.detail.direction;
 
-				var move = function () {
-					var step = self.jogStep * direction;
+					touch = true;
 					moving = true;
+					var step = self.jogStep * direction;
 					return Promise.all([
 						// move
 						self.request('command', { command: 'G21 G91 G0 ' + axis + step }),
@@ -219,15 +219,25 @@ Polymer({
 							moving = false;
 						}
 					});
-				};
+				}
+			});
+
+			self.$.jog.addEventListener('end', function (e) {
+				touch = false;
+			});
+
+			/*
+			var touch  = false;
+			Array.prototype.forEach.call(document.querySelectorAll(".jog paper-button"), function (button) {
+				var axis = button.getAttribute('data-axis');
+				var direction = +button.getAttribute('data-direction');
+				if (!axis) return;
+				axis = axis.toUpperCase();
+
+				var moving = false;
+
 
 				var touchstart = function (e) {
-					// ignore multiple taps while moving
-					if (!moving) {
-						e.preventDefault();
-						touch = true;
-						move();
-					}
 				};
 
 				if (typeof ontouchstart !== "undefined") {
@@ -247,6 +257,7 @@ Polymer({
 			} else {
 				window.addEventListener("mouseup", touchend);
 			}
+			*/
 
 			document.querySelector('.command-container iron-pages').addEventListener('iron-resize', function (e) {
 				var viewer = document.getElementById('viewer');
