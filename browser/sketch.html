@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<title>Sketch</title>
+		<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+		<link rel="import" href="src/app-jog.html">
+			<link rel="import" href="bower_components/paper-progress/paper-progress.html">
+	</head>
+	<body class="fullbleed">
+		<div style="width: 500px">
+			<div style="font-size: 10px; color: #666; height: 10px; line-height: 10px; text-align: center">
+				10% (10min elapsed, 10min remain)
+			</div>
+			<paper-progress style="display: block; width: 100%"></paper-progress>
+		</div>
+		<my-app-jog></my-app-jog>
+	</body>
+</html>
