@@ -303,13 +303,6 @@
 			};
 		}
 
-		@media (min-width: 1280px) {
-			.row {
-				@apply(--layout-horizontal);
-			}
-
-		}
-
 		@media (max-width: 1280px) {
 			:host {
 				width: 100%;
@@ -390,9 +383,16 @@
 
 			.preview {
 				height: 50vh;
-				width: 100vh;
+				width: 100vw;
 			}
 		}
+
+		@media (min-width: 1280px) {
+			.row {
+				@apply(--layout-horizontal);
+			}
+		}
+
 	</style>
 	<template>
 		<div class="main-container">
