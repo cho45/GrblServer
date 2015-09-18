@@ -466,10 +466,19 @@
 					<div class="flex">
 					</div>
 
-					<paper-button noink class="action-pause" on-tap="commandPause">
-						<iron-icon icon="av:pause"></iron-icon>
-						Pause
-					</paper-button>
+
+					<template is="dom-if" if="{{equals(status.state, 'Hold')}}">
+						<paper-button noink class="action-resume" on-tap="commandResume">
+							<iron-icon icon="av:play-arrow"></iron-icon>
+							Resume
+						</paper-button>
+					</template>
+					<template is="dom-if" if="{{!equals(status.state, 'Hold')}}">
+						<paper-button noink class="action-pause" on-tap="commandPause">
+							<iron-icon icon="av:pause"></iron-icon>
+							Pause
+						</paper-button>
+					</template>
 
 					<paper-button noink class="action-reset" on-tap="commandReset">
 						<iron-icon icon="icons:cancel"></iron-icon>

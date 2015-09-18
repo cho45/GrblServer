@@ -180,6 +180,9 @@ Polymer({
 			var touch = false, moving = false;
 			self.$.jog.addEventListener('start', function (e) {
 				// ignore multiple taps while moving
+				var onerror = function () {
+					moving = false;
+				};
 				if (!moving) {
 					e.preventDefault();
 
@@ -209,8 +212,8 @@ Polymer({
 								step = maxStep * direction;
 							}
 							var feed = Math.abs(60 * step / interval);
-							self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
-							self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
+							self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step }).catch(onerror);
+							self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step }).catch(onerror);
 
 							var next = 0, time = new Date().getTime();
 							(function repeat () {
@@ -219,7 +222,7 @@ Polymer({
 								next = interval * 1000 + diff;
 								console.log('append queue', now - time, diff, next);
 								if (touch) {
-									self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step });
+									self.request('command', { command: 'G21 G91 G1 F' + feed + ' ' + axis + step }).catch(onerror);
 									time = now;
 									setTimeout(repeat, next);
 								} else {
@@ -229,7 +232,7 @@ Polymer({
 						} else {
 							moving = false;
 						}
-					});
+					}).catch(onerror);
 				}
 			});
 
@@ -332,6 +335,7 @@ Polymer({
 				} else {
 					callback.resolve(res.result);
 				}
+				delete self._callbacks[res.id];
 			} else {
 				if (res.error) {
 					self.set('error', [res.error.code, res.error.message, res.error.data].join(' : '));
@@ -346,6 +350,12 @@ Polymer({
 		var self = this;
 		self.set('error', self.properties.error.value);
 		self.set('status', self.properties.status.value);
+		for (var key in self._callbacks) if (self._callbacks.hasOwnProperty(key)) {
+			var val = self._callbacks[key];
+			console.log('reject _callbacks');
+			val.reject('resetted');
+		}
+		self._callbacks = {};
 	},
 
 	processNotification : function (res) {
