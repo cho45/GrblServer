@@ -20,6 +20,11 @@ Polymer({
 			value: false
 		},
 
+		selectedMenu: {
+			type: Number,
+			value: 0
+		},
+
 		commandTab: {
 			type: Number,
 			value: 0
