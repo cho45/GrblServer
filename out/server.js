@@ -12,6 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var websocket = require('websocket');
 var grbl_1 = require('./grbl');
 var http = require('http');
+var fs = require('fs');
 var serialport = require("serialport");
 var config = require("config");
 var static = require("node-static");
@@ -85,6 +86,7 @@ var GrblServer = (function () {
             serialPort: config.get('serialPort'),
             serialBaud: config.get('serialBaud'),
         };
+        this.rev = fs.readFileSync('out/rev.txt', 'utf-8');
         console.log('Launching with this config: ');
         console.log(this.serverConfig);
     };
@@ -197,6 +199,8 @@ var GrblServer = (function () {
                 lastAlarm: this.grbl.lastAlarm ? this.grbl.lastAlarm.message : null,
                 lastFeedback: this.grbl.lastFeedback ? this.grbl.lastFeedback.message : null,
                 status: this.grbl.status,
+                serverRev: this.rev,
+                grblVersion: this.grblVersion,
             }
         });
         if (this.grblConfig) {
@@ -323,10 +327,12 @@ var GrblServer = (function () {
         this.grbl.open();
         this.grbl.on('startup', function (res) {
             _this.initializeGrbl();
+            _this.grblVersion = res.version;
             _this.sendBroadcastMessage({
                 id: null,
                 result: res.toObject({
                     type: 'startup',
+                    version: res.version,
                 }),
             });
             _this.sendBroadcastMessage({

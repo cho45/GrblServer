@@ -9,6 +9,7 @@ import * as websocket from 'websocket';
 import {
 	Grbl,
 	STATE_IDLE,
+	GrblVersion,
 	GrblLineParserResultStartup,
 	GrblLineParserResultOk,
 	GrblLineParserResultError,
@@ -19,6 +20,7 @@ import {
 	GrblSerialPortError,
 } from './grbl';
 import http = require('http');
+import fs = require('fs');
 import serialport = require("serialport");
 import config = require("config");
 import static = require("node-static");
@@ -144,6 +146,9 @@ class GCode {
 }
 
 class GrblServer {
+	rev: String;
+	grblVersion: GrblVersion;
+
 	httpServer : http.Server;
 	wsServer : websocket.server;
 	sessions : Array<websocket.connection>;
@@ -167,6 +172,7 @@ class GrblServer {
 			serialPort: config.get('serialPort'),
 			serialBaud: config.get('serialBaud'),
 		};
+		this.rev = fs.readFileSync('out/rev.txt', 'utf-8');
 		console.log('Launching with this config: ');
 		console.log(this.serverConfig);
 	}
@@ -289,6 +295,8 @@ class GrblServer {
 				lastAlarm: this.grbl.lastAlarm ? this.grbl.lastAlarm.message : null,
 				lastFeedback: this.grbl.lastFeedback ? this.grbl.lastFeedback.message : null,
 				status: this.grbl.status,
+				serverRev: this.rev,
+				grblVersion: this.grblVersion,
 			}
 		});
 
@@ -424,10 +432,12 @@ class GrblServer {
 
 		this.grbl.on('startup', (res: GrblLineParserResultStartup) => {
 			this.initializeGrbl();
+			this.grblVersion = res.version;
 			this.sendBroadcastMessage({
 				id: null,
 				result: res.toObject({
 					type: 'startup',
+					version: res.version,
 				}),
 			});
 			this.sendBroadcastMessage({

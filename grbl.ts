@@ -18,12 +18,12 @@ const MESSAGE_FEEDBACK = /^\[(.+)\]$/;
 const MESSAGE_STATUS   = /^<(.+)>$/;
 const MESSAGE_DOLLAR   = /^\$/;
 
-interface GrblVersion {
+export interface GrblVersion {
 	major: number;
 	minor: string;
 }
 
-interface GrblPosition {
+export interface GrblPosition {
 	x : number;
 	y : number;
 	z : number;

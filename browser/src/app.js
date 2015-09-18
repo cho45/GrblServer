@@ -10,6 +10,19 @@ Polymer({
 			}
 		},
 
+		serverVersion: {
+			type: String
+		},
+
+		clientVersion: {
+			type: String
+		},
+
+		grblVersion: {
+			type: String
+		},
+
+
 		config : {
 			type: Object,
 			value: null
@@ -268,6 +281,13 @@ Polymer({
 		self.async(function () {
 			self.openWebSocket();
 		});
+
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "./rev.txt", true);
+		xhr.onload = function () {
+			self.set('clientVersion', xhr.responseText);
+		};
+		xhr.send();
 	},
 
 	openWebSocket : function () {
@@ -329,7 +349,7 @@ Polymer({
 	},
 
 	processNotification : function (res) {
-		// console.log('processNotification', res);
+		console.log('processNotification', res);
 		var self = this;
 		if (res.type === 'init') {
 			console.log('init');
@@ -337,7 +357,8 @@ Polymer({
 			self.set('status.state', res.status.state || 'Unknown');
 			self.set('status.workingPosition', res.status.workingPosition);
 			self.set('status.machinePosition', res.status.machinePosition);
-
+			self.set('grblVersion', String(res.grblVersion.major) + res.grblVersion.minor);
+			self.set('serverVersion', res.serverRev);
 			self.set('lastAlarm', res.lastAlarm);
 			if (res.lastAlarm) {
 				if (self.status.state == 'Alarm') {
@@ -356,6 +377,7 @@ Polymer({
 		if (res.type === 'startup') {
 			self.initialize();
 			self.addCommandHistory('<<', res.raw);
+			self.set('grblVersion', res.version.majar + "." + res.version.minor);
 		} else
 		if (res.type === 'config') {
 			console.log('update config', res.config);
