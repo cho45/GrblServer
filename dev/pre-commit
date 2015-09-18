@@ -2,8 +2,9 @@
 
 make tsc
 
-git add out
 git rev-parse --short HEAD > out/rev.txt
 git rev-parse --short HEAD > browser/rev.txt
+git add out
+git add browser/rev.txt
 
 exit 0
