@@ -366,7 +366,7 @@
 			}
 
 			#macros {
-				min-width: 180px;
+				min-width: 240px;
 				min-height: 100px;
 			}
 
@@ -407,7 +407,7 @@
 			}
 
 			#preview {
-				min-width: 320px;
+				min-width: 500px;
 				min-height: 320px;
 			}
 		}
@@ -547,7 +547,7 @@
 							</div>
 						</div>
 
-						<div id="command-upload" class="flex command-container layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
+						<div id="command-upload" class="flex-2 command-container layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
 							<paper-tabs selected="{{commandTab}}" noink no-slide>
 								<paper-tab>
 									<iron-icon icon="hardware:keyboard"></iron-icon>
@@ -743,7 +743,7 @@
 
 		</paper-drawer-panel>
 
-		<paper-dialog id="alarm" modal style="min-width: 200px;">
+		<paper-dialog id="alarm" modal style="min-width: 310px;">
 			<h2>ALARM</h2>
 			<p>{{lastAlarm}}</p>
 			<div class="buttons">
@@ -754,7 +754,7 @@
 			</div>
 		</paper-dialog>
 
-		<paper-dialog id="alarm-reset" modal style="min-width: 200px;">
+		<paper-dialog id="alarm-reset" modal style="min-width: 310px; min-height: 200px">
 			<h2>ALARM</h2>
 			<div class="" style="font-weight: bold">
 				<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
