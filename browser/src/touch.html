@@ -44,6 +44,11 @@
 			margin: 0;
 		}
 
+		[disabled] {
+			opacity: 0.3;
+		}
+
+
 		.nav {
 			border-right: 1px solid #ccc;
 		}
@@ -132,10 +137,14 @@
 		}
 
 		#mainContent {
+			overflow: hidden;
+		}
+
+		#coords {
+			box-sizing: border-box;
 		}
 
 		.coords-container {
-			position: relative;
 		}
 
 		.coords {
@@ -192,8 +201,113 @@
 			background: #fff;
 		}
 
-		#mainContent {
-			overflow: hidden;
+
+		#jogging {
+			box-sizing: border-box;
+		}
+
+		#macros {
+			box-sizing: border-box;
+			padding: 16px;
+		}
+
+		#macros paper-button {
+			margin: 0 8px 8px 0;
+		}
+
+		#command-upload {
+			box-sizing: border-box;
+		}
+
+		#command-history {
+			overflow-y: scroll;
+			font-family: monospace;
+			font-size: 12px;
+			line-height: 12px;
+		}
+
+		#command-history .line {
+			font-size: 12px;
+			padding: 5px;
+		}
+
+		#command-history .line:nth-child(even) {
+			background: var(--paper-grey-100);
+		}
+		
+		#command-history .line:nth-child(odd) {
+		}
+
+		.gcode {
+			font-family: monospace;
+			font-size: 12px;
+			line-height: 12px;
+		}
+
+		.gcode .line {
+			padding: 6px;
+		}
+
+		.gcode .line:nth-child(even) {
+			background: var(--paper-grey-100);
+		}
+
+		.gcode .line:nth-child(odd) {
+		}
+
+		.gcode .line.sent:nth-child(even) {
+			background: var(--paper-grey-500);
+			color: var(--paper-grey-800);
+		}
+
+		.gcode .line.sent:nth-child(odd) {
+			background: var(--paper-grey-400);
+			color: var(--paper-grey-800);
+		}
+
+
+		#preview {
+			box-sizing: border-box;
+		}
+
+		#settingsContent {
+		}
+
+		#settingsContent .body {
+			margin: 0;
+			padding: 0;
+		}
+
+		#settingsContent .body > iron-pages > * {
+			padding: 0;
+		}
+
+		#settingsContent .body > iron-pages > .macros {
+			padding: 0;
+		}
+
+		#settingsContent .body > iron-pages > .macros > * {
+			padding: 0;
+		}
+
+		#settingsContent .body > iron-pages > .macros .list {
+		}
+
+		#settingsContent .body > iron-pages > .macros .edit {
+			margin-right: -16px;
+			padding: 0 16px;
+			background: #efefef;
+			border-left: 1px solid #ccc;
+		}
+
+		#settingsContent .grbl-settings paper-input-container * {
+			font-size: 12px;
+		}
+
+		.uploaded-info paper-input {
+			--paper-input-container-input: {
+				font-size: 12px;
+			};
 		}
 
 		@media all and (orientation: portrait) {
@@ -201,6 +315,15 @@
 				@apply(--layout-vertical);
 				@apply(--layout-fit);
 				@apply(--layout-wrap);
+			}
+
+			#mainContent > * {
+				display: none;
+			}
+
+			#mainContent > #jogging,
+			#mainContent > #coords {
+				display: block;
 			}
 		}
 
@@ -243,12 +366,12 @@
 			}
 
 			#macros {
-				min-width: 320px;
-				min-height: 320px;
+				min-width: 180px;
+				min-height: 100px;
 			}
 
 			#command-upload {
-				min-width: 320px;
+				min-width: 460px;
 				min-height: 320px;
 			}
 
@@ -275,7 +398,7 @@
 
 			#macros {
 				min-width: 320px;
-				min-height: 320px;
+				min-height: 100px;
 			}
 
 			#command-upload {
@@ -293,7 +416,7 @@
 
 	<template>
 
-		<paper-drawer-panel id="drawerPanel" responsive-width="900px">
+		<paper-drawer-panel id="drawerPanel" responsive-width="1600px">
 
 			<div class="nav" drawer>
 				<a on-top="openSettings">
@@ -334,190 +457,288 @@
 					<div id="progressBar" class="bottom fit"></div>
 				</paper-toolbar>
 
-				<div id="mainContent" class="content" style="background: #fff">
-					<div id="coords" class="" style="">
-						<div class="coords-container" disabled$="{{equals(status.state, 'Unknown')}}">
-							<table class="coords">
-								<tr>
-									<th colspan="3" class="heading">Work</th>
-								</tr>
+				<iron-pages class="content fit" selected="{{selectedMenu}}">
+					<div id="mainContent" style="background: #fff">
+						<div id="coords" class="" style="">
+							<div class="coords-container" disabled$="{{equals(status.state, 'Unknown')}}">
+								<table class="coords">
+									<tr>
+										<th colspan="3" class="heading">Work</th>
+									</tr>
 
-								<tr>
-									<th class="axis">X</th>
-									<td class="number">{{formatCoords(status.workingPosition.x)}}</td>
-									<td class="reset"><paper-button noink data-axis="x" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
-								</tr>
-								<tr>
-									<th class="axis">Y</th>
-									<td class="number">{{formatCoords(status.workingPosition.y)}}</td>
-									<td class="reset"><paper-button noink data-axis="y" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
-								</tr>
-								<tr>
-									<th class="axis">Z</th>
-									<td class="number">{{formatCoords(status.workingPosition.z)}}</td>
-									<td class="reset"><paper-button noink data-axis="z" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
-								</tr>
+									<tr>
+										<th class="axis">X</th>
+										<td class="number">{{formatCoords(status.workingPosition.x)}}</td>
+										<td class="reset"><paper-button noink data-axis="x" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+									</tr>
+									<tr>
+										<th class="axis">Y</th>
+										<td class="number">{{formatCoords(status.workingPosition.y)}}</td>
+										<td class="reset"><paper-button noink data-axis="y" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+									</tr>
+									<tr>
+										<th class="axis">Z</th>
+										<td class="number">{{formatCoords(status.workingPosition.z)}}</td>
+										<td class="reset"><paper-button noink data-axis="z" on-tap="resetToZero" disabled="{{isBatchMode}}"><iron-icon icon="settings-backup-restore"></iron-icon></paper-button></td>
+									</tr>
 
-								<tr>
-									<th colspan="3" class="heading">Machine</th>
-								</tr>
+									<tr>
+										<th colspan="3" class="heading">Machine</th>
+									</tr>
 
-								<tr class="machine">
-									<th class="axis">X</th>
-									<td class="number">{{formatCoords(status.machinePosition.x)}}</td>
-									<td class="reset"></td>
-								</tr>
-								<tr class="machine">
-									<th class="axis">Y</th>
-									<td class="number">{{formatCoords(status.machinePosition.y)}}</td>
-									<td class="reset"></td>
-								</tr>
-								<tr class="machine">
-									<th class="axis">Z</th>
-									<td class="number">{{formatCoords(status.machinePosition.z)}}</td>
-									<td class="reset"></td>
-								</tr>
-							</table>
+									<tr class="machine">
+										<th class="axis">X</th>
+										<td class="number">{{formatCoords(status.machinePosition.x)}}</td>
+										<td class="reset"></td>
+									</tr>
+									<tr class="machine">
+										<th class="axis">Y</th>
+										<td class="number">{{formatCoords(status.machinePosition.y)}}</td>
+										<td class="reset"></td>
+									</tr>
+									<tr class="machine">
+										<th class="axis">Z</th>
+										<td class="number">{{formatCoords(status.machinePosition.z)}}</td>
+										<td class="reset"></td>
+									</tr>
+								</table>
+							</div>
 						</div>
-					</div>
 
-					<div id="jogging" class="flex relative">
-						<div class="layout vertical fit">
-							<div class="flex relative">
-								<div class="fit">
-									<app-jog id="jog" disabled="{{isBatchMode}}"></app-jog>
+						<div id="jogging" class="flex relative">
+							<div class="layout vertical fit">
+								<div class="flex relative">
+									<div class="fit">
+										<app-jog id="jog" disabled="{{isBatchMode}}"></app-jog>
+									</div>
+								</div>
+								<div style="height: 45px">
+									<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right" disabled="{{isBatchMode}}">
+										<paper-button noink class="dropdown-trigger" style="text-transform: none">
+											<iron-icon icon="image:straighten"></iron-icon>
+											Step: <span>{{jogStep}}</span> mm
+										</paper-button>
+										<paper-menu class="dropdown-content">
+											<template is="dom-repeat" items="{{jogStepList}}">
+												<paper-item on-tap="changeStep" data-value$="{{item}}">Step: <span>{{item}}</span> mm</paper-item>
+											</template>
+										</paper-menu>
+									</paper-menu-button>
 								</div>
 							</div>
-							<div style="height: 45px">
-								<paper-menu-button style="padding: 0" vertical-align="bottom" horizontal-align="right" disabled="{{isBatchMode}}">
-									<paper-button noink class="dropdown-trigger" style="text-transform: none">
-										<iron-icon icon="image:straighten"></iron-icon>
-										Step: <span>{{jogStep}}</span> mm
-									</paper-button>
-									<paper-menu class="dropdown-content">
-										<template is="dom-repeat" items="{{jogStepList}}">
-											<paper-item on-tap="changeStep" data-value$="{{item}}">Step: <span>{{item}}</span> mm</paper-item>
-										</template>
-									</paper-menu>
-								</paper-menu-button>
-							</div>
 						</div>
-					</div>
 
-					<div id="macros" class="flex">
-						<div class="preset-positions">
-							<paper-button noink on-tap="commandHoming" disabled="{{isBatchMode}}">
-								<iron-icon icon="icons:home"></iron-icon>
-								Homing
-							</paper-button>
-							<paper-button noink on-tap="commandReturn" disabled="{{isBatchMode}}">
-								<iron-icon icon="hardware:keyboard-return"></iron-icon>
-								Return to zero
-							</paper-button>
-							<template is="dom-repeat" items="{{settings.macros}}">
-								<paper-button on-tap="settingsDoMacro" data-item$="{{item.id}}" disabled="{{isBatchMode}}">
-									<iron-icon icon="icons:extension"></iron-icon>
-									<span>{{item.label}}</span>
+						<div id="macros" class="flex">
+							<div class="preset-positions">
+								<paper-button noink on-tap="commandHoming" disabled="{{isBatchMode}}">
+									<iron-icon icon="icons:home"></iron-icon>
+									Homing
 								</paper-button>
-							</template>
+								<paper-button noink on-tap="commandReturn" disabled="{{isBatchMode}}">
+									<iron-icon icon="hardware:keyboard-return"></iron-icon>
+									Return to zero
+								</paper-button>
+								<template is="dom-repeat" items="{{settings.macros}}">
+									<paper-button on-tap="settingsDoMacro" data-item$="{{item.id}}" disabled="{{isBatchMode}}">
+										<iron-icon icon="icons:extension"></iron-icon>
+										<span>{{item.label}}</span>
+									</paper-button>
+								</template>
+							</div>
 						</div>
-					</div>
 
-					<div id="command-upload" class="flex command-container layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
-						<paper-tabs selected="{{commandTab}}" noink no-slide>
-							<paper-tab>
-								<iron-icon icon="hardware:keyboard"></iron-icon>
-								Command Line
-							</paper-tab>
-							<paper-tab>
-								<iron-icon icon="icons:file-upload"></iron-icon>
-								Upload File
-							</paper-tab>
-						</paper-tabs>
-						<iron-pages class="flex layout vertical" selected="{{commandTab}}">
-							<div class="flex layout vertical" style="height: 100%">
-								<div style="padding: 0 16px">
-									<paper-input disabled="{{isBatchMode}}" label="Command" placeholder="G28" on-keydown="commandAny"></paper-input>
+						<div id="command-upload" class="flex command-container layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
+							<paper-tabs selected="{{commandTab}}" noink no-slide>
+								<paper-tab>
+									<iron-icon icon="hardware:keyboard"></iron-icon>
+									Command Line
+								</paper-tab>
+								<paper-tab>
+									<iron-icon icon="icons:file-upload"></iron-icon>
+									Upload File
+								</paper-tab>
+							</paper-tabs>
+							<iron-pages class="flex layout vertical" selected="{{commandTab}}">
+								<div class="flex layout vertical" style="height: 100%">
+									<div style="padding: 0 16px">
+										<paper-input disabled="{{isBatchMode}}" label="Command" placeholder="G28" on-keydown="commandAny"></paper-input>
+									</div>
+									<div class="flex" style="position: relative">
+										<div style="position: absolute; top: 0; left: 16px; right: 16px; bottom: 0; overflow-y: scroll">
+											<div id="command-history" style="height: 100%">
+												<template is="dom-repeat" items="{{commandHistory}}">
+													<div class="line">
+														<span>{{item.prefix}}</span>
+														<span>{{item.value}}</span>
+													</div>
+												</template>
+											</div>
+										</div>
+									</div>
 								</div>
-								<div class="flex" style="position: relative">
-									<div style="position: absolute; top: 0; left: 16px; right: 16px; bottom: 0; overflow-y: scroll">
-										<div id="command-history" style="height: 100%">
-											<template is="dom-repeat" items="{{commandHistory}}">
-												<div class="line">
-													<span>{{item.prefix}}</span>
-													<span>{{item.value}}</span>
+								<div class="flex layout vertical" style="padding: 0 16px">
+									<template is="dom-if" if="{{!gcode}}">
+										<div id="upload-file" style="self-center">
+											<div style="margin-top: 50px; padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
+												Drag and Drop here
+												<div style="font-size: 50%">or click to open select dialogue</div>
+											</div>
+											<input type="file" style="visibility: hidden"></input>
+										</div>
+									</template>
+									<template is="dom-if" if="{{gcode}}">
+										<div class="layout horizontal uploaded-info">
+											<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
+											<template is="dom-if" if="{{!isBatchMode}}">
+												<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
+													<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file" disabled="{{isBatchMode}}"></paper-icon-button>
 												</div>
 											</template>
+											<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly always-float-label></paper-input>
+											<paper-input class="flex" label="Time" value="{{duration(gcode.total)}}" readonly always-float-label></paper-input>
+											<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly always-float-label></paper-input>
 										</div>
-									</div>
-								</div>
-							</div>
-							<div class="flex layout vertical" style="padding: 0 16px">
-								<template is="dom-if" if="{{!gcode}}">
-									<div id="upload-file" style="self-center">
-										<div style="margin-top: 50px; padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
-											Drag and Drop here
-											<div style="font-size: 50%">or click to open select dialogue</div>
-										</div>
-										<input type="file" style="visibility: hidden"></input>
-									</div>
-								</template>
-								<template is="dom-if" if="{{gcode}}">
-									<div class="layout horizontal uploaded-info">
-										<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
-										<template is="dom-if" if="{{!isBatchMode}}">
-											<div style="padding-top: 20px; margin: 0 10px 0 -10px; color: #666">
-												<paper-icon-button icon="icons:clear" on-tap="commandClearUploadedFile" title="Clear uploaded file" disabled="{{isBatchMode}}"></paper-icon-button>
+										<!-- div class="layout horizontal">
+											<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly always-float-label></paper-input>
+											<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly always-float-label></paper-input>
+											<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly always-float-label></paper-input>
+										</div -->
+										<template is="dom-if" if="{{gcode.startedTime}}">
+
+											<div style="font-size: 10px; color: #666; height: 10px; line-height: 10px; text-align: center">
+												<span>{{progress.percent}}</span>%
+												(<span>{{duration(progress.elapsed)}}</span> elapsed, <span>{{duration(progress.remainTime)}}</span> remain)
+											</div>
+											<paper-progress value="{{progress.percentRaw}}" style="display: block; width: 100%"></paper-progress>
+										</template>
+										<template is="dom-if" if="{{!gcode.startedTime}}">
+											<div style="vertical-align: baseline; text-align: right">
+												<paper-button noink class="action-resume" on-tap="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
+													<iron-icon icon="av:play-arrow"></iron-icon>
+													Execute
+												</paper-button>
 											</div>
 										</template>
-										<paper-input class="flex" label="Uploaded" value="{{strftime('%Y-%m-%d %H:%M', gcode.createdTime)}}" readonly always-float-label></paper-input>
-										<paper-input class="flex" label="Time" value="{{duration(gcode.total)}}" readonly always-float-label></paper-input>
-										<paper-input class="flex" label="Started" value="{{strftime('%Y-%m-%d %H:%M', gcode.startedTime)}}" readonly always-float-label></paper-input>
-									</div>
-									<!-- div class="layout horizontal">
-										<paper-input class="flex" label="Uploaded Total" value="{{bind(gcode.total, gcode.*)}}" readonly always-float-label></paper-input>
-										<paper-input class="flex" label="Sent" value="{{bind(gcode.sent.length, gcode.*)}}" readonly always-float-label></paper-input>
-										<paper-input class="flex" label="Remain" value="{{bind(gcode.remain.length, gcode.*)}}" readonly always-float-label></paper-input>
-									</div -->
-									<template is="dom-if" if="{{gcode.startedTime}}">
-
-										<div style="font-size: 10px; color: #666; height: 10px; line-height: 10px; text-align: center">
-											<span>{{progress.percent}}</span>%
-											(<span>{{duration(progress.elapsed)}}</span> elapsed, <span>{{duration(progress.remainTime)}}</span> remain)
-										</div>
-										<paper-progress value="{{progress.percentRaw}}" style="display: block; width: 100%"></paper-progress>
-									</template>
-									<template is="dom-if" if="{{!gcode.startedTime}}">
-										<div style="vertical-align: baseline; text-align: right">
-											<paper-button noink class="action-resume" on-tap="commandRunGCode" disabled="{{!equals(status.state, 'Idle')}}">
-												<iron-icon icon="av:play-arrow"></iron-icon>
-												Execute
-											</paper-button>
+										<div class="flex gcode" style="overflow-y: scroll; position: relative;">
+											<div id="gcode-list" style="position: absolute; top: 10px; left: 0; right: 0; bottom: 0;">
+												<template is="dom-repeat" items="{{gcode.sent}}">
+													<div class="line sent">{{item}}</div>
+												</template>
+												<template is="dom-repeat" items="{{gcode.remain}}">
+													<div class="line remain">{{item}}</div>
+												</template>
+											</div>
 										</div>
 									</template>
-									<div class="flex gcode" style="overflow-y: scroll; position: relative;">
-										<div id="gcode-list" style="position: absolute; top: 10px; left: 0; right: 0; bottom: 0;">
-											<template is="dom-repeat" items="{{gcode.sent}}">
-												<div class="line sent">{{item}}</div>
-											</template>
-											<template is="dom-repeat" items="{{gcode.remain}}">
-												<div class="line remain">{{item}}</div>
-											</template>
-										</div>
-									</div>
-								</template>
-							</div>
-						</iron-pages>
-					</div>
+								</div>
+							</iron-pages>
+						</div>
 
-					<div id="preview" class="flex preview layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
-						<div class="flex relative">
-							<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
-								<cnc-gcode id="viewer" style="width: 100%; height: 100%"></cnc-gcode>
+						<div id="preview" class="flex preview layout vertical" disabled$="{{equals(status.state, 'Unknown')}}">
+							<div class="flex relative">
+								<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+									<cnc-gcode id="viewer" style="width: 100%; height: 100%"></cnc-gcode>
+								</div>
 							</div>
 						</div>
+					</div><!-- #mainContent -->
+
+					<div id="settingsContent" class="fit layout vertical" style="background: #fff; padding: 0 16px">
+						<div class="layout horizontal" style="margin: 0">
+							<h2 class="flex" style="height: 48px; line-height: 48px; text-align: left; margin: 0 0 0 -16px; padding: 0 0 0 16px">Settings</h2>
+							<paper-tabs class="flex-5" selected="{{settingsTab}}" noink no-slide style="margin-right: -16px;">
+								<paper-tab>Macros</paper-tab>
+								<paper-tab>Connection</paper-tab>
+								<paper-tab>Grbl</paper-tab>
+							</paper-tabs>
+						</div>
+						<div class="body flex">
+							<iron-pages class="flex layout vertical relative" selected="{{settingsTab}}">
+								<!-- Macros -->
+								<div class="macros flex layout horizontal fit">
+									<div class="list flex">
+										<div class="layout horizontal">
+											<h3 class="flex-3"> Current List </h3>
+											<div class="flex-1" style="text-align: right; padding: 5px">
+												<paper-icon-button icon="icons:add-box" on-tap="settingsAddMacro"></paper-icon-button>
+											</div>
+										</div>
+
+										<template is="dom-repeat" items="{{settings.macros}}">
+											<paper-button on-tap="settingsEditMacro" data-item$="{{item.id}}">
+												<iron-icon icon="icons:extension"></iron-icon>
+												<span>{{item.label}}</span>
+											</paper-button>
+										</template>
+
+									</div>
+
+									<div class="edit flex">
+										<template is="dom-if" if="{{currentEdittingMacro}}">
+											<div class="layout horizontal">
+												<h3 class="flex">Edit</h3>
+												<div class="flex" style="text-align: right; padding: 5px">
+													<paper-icon-button icon="icons:cancel" on-tap="settingsRemoveMacro"></paper-icon-button>
+												</div>
+											</div>
+											<paper-input label="Label" placeholder="" value="{{currentEdittingMacro.label}}"></paper-input>
+											<paper-textarea label="Code" placeholder="" rows="3" value="{{currentEdittingMacro.gcode}}"></paper-textarea>
+											<paper-button on-tap="settingsSaveMacro">Save</paper-button>
+										</template>
+									</div>
+								</div>
+								<!-- /Macros -->
+
+								<!-- Connection -->
+								<div class="flex vertical">
+									<h3>Grbl Server</h3>
+									<paper-input label="Server Address" placeholder="ws://" value="{{settings.grblServer.address}}" disabled="{{settings.grblServer.addressAuto}}"></paper-input>
+									<paper-checkbox checked="{{settings.grblServer.addressAuto}}">Automatic</paper-checkbox>
+								</div>
+								<!-- /Connection -->
+
+								<!-- Grbl -->
+								<div class="flex vertical grbl-settings">
+									<h3>Edit Grbl Settings</h3>
+
+									<div class="layout horizontal wrap">
+										<!--
+										<div class="flex">
+											<h4>Basic Machine Settings</h4>
+											<paper-input-container always-float-label>
+												<label>Step Pulse</label>
+												<input is="iron-input"/>
+												<div suffix>us</div>
+											</paper-input-container>
+
+											<paper-input-container always-float-label>
+												<label>Step Idle Delay</label>
+												<input is="iron-input"/>
+												<div suffix>ms</div>
+											</paper-input-container>
+										</div>
+
+										<div class="flex">
+											<h4>Limits</h4>
+											<paper-checkbox checked="{{grblSettings.20}}"> Hard Limits</paper-checkbox>
+											<paper-checkbox checked="{{grblSettings.20}}"> Soft Limits</paper-checkbox>
+										</div>
+									-->
+									</div>
+								</div>
+								<!-- /Grbl -->
+							</iron-pages>
+
+							<iron-localstorage
+								name="grbl-server-client-settings"
+								value="{{settings}}"
+								on-iron-localstorage-load-empty="initializeDefaultSettings"
+								></iron-localstorage>
+						</div>
 					</div>
-				</div><!-- #mainContent -->
+					<!-- #/settingsContent -->
+
+				</iron-pages>
 			</paper-header-panel>
 
 		</paper-drawer-panel>
@@ -539,104 +760,6 @@
 			<p>
 				<paper-progress value="{{upload.progress}}" style="width: 100%"></paper-progress>
 			</p>
-		</paper-dialog>
-
-		<paper-dialog id="settings" modal style="min-width: 900px">
-			<div class="layout horizontal" style="margin: 0">
-				<h2 class="flex" style="height: 48px; line-height: 48px; text-align: left; margin-left: -24px; padding-left: 24px">Settings</h2>
-				<paper-tabs class="flex-5" selected="{{settingsTab}}" noink no-slide style="margin-right: -24px;">
-					<paper-tab>Macros</paper-tab>
-					<paper-tab>Connection</paper-tab>
-					<paper-tab>Grbl</paper-tab>
-				</paper-tabs>
-			</div>
-			<div class="body">
-				<iron-pages class="flex layout vertical" selected="{{settingsTab}}" style="min-height: 400px">
-					<!-- Macros -->
-					<div class="macros flex layout horizontal">
-						<div class="list flex">
-							<div class="layout horizontal">
-								<h3 class="flex-3"> Current List </h3>
-								<div class="flex-1" style="text-align: right; padding: 5px">
-									<paper-icon-button icon="icons:add-box" on-tap="settingsAddMacro"></paper-icon-button>
-								</div>
-							</div>
-
-							<template is="dom-repeat" items="{{settings.macros}}">
-								<paper-button on-tap="settingsEditMacro" data-item$="{{item.id}}">
-									<iron-icon icon="icons:extension"></iron-icon>
-									<span>{{item.label}}</span>
-								</paper-button>
-							</template>
-
-						</div>
-
-						<div class="edit flex">
-							<template is="dom-if" if="{{currentEdittingMacro}}">
-								<div class="layout horizontal">
-									<h3 class="flex">Edit</h3>
-									<div class="flex" style="text-align: right; padding: 5px">
-										<paper-icon-button icon="icons:cancel" on-tap="settingsRemoveMacro"></paper-icon-button>
-									</div>
-								</div>
-								<paper-input label="Label" placeholder="" value="{{currentEdittingMacro.label}}"></paper-input>
-								<paper-textarea label="Code" placeholder="" rows="5" value="{{currentEdittingMacro.gcode}}"></paper-textarea>
-								<paper-button on-tap="settingsSaveMacro">Save</paper-button>
-							</template>
-						</div>
-					</div>
-					<!-- /Macros -->
-
-					<!-- Connection -->
-					<div class="flex vertical">
-						<h3>Grbl Server</h3>
-						<paper-input label="Server Address" placeholder="ws://" value="{{settings.grblServer.address}}" disabled="{{settings.grblServer.addressAuto}}"></paper-input>
-						<paper-checkbox checked="{{settings.grblServer.addressAuto}}">Automatic</paper-checkbox>
-					</div>
-					<!-- /Connection -->
-
-					<!-- Grbl -->
-					<div class="flex vertical grbl-settings">
-						<h3>Edit Grbl Settings</h3>
-
-						<div class="layout horizontal wrap">
-							<!--
-							<div class="flex">
-								<h4>Basic Machine Settings</h4>
-								<paper-input-container always-float-label>
-									<label>Step Pulse</label>
-									<input is="iron-input"/>
-									<div suffix>us</div>
-								</paper-input-container>
-
-								<paper-input-container always-float-label>
-									<label>Step Idle Delay</label>
-									<input is="iron-input"/>
-									<div suffix>ms</div>
-								</paper-input-container>
-							</div>
-
-							<div class="flex">
-								<h4>Limits</h4>
-								<paper-checkbox checked="{{grblSettings.20}}"> Hard Limits</paper-checkbox>
-								<paper-checkbox checked="{{grblSettings.20}}"> Soft Limits</paper-checkbox>
-							</div>
-						-->
-						</div>
-					</div>
-					<!-- /Grbl -->
-				</iron-pages>
-
-				<iron-localstorage
-					name="grbl-server-client-settings"
-					value="{{settings}}"
-					on-iron-localstorage-load-empty="initializeDefaultSettings"
-					></iron-localstorage>
-			</div>
-
-			<div class="buttons">
-				<paper-button noink dialog-confirm autofocus>Close</paper-button>
-			</div>
 		</paper-dialog>
 
 		<paper-toast id="feedback" duration="10000"></paper-toast>
