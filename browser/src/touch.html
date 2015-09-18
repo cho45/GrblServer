@@ -317,14 +317,17 @@
 				@apply(--layout-wrap);
 			}
 
+			/*
 			#mainContent > * {
 				display: none;
 			}
 
 			#mainContent > #jogging,
-			#mainContent > #coords {
+			#mainContent > #coords ,
+			#mainContent > #macros {
 				display: block;
 			}
+			*/
 		}
 
 		@media all and (orientation: landscape) {
@@ -349,8 +352,14 @@
 			}
 
 			#mainContent > #jogging,
-			#mainContent > #coords {
+			#mainContent > #coords ,
+			#mainContent > #macros {
 				display: block;
+			}
+
+			#macros {
+				max-height: 50px;
+				padding: 0;
 			}
 		}
 
@@ -362,7 +371,7 @@
 
 			#jogging {
 				min-width: 320px;
-				min-height: 320px;
+				min-height: 290px;
 			}
 
 			#macros {
@@ -380,6 +389,16 @@
 			}
 		}
 
+		@media (min-height: 320px) and (max-height: 600px) {
+			#command-upload {
+				display: none;
+			}
+
+			#preview {
+				display: none;
+			}
+		}
+
 		/* large screen */
 		@media (min-width: 1280px) {
 			#mainContent > * {
@@ -387,28 +406,30 @@
 				@apply(--shadow-elevation-2dp);
 			}
 
-			#coords {
+			#mainContent > #coords {
 				min-width: 240px;
 			}
 
-			#jogging {
-				min-width: 320px;
+			#mainContent > #jogging {
+				min-width: 33%;
 				min-height: 320px;
 			}
 
-			#macros {
-				min-width: 320px;
+			#mainContent > #macros {
+				min-width: 33%;
 				min-height: 100px;
 			}
 
-			#command-upload {
-				min-width: 320px;
+			#mainContent > #command-upload {
+				min-width: 40%;
 				min-height: 320px;
+				max-height: none;
 			}
 
-			#preview {
-				min-width: 500px;
+			#mainContent > #preview {
+				min-width: 40%;
 				min-height: 320px;
+				max-height: none;
 			}
 		}
 
