@@ -359,7 +359,7 @@ Polymer({
 	},
 
 	processNotification : function (res) {
-		console.log('processNotification', res);
+		// console.log('processNotification', res);
 		var self = this;
 		if (res.type === 'init') {
 			console.log('init');
