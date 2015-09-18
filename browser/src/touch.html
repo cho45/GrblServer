@@ -743,12 +743,31 @@
 
 		</paper-drawer-panel>
 
-		<paper-dialog id="alarm" modal style="min-width: 400px;">
+		<paper-dialog id="alarm" modal style="min-width: 200px;">
 			<h2>ALARM</h2>
 			<p>{{lastAlarm}}</p>
 			<div class="buttons">
-				<paper-button noink dialog-confirm autofocus>Tap me to close</paper-button>
+				<paper-button noink dialog-confirm autofocus on-tap="commandReset" class="action-reset">
+					<iron-icon icon="icons:cancel"></iron-icon>
+					Reset
+				</paper-button>
 			</div>
+		</paper-dialog>
+
+		<paper-dialog id="alarm-reset" modal style="min-width: 200px;">
+			<h2>ALARM</h2>
+			<div class="" style="font-weight: bold">
+				<iron-icon icon="icons:error" style="color: #cc0000; margin-right: 10px; margin-top: -4px"></iron-icon>
+				Grbl is locked. Unlock by:
+			</div>
+			<paper-button noink on-tap="commandUnlock" dialog-confirm>
+				<iron-icon icon="icons:lock-open"></iron-icon>
+				Unlock
+			</paper-button>
+			<paper-button noink on-tap="commandHoming" dialog-confirm>
+				<iron-icon icon="icons:home"></iron-icon>
+				Homing
+			</paper-button>
 		</paper-dialog>
 
 		<paper-dialog id="upload" modal style="min-width: 400px;">

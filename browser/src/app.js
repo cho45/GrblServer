@@ -124,13 +124,8 @@ Polymer({
 		console.log('ready');
 
 		self.alarmDialog = document.getElementById('alarm');
-		document.body.appendChild(self.alarmDialog);
-
+		self.alarmResetDialog = document.getElementById('alarm-reset');
 		self.uploadDialog = document.getElementById('upload');
-		document.body.appendChild(self.uploadDialog);
-
-		self.settingsDialog = document.getElementById('settings');
-		// document.body.appendChild(self.settingsDialog);
 
 		self.async(function () {
 			var uploadFile = document.getElementById('upload-file');
@@ -150,8 +145,6 @@ Polymer({
 //			setInterval(function () {
 //				self.set('upload.progress', self.upload.progress+1);
 //			}, 100);
-
-			// self.openSettings();
 
 			inputFile.onchange = function () {
 				var files = inputFile.files;
@@ -348,8 +341,7 @@ Polymer({
 			self.set('lastAlarm', res.lastAlarm);
 			if (res.lastAlarm) {
 				if (self.status.state == 'Alarm') {
-					self.alarmDialog.refit();
-					self.alarmDialog.open();
+				//	self.openDialog(self.alarmDialog);
 				}
 			}
 
@@ -379,8 +371,7 @@ Polymer({
 			self.addCommandHistory('<<', res.raw);
 
 			self.set('lastAlarm', res.message);
-			self.alarmDialog.refit();
-			self.alarmDialog.open();
+			self.openDialog(self.alarmDialog);
 		} else
 		if (res.type === 'feedback') {
 			var feeback = document.getElementById('feedback'); // no warnings
@@ -446,6 +437,10 @@ Polymer({
 
 		if (self.error == "'$H'|'$X' to unlock") {
 			self.set('error', '');
+		}
+
+		if (self.status.state == 'Alarm') {
+			self.openDialog(self.alarmResetDialog);
 		}
 	},
 
@@ -672,13 +667,13 @@ Polymer({
 		return ret;
 	},
 
-	openSettings : function () {
+	openDialog : function (dialog) {
 		var self = this;
-		self.settingsDialog.open();
-		self.settingsDialog.style.visibility = 'hidden';
+		dialog.open();
+		dialog.style.visibility = 'hidden';
 		self.async(function() {
-			self.settingsDialog.refit();
-			self.settingsDialog.style.visibility = 'visible';
+			dialog.refit();
+			dialog.style.visibility = 'visible';
 		}, 10);
 	},
 
