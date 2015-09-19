@@ -20,6 +20,9 @@ export namespace gcode {
 		}
 
 		get distance():number {
+			if (!this.prevMotion) {
+				return 0;
+			}
 			var x = this.prevMotion.x - this.x;
 			var y = this.prevMotion.y - this.y;
 			var z = this.prevMotion.z - this.z;
@@ -28,7 +31,12 @@ export namespace gcode {
 
 		// return second
 		get duration():number {
-			return this.distance / this.feedRate * 60;
+			var distance = this.distance;
+			if (distance) {
+				return this.distance / this.feedRate * 60;
+			} else {
+				return 0;
+			}
 		}
 	}
 
@@ -412,8 +420,8 @@ export namespace gcode {
 			this.motions = [ new Motion(null) ];
 		}
 
-		executeBlock(block: Block):number {
-			var motionIndex = this.motions.length - 1;
+		executeBlock(block: Block):Array<Motion> {
+			var motionIndex = this.motions.length;
 
 			this.prevState = this.state;
 			this.state = new State(this.prevState);
@@ -443,14 +451,7 @@ export namespace gcode {
 
 			this.state.clearModeless();
 
-			var elapsed = 0;
-			if (motionIndex > 0) {
-				for (let i = motionIndex, it: Motion; (it = this.motions[i]); i++) {
-					elapsed += it.duration;
-				}
-			}
-
-			return elapsed;
+			return this.motions.slice(motionIndex);
 		}
 
 		drawLine(

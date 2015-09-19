@@ -102,6 +102,8 @@ Polymer({
 	initContext : function () {
 		var self = this;
 		self.context = new gcode.Context();
+		self.lineNumber = 1;
+		self.lineNumberMotionMap = {};
 	},
 
 	/**
@@ -111,7 +113,13 @@ Polymer({
 	 */
 	executeBlock : function (line) {
 		var self = this;
-		return self.context.executeBlock(gcode.Block.parse(line));
+		var motions = self.context.executeBlock(gcode.Block.parse(line));
+		self.lineNumberMotionMap[ self.lineNumber++ ] = motions;
+		var ret = 0;
+		for (var i = 0, it; (it = motions[i]); i++) {
+			ret += it.duration;
+		}
+		return ret;
 	},
 
 	/**
@@ -127,17 +135,18 @@ Polymer({
 		self.initContext();
 		self.context.rapidFeedRate = self.rapidFeedRate;
 
-		var duration = 0;
 		var lines = raw.split(/\n/);
 		for (var i = 0, len = lines.length; i < len; i++) {
-			duration += self.context.executeBlock(gcode.Block.parse(lines[i]));
+			self.context.executeBlock(gcode.Block.parse(lines[i]));
 		}
-		console.log('duration', duration);
 
 		self.constructPathObject();
 		self.render();
 	},
 
+	/**
+	 * Construct 3D path object for this context
+	 */
 	constructPathObject : function () {
 		var self = this;
 		if (self.path) {
@@ -170,6 +179,7 @@ Polymer({
 
 		for (var i = 1, len = self.context.motions.length; i < len; i++) {
 			var motion = self.context.motions[i];
+			motion._pathIndex = i;
 			positions[i * 6 + 0] = motion.prevMotion.x;
 			positions[i * 6 + 1] = motion.prevMotion.y;
 			positions[i * 6 + 2] = motion.prevMotion.z;
@@ -202,6 +212,26 @@ Polymer({
 		self.scene.add(self.path);
 
 		self.resetCamera();
+	},
+
+	/**
+	 * Override path color for current path object created from current context.
+	 *
+	 * This method is only valid after calling constructPathObject()
+	 */
+	overridePathColor : function (lineNumber, color) {
+		var self = this;
+		color = new THREE.Color(color);
+		var attr = self.path.geometry.getAttribute('color');
+		var colors = attr.array;
+		var motions = self.lineNumberMotionMap[lineNumber];
+		for (var j = 0, it; (it = motions[j]); j++) {
+			var i = it._pathIndex;
+			colors[i * 6 + 0] = colors[i * 6 + 3] = color.r;
+			colors[i * 6 + 1] = colors[i * 6 + 4] = color.g;
+			colors[i * 6 + 2] = colors[i * 6 + 5] = color.b;
+		}
+		attr.needsUpdate = true;
 	},
 
 	resetCamera : function () {

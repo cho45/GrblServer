@@ -443,6 +443,11 @@ Polymer({
 					console.log('loaded gcode', 'total', total, 'durations', durations);
 					
 					viewer.constructPathObject();
+
+					for (var i = 0, len = res.gcode.sent.length; i < len; i++) {
+						viewer.overridePathColor(i+1, "#000000");
+					}
+
 					viewer.render();
 				} else {
 					viewer.loadGCode("");
@@ -454,6 +459,8 @@ Polymer({
 		} else
 		if (res.type === 'gcode.progress') {
 			self.push('gcode.sent', self.shift('gcode.remain'));
+			viewer.overridePathColor(self.gcode.sent.length, "#000000");
+			viewer.render();
 			self.async(function () {
 				var container = document.getElementById('gcode-list').parentNode;
 				var target = container.querySelector('.remain');

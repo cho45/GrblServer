@@ -11,6 +11,9 @@ var gcode;
         }
         Object.defineProperty(Motion.prototype, "distance", {
             get: function () {
+                if (!this.prevMotion) {
+                    return 0;
+                }
                 var x = this.prevMotion.x - this.x;
                 var y = this.prevMotion.y - this.y;
                 var z = this.prevMotion.z - this.z;
@@ -22,7 +25,13 @@ var gcode;
         Object.defineProperty(Motion.prototype, "duration", {
             // return second
             get: function () {
-                return this.distance / this.feedRate * 60;
+                var distance = this.distance;
+                if (distance) {
+                    return this.distance / this.feedRate * 60;
+                }
+                else {
+                    return 0;
+                }
             },
             enumerable: true,
             configurable: true
@@ -283,7 +292,7 @@ var gcode;
             configurable: true
         });
         Context.prototype.executeBlock = function (block) {
-            var motionIndex = this.motions.length - 1;
+            var motionIndex = this.motions.length;
             this.prevState = this.state;
             this.state = new State(this.prevState);
             this.blockSub = null;
@@ -308,13 +317,7 @@ var gcode;
                 this.blockSub = null;
             }
             this.state.clearModeless();
-            var elapsed = 0;
-            if (motionIndex > 0) {
-                for (var i = motionIndex, it = void 0; (it = this.motions[i]); i++) {
-                    elapsed += it.duration;
-                }
-            }
-            return elapsed;
+            return this.motions.slice(motionIndex);
         };
         Context.prototype.drawLine = function (type, x1, y1, z1, x2, y2, z2, feedRate) {
             var line = new Motion(this.lastMotion);
