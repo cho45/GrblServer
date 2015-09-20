@@ -35,7 +35,7 @@ Polymer({
 
 		selectedMenu: {
 			type: Number,
-			value: 1
+			value: 0
 		},
 
 		selectedSubMenu: {
