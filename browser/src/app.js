@@ -393,7 +393,7 @@ Polymer({
 		if (res.type === 'startup') {
 			self.initialize();
 			self.addCommandHistory('<<', res.raw);
-			self.set('grblVersion', res.version.majar + "." + res.version.minor);
+			self.set('grblVersion', String(res.version.major) + res.version.minor);
 		} else
 		if (res.type === 'config') {
 			console.log('update config', res.config);

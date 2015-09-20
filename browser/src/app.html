@@ -15,7 +15,6 @@
 <link rel="import" href="../bower_components/paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-input-container/paper-input-container.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
@@ -36,6 +35,7 @@
 <dom-module id="my-app">
 	<style is="custom-style">
 		:host {
+			@apply(--paper-font-common-base);
 			cursor: default;
 			display: block;
 			margin: 0 auto;
@@ -56,6 +56,15 @@
 
 		.nav paper-menu paper-submenu paper-menu {
 			padding-left: 16px;
+		}
+
+		table.versions {
+		}
+
+		table.versions th ,
+		table.versions td {
+			text-align: left;
+			padding-right: 8px;
 		}
 
 		.main {
@@ -478,13 +487,10 @@
 		<paper-drawer-panel id="drawerPanel" responsive-width="1600px">
 
 			<div class="nav" drawer style="height: 100%; overflow-y: auto">
-				<div class="menu-title" style="padding: 16px">
+				<div class="menu-title" style="padding: 0 16px">
 					<h1>GrblServer</h1>
-					<p style="color: #bdbdbd">
-						server <span>{{serverVersion}}</span><br />
-						client <span>{{clientVersion}}</span><br />
-						grbl <span>{{grblVersion}}</span><br />
-						last alarm: <span>{{lastAlarm}}</span>
+					<p style="color: #999">
+						Last alarm:<br/><span>{{lastAlarm}}</span>
 					</p>
 				</div>
 				<paper-menu selected="{{selectedMenu}}">
@@ -499,6 +505,25 @@
 					</paper-submenu>
 					<paper-item>Settings</paper-item>
 				</paper-menu>
+				<div style="color: #bdbdbd; padding: 8px 16px; border-top: 1px solid #ddd">
+					<table class="versions">
+						<tr>
+							<th colspan="2">Versions</th>
+						</tr>
+						<tr>
+							<th>grbl</th>
+							<td>{{grblVersion}}</td>
+						</tr>
+						<tr>
+							<th>server</th>
+							<td>{{serverVersion}}</td>
+						</tr>
+						<tr>
+							<th>client</th>
+							<td>{{clientVersion}}</td>
+						</tr>
+					</table>
+				</div>
 			</div>
 
 			<paper-header-panel class="main" main mode="waterfall">
