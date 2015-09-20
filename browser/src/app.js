@@ -279,7 +279,7 @@ Polymer({
 			}
 			*/
 
-			document.querySelector('.command-container iron-pages').addEventListener('iron-resize', function (e) {
+			document.querySelector('#command-upload iron-pages').addEventListener('iron-resize', function (e) {
 				var viewer = document.getElementById('viewer');
 				if (viewer) {
 					viewer.refit();
@@ -846,8 +846,13 @@ Polymer({
 
 			var target = targets[change];
 			for (var i = 0, it; (it = target[i]); i++) {
-				document.getElementById(it).style.display = 'block';
+				document.getElementById(it).style.display = 'flex';
 			}
+		}
+
+		var viewer = document.getElementById('viewer');
+		if (viewer) {
+			viewer.refit();
 		}
 	},
 
