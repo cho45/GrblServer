@@ -77,6 +77,7 @@ Polymer({
 		if (!self.camera) return;
 
 		var container = document.getElementById('container');
+		if (!container) return;
 		console.log('creating three.js view for', container, container.offsetWidth, container.offsetHeight);
 
 		var width = container.offsetWidth;
