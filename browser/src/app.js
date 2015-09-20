@@ -11,15 +11,18 @@ Polymer({
 		},
 
 		serverVersion: {
-			type: String
+			type: String,
+			value: null
 		},
 
 		clientVersion: {
-			type: String
+			type: String,
+			value: null
 		},
 
 		grblVersion: {
-			type: String
+			type: String,
+			value: null
 		},
 
 

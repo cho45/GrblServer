@@ -514,15 +514,15 @@
 						</tr>
 						<tr>
 							<th>grbl</th>
-							<td>{{grblVersion}}</td>
+							<td>{{conditional(grblVersion, grblVersion, "(unconnected)")}}</td>
 						</tr>
 						<tr>
 							<th>server</th>
-							<td>{{serverVersion}}</td>
+							<td>{{conditional(serverVersion, serverVersion, "(unconnected)")}}</td>
 						</tr>
 						<tr>
 							<th>client</th>
-							<td>{{clientVersion}}</td>
+							<td>{{conditional(clientVersion, clientVersion, "(unknown)")}}</td>
 						</tr>
 					</table>
 				</div>
