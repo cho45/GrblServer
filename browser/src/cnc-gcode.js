@@ -159,6 +159,15 @@ Polymer({
 		self.render();
 	},
 
+	clear : function () {
+		var self = this;
+		if (self.path) {
+			self.scene.remove(self.path);
+			self.path.geometry.dispose();
+		}
+		self.render();
+	},
+
 	/**
 	 * Construct 3D path object for this context
 	 */

@@ -456,7 +456,7 @@ Polymer({
 
 					viewer.render();
 				} else {
-					viewer.loadGCode("");
+					viewer.clear();
 				}
 			});
 		} else
