@@ -285,6 +285,8 @@
 		}
 
 		#settingsContent {
+			max-width: 800px;
+			margin: 0 auto;
 		}
 
 		#settingsContent .body {
@@ -310,7 +312,7 @@
 		#settingsContent .body > iron-pages > .macros .edit {
 			margin-right: -16px;
 			padding: 0 16px;
-			background: #efefef;
+			background: var(--paper-grey-100);
 			border-left: 1px solid #ccc;
 		}
 
@@ -745,16 +747,13 @@
 					</div><!-- #mainContent -->
 
 					<div id="settingsContent" class="fit layout vertical" style="background: #fff; padding: 0 16px">
-						<div class="layout horizontal" style="margin: 0">
-							<h2 class="flex" style="height: 48px; line-height: 48px; text-align: left; margin: 0 0 0 -16px; padding: 0 0 0 16px">Settings</h2>
-							<paper-tabs class="flex-5" selected="{{settingsTab}}" noink no-slide style="margin-right: -16px;">
-								<paper-tab>Macros</paper-tab>
-								<paper-tab>Connection</paper-tab>
-								<paper-tab>Grbl</paper-tab>
-							</paper-tabs>
-						</div>
-						<div class="body flex">
-							<iron-pages class="flex layout vertical relative" selected="{{settingsTab}}">
+						<paper-tabs class="" selected="{{settingsTab}}" noink no-slide style="margin: 0 -16px">
+							<paper-tab>Macros</paper-tab>
+							<paper-tab>Connection</paper-tab>
+							<paper-tab>Grbl</paper-tab>
+						</paper-tabs>
+						<div class="body flex relative">
+							<iron-pages class="fit flex layout vertical relative" selected="{{settingsTab}}">
 								<!-- Macros -->
 								<div class="macros flex layout horizontal fit">
 									<div class="list flex">
