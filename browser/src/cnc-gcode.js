@@ -9,18 +9,29 @@ Polymer({
 		rapidFeedRate: {
 			type: Number,
 			value: 0
+		},
+
+		supported: {
+			type: Boolean,
+			value: true,
+			readonly: true
 		}
 	},
 
 	created : function () {
 		var self = this;
+
+		try {
+			self.renderer = new THREE.WebGLRenderer({ antialias: true });
+		} catch (e) {
+			self.supported = false;
+			return;
+		}
+		self.renderer.setPixelRatio( window.devicePixelRatio );
+
 		self.scene = new THREE.Scene();
 		self.camera = new THREE.PerspectiveCamera( 75, 3/2, 0.1, 1000 );
 		self.camera.position.z = 100;
-
-
-		self.renderer = new THREE.WebGLRenderer({ antialias: true });
-		self.renderer.setPixelRatio( window.devicePixelRatio );
 
 		var arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 10, 0x990000, 3, 3);
 		arrowX.line.material.linewidth = 5;
@@ -44,6 +55,7 @@ Polymer({
 
 	attached : function () {
 		var self = this;
+		if (!self.supported) return;
 		var container = document.getElementById('container');
 
 		container.appendChild( self.renderer.domElement );
@@ -74,6 +86,7 @@ Polymer({
 
 	refit : function () {
 		var self = this;
+		if (!self.supported) return;
 		if (!self.camera) return;
 
 		var container = document.getElementById('container');
@@ -93,6 +106,7 @@ Polymer({
 
 	render : function () {
 		var self = this;
+		if (!self.supported) return;
 		self.renderer.render(self.scene, self.camera);
 	},
 
@@ -150,6 +164,7 @@ Polymer({
 	 */
 	constructPathObject : function () {
 		var self = this;
+		if (!self.supported) return;
 		if (self.path) {
 			self.scene.remove(self.path);
 			self.path.geometry.dispose();
@@ -222,6 +237,7 @@ Polymer({
 	 */
 	overridePathColor : function (lineNumber, color) {
 		var self = this;
+		if (!self.supported) return;
 		color = new THREE.Color(color);
 		var attr = self.path.geometry.getAttribute('color');
 		var colors = attr.array;
@@ -237,6 +253,7 @@ Polymer({
 
 	resetCamera : function () {
 		var self = this;
+		if (!self.supported) return;
 		if (!self.controls) return;
 		var box = self.path ? self.path.geometry.boundingBox : {
 			max : new THREE.Vector3( 10,  10,  10),
