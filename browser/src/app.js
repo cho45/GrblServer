@@ -38,6 +38,11 @@ Polymer({
 			value: 0
 		},
 
+		selectedSubMenu: {
+			type: Number,
+			value: 0
+		},
+
 		commandTab: {
 			type: Number,
 			value: 0
@@ -126,7 +131,8 @@ Polymer({
 	},
 
 	observers: [
-		'_settingsChanged(settings.*)'
+		'_settingsChanged(settings.*)',
+		'_submenuChanged(selectedSubMenu)'
 	],
 
 	_id : 0,
@@ -816,6 +822,32 @@ Polymer({
 		if (change.path.indexOf('settings.grblServer') === 0) {
 			console.log('settings.grblServer is changed. close and reconnect');
 			self.connection.close();
+		}
+	},
+
+	_submenuChanged : function (change) {
+		var targets = [
+			[ 'coords', 'jogging', 'macros', 'command-upload', 'preview' ],
+			[ 'coords', 'jogging', 'macros' ],
+			[ 'command-upload' ],
+			[ 'preview' ]
+		];
+
+		var all = targets[0];
+
+		if (change === 0) {
+			for (var i = 0, it; (it = all[i]); i++) {
+				document.getElementById(it).style.display = '';
+			}
+		} else {
+			for (var i = 0, it; (it = all[i]); i++) {
+				document.getElementById(it).style.display = 'none';
+			}
+
+			var target = targets[change];
+			for (var i = 0, it; (it = target[i]); i++) {
+				document.getElementById(it).style.display = 'block';
+			}
 		}
 	},
 

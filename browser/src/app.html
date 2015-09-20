@@ -24,6 +24,7 @@
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-menu/paper-submenu.html">
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-styles/paper-styles.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
@@ -472,21 +473,28 @@
 
 		<paper-drawer-panel id="drawerPanel" responsive-width="1600px">
 
-			<div class="nav" drawer>
-				<a on-top="openSettings">
-					<div class="menu-title" style="padding: 16px">
-						<h1>GrblServer</h1>
-						<p style="color: #bdbdbd">
-							server <span>{{serverVersion}}</span>
-							client <span>{{clientVersion}}</span><br />
-							grbl <span>{{grblVersion}}</span>
-						</p>
-					</div>
-					<paper-menu selected="{{selectedMenu}}">
-						<paper-item>Main</paper-item>
-						<paper-item>Settings</paper-item>
-					</paper-menu>
-				</a>
+			<div class="nav" drawer style="height: 100%; overflow-y: auto">
+				<div class="menu-title" style="padding: 16px">
+					<h1>GrblServer</h1>
+					<p style="color: #bdbdbd">
+						server <span>{{serverVersion}}</span><br />
+						client <span>{{clientVersion}}</span><br />
+						grbl <span>{{grblVersion}}</span><br />
+						last alarm: <span>{{lastAlarm}}</span>
+					</p>
+				</div>
+				<paper-menu selected="{{selectedMenu}}">
+					<paper-submenu opened>
+						<paper-item class="menu-trigger">Controls</paper-item>
+						<paper-menu class="menu-content" selected="{{selectedSubMenu}}">
+							<paper-item>Dashboard</paper-item>
+							<paper-item>Jogging</paper-item>
+							<paper-item>Commnad</paper-item>
+							<paper-item>Preview</paper-item>
+						</paper-menu>
+					</paper-submenu>
+					<paper-item>Settings</paper-item>
+				</paper-menu>
 			</div>
 
 			<paper-header-panel class="main" main mode="waterfall">
