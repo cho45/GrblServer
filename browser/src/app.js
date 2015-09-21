@@ -281,13 +281,6 @@ Polymer({
 				window.addEventListener("mouseup", touchend);
 			}
 			*/
-
-			document.querySelector('#command-upload iron-pages').addEventListener('iron-resize', function (e) {
-				var viewer = document.getElementById('viewer');
-				if (viewer) {
-					viewer.refit();
-				}
-			});
 		});
 
 		self.async(function () {

@@ -92,7 +92,9 @@ var GrblServer = (function () {
     };
     GrblServer.prototype.startHttp = function () {
         var _this = this;
-        var fileServer = new static.Server('./browser');
+        var fileServer = new static.Server('./browser', {
+            cache: 3600 * 24 * 30
+        });
         console.log('startHttp');
         this.httpServer = http.createServer(function (req, res) {
             if (req.url === '/config') {

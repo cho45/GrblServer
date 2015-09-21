@@ -178,7 +178,9 @@ class GrblServer {
 	}
 
 	startHttp() {
-		var fileServer = new static.Server('./browser');
+		var fileServer = new static.Server('./browser', {
+			cache: 3600 * 24 * 30
+		});
 
 		console.log('startHttp');
 		this.httpServer = http.createServer( (req, res) => {
