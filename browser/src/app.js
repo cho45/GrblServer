@@ -842,7 +842,7 @@ Polymer({
 
 			var target = targets[change];
 			for (var i = 0, it; (it = target[i]); i++) {
-				document.getElementById(it).style.display = '';
+				document.getElementById(it).style.display = 'flex';
 			}
 		}
 
