@@ -1,16 +1,16 @@
 CACHE MANIFEST
 #v1
 
-#/src/app.html
-#/rev.txt
-#/src/app-jog.html
-#/src/app.js
-#/src/assets/icon-192.png
-#/src/cnc-gcode.html
-#/src/cnc-gcode.js
-#/src/lib/TrackballControls.js
-#/src/lib/gcode.js
-#/src/lib/three.min.js
+/src/app.html
+/rev.txt
+/src/app-jog.html
+/src/app.js
+/src/assets/icon-192.png
+/src/cnc-gcode.html
+/src/cnc-gcode.js
+/src/lib/TrackballControls.js
+/src/lib/gcode.js
+/src/lib/three.min.js
 
 /bower_components/font-roboto/roboto.html
 /bower_components/iron-a11y-announcer/iron-a11y-announcer.html
