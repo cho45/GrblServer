@@ -324,6 +324,17 @@
 			font-size: 12px;
 		}
 
+		#settingsContent .grbl-settings section {
+			margin: 0 16px 16px 0;
+		}
+
+		#settingsContent .grbl-settings h4 {
+		}
+
+		#settingsContent .grbl-settings paper-checkbox {
+			margin: 8px 8px 8px 0;
+		}
+
 		.uploaded-info paper-input {
 			--paper-input-container-input: {
 				font-size: 12px;
@@ -808,28 +819,42 @@
 									<h3>Edit Grbl Settings</h3>
 
 									<div class="layout horizontal wrap">
-										<!--
-										<div class="flex">
-											<h4>Basic Machine Settings</h4>
+										<section>
+											<h4>Max Travels</h4>
 											<paper-input-container always-float-label>
-												<label>Step Pulse</label>
-												<input is="iron-input"/>
-												<div suffix>us</div>
+												<label>X Max Travel</label>
+												<input is="iron-input" bind-value="{{settings.grbl.$130}}"/>
+												<div suffix>mm</div>
 											</paper-input-container>
-
 											<paper-input-container always-float-label>
-												<label>Step Idle Delay</label>
-												<input is="iron-input"/>
-												<div suffix>ms</div>
+												<label>Y Max Travel</label>
+												<input is="iron-input" bind-value="{{settings.grbl.$131}}"/>
+												<div suffix>mm</div>
 											</paper-input-container>
-										</div>
+											<paper-input-container always-float-label>
+												<label>Z Max Travel</label>
+												<input is="iron-input" bind-value="{{settings.grbl.$132}}"/>
+												<div suffix>mm</div>
+											</paper-input-container>
+										</section>
 
-										<div class="flex">
+										<section>
 											<h4>Limits</h4>
-											<paper-checkbox checked="{{grblSettings.20}}"> Hard Limits</paper-checkbox>
-											<paper-checkbox checked="{{grblSettings.20}}"> Soft Limits</paper-checkbox>
+											<paper-checkbox checked="{{settings.grbl.$20}}"> Soft Limits</paper-checkbox>
+											<paper-checkbox checked="{{settings.grbl.$21}}"> Hard Limits</paper-checkbox>
+										</section>
+
+										<div class="flex"></div>
+									</div>
+
+									<div class="layout horizontal wrap">
+										<div>
+											<paper-button on-tap="settingsSaveGrblConfig">Save</paper-button>
 										</div>
-									-->
+									
+										<div class="flex" style="text-align: right">
+											<a href="https://github.com/grbl/grbl/wiki/Configuring-Grbl-v0.9">Reference</a>
+										</div>
 									</div>
 								</div>
 								<!-- /Grbl -->

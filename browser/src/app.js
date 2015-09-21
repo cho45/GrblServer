@@ -38,7 +38,7 @@ Polymer({
 
 		selectedMenu: {
 			type: Number,
-			value: 0
+			value: 1
 		},
 
 		selectedSubMenu: {
@@ -53,7 +53,7 @@ Polymer({
 
 		settingsTab: {
 			type: Number,
-			value: 0
+			value: 2
 		},
 
 		settings : {
@@ -135,6 +135,7 @@ Polymer({
 
 	observers: [
 		'_settingsChanged(settings.*)',
+		'_configChanged(config)',
 		'_submenuChanged(selectedSubMenu)'
 	],
 
@@ -513,8 +514,10 @@ Polymer({
 					}
 				}
 				self.addCommandHistory('<<', 'ok');
+				return Promise.resolve('ok');
 			}, function (e) {
 				self.addCommandHistory('<<', 'error:' + e.message);
+				return Promise.reject(e.message);
 			});
 	},
 
@@ -790,6 +793,44 @@ Polymer({
 		}
 	},
 
+	_configChanged : function (config) {
+		console.log('configChanged', config);
+		this.set('settings.grbl', {});
+		for (var key in config) if (config.hasOwnProperty(key)) {
+			var value;
+			if (key === '$20') {
+				value = !!+config[key];
+			} else
+			if (key === '$21') {
+				value = !!+config[key];
+			} else {
+				value = +config[key];
+			}
+			this.set('settings.grbl.' + key, value);
+		}
+	},
+
+	settingsSaveGrblConfig : function () {
+		var self = this;
+		var config = self.config;
+		var newConfig = self.settings.grbl;
+		var changes = [];
+		for (var key in config) if (config.hasOwnProperty(key)) {
+			if (config[key] != newConfig[key]) {
+				changes.push(key + '=' + Number(newConfig[key]));
+			}
+		}
+
+		console.log(changes);
+
+		Promise.all(
+			changes.map(function (i) { return self.command(i).catch(function (e) { return e }) })
+		).then(function (results) {
+			console.log(results);
+			return self.request('command', { command: '$$' });
+		});
+	},
+
 	computeProgress : function () {
 		if (!this.gcode) return 0;
 		var progress = {
@@ -812,7 +853,7 @@ Polymer({
 
 	_settingsChanged : function (change) {
 		var self = this;
-		console.log('_settingsChanged', change);
+		// console.log('_settingsChanged', change);
 		if (change.path.indexOf('settings.grblServer') === 0) {
 			console.log('settings.grblServer is changed. close and reconnect');
 			self.connection.close();
