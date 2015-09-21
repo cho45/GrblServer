@@ -1,4 +1,7 @@
 node_modules/
 /*.js
 .dropbox.attr
-
+config/local.json
+sketch/
+*.ts_
+grblserver-product-icon-assets/

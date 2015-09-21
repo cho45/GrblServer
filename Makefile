@@ -20,3 +20,6 @@ watch:
 clean:
 	rm -r out test.js sketch.js client.js server.js grbl.js
 
+.PHONY: icon
+icon:
+	cp ./grblserver-product-icon-assets/*.png browser/src/assets/
