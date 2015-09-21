@@ -488,8 +488,6 @@ Polymer({
 	request : function (method, params) {
 		var self = this;
 
-		console.log(method, params);
-
 		return new Promise(function (resolve, reject) {
 			var id = self._id++;
 			self._callbacks[id] = {
@@ -802,7 +800,7 @@ Polymer({
 			});
 			progress.remainTime = this.gcode.total - progress.sentTime;
 			progress.percentRaw = progress.sentTime / this.gcode.total * 100;
-			console.log('progress','total', this.gcode.total, '=', progress);
+			// console.log('progress','total', this.gcode.total, '=', progress);
 		} catch (e) {
 			console.log(e);
 			progress.percentRaw = (this.gcode.sent.length / (this.gcode.total) * 100);
