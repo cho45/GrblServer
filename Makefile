@@ -23,3 +23,7 @@ clean:
 .PHONY: icon
 icon:
 	cp ./grblserver-product-icon-assets/*.png browser/src/assets/
+
+.PHONY: vulcanize
+vulcanize:
+	cd browser && vulcanize --inline-scripts --inline-css index.html > index-vulcanize.html
