@@ -121,16 +121,22 @@ var GrblServer = (function () {
         });
     };
     GrblServer.prototype.startWebSocket = function () {
-        var _this = this;
         console.log('startWebSocket');
         this.sessions = [];
-        this.wsServer = new websocket.server({
-            httpServer: this.httpServer,
+        this.wsServer = this._startWebSocket(this.httpServer);
+        if (this.http2Server) {
+            this.wssServer = this._startWebSocket(this.http2Server);
+        }
+    };
+    GrblServer.prototype._startWebSocket = function (server) {
+        var _this = this;
+        var wsServer = new websocket.server({
+            httpServer: server,
             maxReceivedFrameSize: 131072,
             maxReceivedMessageSize: 10 * 1024 * 1024,
             autoAcceptConnections: false
         });
-        this.wsServer.on('request', function (req) {
+        wsServer.on('request', function (req) {
             if (!req.remoteAddress.match(/^((::ffff:)?(127\.|10\.|192\.168\.)|::1)/)) {
                 req.reject();
                 console.log('Connection from origin ' + req.remoteAddress + ' rejected.');
@@ -203,6 +209,7 @@ var GrblServer = (function () {
                 console.log(_this.sessions);
             });
         });
+        return wsServer;
     };
     GrblServer.prototype.sendInitialMessage = function (connection) {
         this.sendMessage(connection, {
