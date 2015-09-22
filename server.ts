@@ -156,6 +156,8 @@ class GrblServer {
 	http2Server : http.Server;
 
 	wsServer : websocket.server;
+	wssServer : websocket.server;
+
 	sessions : Array<websocket.connection>;
 	grbl : Grbl;
 
@@ -217,14 +219,21 @@ class GrblServer {
 		console.log('startWebSocket');
 		this.sessions = [];
 
-		this.wsServer = new websocket.server({
-			httpServer: this.httpServer,
+		this.wsServer = this._startWebSocket(this.httpServer);
+		if (this.http2Server) {
+			this.wssServer = this._startWebSocket(this.http2Server);
+		}
+	}
+
+	_startWebSocket(server: http.Server):websocket.server {
+		var wsServer = new websocket.server({
+			httpServer: server,
 			maxReceivedFrameSize: 131072,
 			maxReceivedMessageSize: 10 * 1024 * 1024,
 			autoAcceptConnections: false
 		});
 
-		this.wsServer.on('request', (req) => {
+		wsServer.on('request', (req) => {
 			if (!req.remoteAddress.match(/^((::ffff:)?(127\.|10\.|192\.168\.)|::1)/)) {
 				req.reject();
 				console.log('Connection from origin ' + req.remoteAddress + ' rejected.');
@@ -303,6 +312,8 @@ class GrblServer {
 				console.log(this.sessions);
 			});
 		});
+
+		return wsServer;
 	}
 
 	sendInitialMessage(connection: websocket.connection) {
