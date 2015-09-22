@@ -80,6 +80,17 @@ Specify serial baudrate to Grbl.
 You want to write configuration with other formats? You can:
 https://github.com/lorenwest/node-config/wiki/Configuration-Files
 
+### `TLSKey`, `TLSCert`
+
+Specify TLS key/cert for HTTP2. Default is empty (disabled).
+
+GrblServer includes `localhost` cert (self signed certificates). Use it by following:
+
+	"TLSKey" : "dev/server.key",
+	"TLSCert" : "dev/server.crt" 
+
+Or create self signed certificates by dev/make-key.sh
+
 Usecases
 ========
 
