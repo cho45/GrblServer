@@ -1,5 +1,7 @@
 {
 	"serverPort": 8080,
 	"serialPort": "/dev/ttyUSB0",
-	"serialBaud": 115200
+	"serialBaud": 115200,
+	"TLSKey" : null,
+	"TLSCert" : null
 }

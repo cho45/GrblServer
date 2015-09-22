@@ -32,6 +32,8 @@ interface GrblServerConfig {
 	serialPort: string;
 	serialBaud: number;
 	serverPort: number;
+	TLSKey: string;
+	TLSCert: string;
 };
 
 interface GrblConfig {
@@ -178,6 +180,8 @@ class GrblServer {
 			serverPort: config.get('serverPort'),
 			serialPort: config.get('serialPort'),
 			serialBaud: config.get('serialBaud'),
+			TLSKey: config.get('TLSKey'),
+			TLSCert: config.get('TLSCert'),
 		};
 		this.rev = fs.readFileSync('out/rev.txt', 'utf-8');
 		console.log('Launching with this config: ');
@@ -204,15 +208,17 @@ class GrblServer {
 			console.log('Server is listening on port ' + this.serverConfig.serverPort);
 		});
 
-		this.http2Server = http2.createServer({
-			key: fs.readFileSync('dev/server.key'),
-			cert: fs.readFileSync('dev/server.crt')
-		}, handler);
+		if (this.serverConfig.TLSKey) {
+			this.http2Server = http2.createServer({
+				key: fs.readFileSync(this.serverConfig.TLSKey),
+				cert: fs.readFileSync(this.serverConfig.TLSCert)
+			}, handler);
 
-		var http2port = this.serverConfig.serverPort - 80 + 443;
-		this.http2Server.listen(http2port, () => {
-			console.log('Server is listening on port ' + http2port);
-		});
+			var http2port = this.serverConfig.serverPort - 80 + 443;
+			this.http2Server.listen(http2port, () => {
+				console.log('Server is listening on port ' + http2port);
+			});
+		}
 	}
 
 	startWebSocket() {
