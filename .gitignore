@@ -5,3 +5,5 @@ config/local.json
 sketch/
 *.ts_
 grblserver-product-icon-assets/
+browser/index-vulcanize.html
+
