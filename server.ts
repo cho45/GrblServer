@@ -4,6 +4,7 @@
 ///<reference path="./typings/serialport.d.ts" />
 ///<reference path="./typings/config.d.ts" />
 ///<reference path="./typings/node-static.d.ts" />
+///<reference path="./typings/http2.ts" />
 
 import * as websocket from 'websocket';
 import {
@@ -20,9 +21,11 @@ import {
 	GrblSerialPortError,
 } from './grbl';
 import http = require('http');
+import http2 = require('http2');
 import fs = require('fs');
 import serialport = require("serialport");
 import config = require("config");
+import path = require("path");
 import static = require("node-static");
 
 interface GrblServerConfig {
@@ -150,6 +153,8 @@ class GrblServer {
 	grblVersion: GrblVersion;
 
 	httpServer : http.Server;
+	http2Server : http.Server;
+
 	wsServer : websocket.server;
 	sessions : Array<websocket.connection>;
 	grbl : Grbl;
@@ -182,18 +187,29 @@ class GrblServer {
 			cache: 3600 * 24 * 30
 		});
 
-		console.log('startHttp');
-		this.httpServer = http.createServer( (req, res) => {
+		var handler = (req : http.IncomingMessage, res : http.ServerResponse) => {
 			if (req.url === '/config') {
 				res.writeHead(200, { 'Content-Type': 'application/json' });
 				res.end(JSON.stringify(this.serverConfig));
 			} else {
 				fileServer.serve(req, res);
 			}
-		});
+		};
 
+		console.log('startHttp');
+		this.httpServer = http.createServer(handler);
 		this.httpServer.listen(this.serverConfig.serverPort, () => {
 			console.log('Server is listening on port ' + this.serverConfig.serverPort);
+		});
+
+		this.http2Server = http2.createServer({
+			key: fs.readFileSync('dev/server.key'),
+			cert: fs.readFileSync('dev/server.crt')
+		}, handler);
+
+		var http2port = this.serverConfig.serverPort - 80 + 443;
+		this.http2Server.listen(http2port, () => {
+			console.log('Server is listening on port ' + http2port);
 		});
 	}
 
