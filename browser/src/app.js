@@ -483,6 +483,8 @@ Polymer({
 
 		if (self.status.state == 'Alarm') {
 			self.openDialog(self.alarmResetDialog);
+		} else {
+			self.alarmResetDialog.close();
 		}
 	},
 
