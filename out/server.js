@@ -9,9 +9,11 @@ var __extends = (this && this.__extends) || function (d, b) {
 ///<reference path="./typings/serialport.d.ts" />
 ///<reference path="./typings/config.d.ts" />
 ///<reference path="./typings/node-static.d.ts" />
+///<reference path="./typings/http2.ts" />
 var websocket = require('websocket');
 var grbl_1 = require('./grbl');
 var http = require('http');
+var http2 = require('http2');
 var fs = require('fs');
 var serialport = require("serialport");
 var config = require("config");
@@ -95,8 +97,7 @@ var GrblServer = (function () {
         var fileServer = new static.Server('./browser', {
             cache: 3600 * 24 * 30
         });
-        console.log('startHttp');
-        this.httpServer = http.createServer(function (req, res) {
+        var handler = function (req, res) {
             if (req.url === '/config') {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(_this.serverConfig));
@@ -104,9 +105,19 @@ var GrblServer = (function () {
             else {
                 fileServer.serve(req, res);
             }
-        });
+        };
+        console.log('startHttp');
+        this.httpServer = http.createServer(handler);
         this.httpServer.listen(this.serverConfig.serverPort, function () {
             console.log('Server is listening on port ' + _this.serverConfig.serverPort);
+        });
+        this.http2Server = http2.createServer({
+            key: fs.readFileSync('dev/server.key'),
+            cert: fs.readFileSync('dev/server.crt')
+        }, handler);
+        var http2port = this.serverConfig.serverPort - 80 + 443;
+        this.http2Server.listen(http2port, function () {
+            console.log('Server is listening on port ' + http2port);
         });
     };
     GrblServer.prototype.startWebSocket = function () {
