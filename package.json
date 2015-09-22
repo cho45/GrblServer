@@ -9,6 +9,7 @@
   "dependencies": {
     "config": "*",
     "node-static": "^0.7.7",
+    "http2": "*",
     "serialport": "*",
     "websocket": "*"
   },
