@@ -89,7 +89,7 @@ GrblServer includes `localhost` cert (self signed certificates). Use it by follo
 	"TLSKey" : "dev/server.key",
 	"TLSCert" : "dev/server.crt" 
 
-Or create self signed certificates by dev/make-key.sh
+Or create self signed certificates by `dev/make-key.sh`.
 
 Usecases
 ========
@@ -135,12 +135,23 @@ GrblServer is written in TypeScript.
 
 	sudo npm install -g typescript
 	npm install
-	make watch
-
+	make watch # tsc watch
+	make server # launch websocket/http server
 
 browser client is written JavaScript with Polymer
 
-	cd browser/
+Above `make server` also serves static files under `browser/`.
+
+## Grbl for development
+
+You may need actual connection to Grbl. But you should not connect to Grbl which connected to powered CNC machine. So I suggest you to make another Grbl installed Arduino and use it for development.
+
+Grbl is open-loop control except homing and probing. It means you don't need to connect actual CNC machine in most case.
+
+Contribute
+==========
+
+Send pull-request.
 	
 LICENSE
 =======
