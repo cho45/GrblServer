@@ -46,17 +46,18 @@
 		</style>
 
 		<my-app></my-app>
+
 		<script>
-			setTimeout(function () {
+			requestAnimationFrame(function () {
 				var link = document.createElement('link');
 				link.rel = "import";
 				link.href = "src/app.html";
-				document.body.appendChild(link);
-				link.onload = function () {
-					var loading = document.querySelector('loading');
+				link.addEventListener('load', function () {
+					var loading = document.querySelector('.loading');
 					loading.parentNode.removeChild(loading);
-				};
-			}, 0);
+				});
+				document.body.appendChild(link);
+			});
 		</script>
 	</body>
 </html>
