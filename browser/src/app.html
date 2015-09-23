@@ -625,7 +625,7 @@
 							</div>
 						</div>
 
-						<div id="jogging" class="flex relative">
+						<div id="jogging" class="flex relative" disabled$="{{equals(status.state, 'Unknown')}}">
 							<div class="layout vertical fit">
 								<div class="flex relative">
 									<div class="fit">
@@ -648,7 +648,7 @@
 							</div>
 						</div>
 
-						<div id="macros" class="flex">
+						<div id="macros" class="flex" disabled$="{{equals(status.state, 'Unknown')}}">
 							<div class="preset-positions">
 								<paper-button noink on-tap="commandHoming" disabled="{{isBatchMode}}">
 									<iron-icon icon="icons:home"></iron-icon>
