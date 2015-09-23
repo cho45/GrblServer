@@ -6,10 +6,57 @@
 		<title>Grbl</title>
 		<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
 		<link rel="icon" type="image/png" href="src/assets/icon-192.png"/>
-		<link rel="import" href="src/app.html">
 		<link rel="manifest" href="manifest.json">
 	</head>
-	<body class="fullbleed">
+	<body style="margin: 0; padding: 0; height: 100vh; width: 100vw; background: #00bcd4">
+
+		<style>
+		@-webkit-keyframes spin{
+			0%{-webkit-transform: rotate(0deg);}
+			100%{-webkit-transform: rotate(1080deg);}
+		}
+		@keyframes spin{
+			0%{transform: rotate(0deg);}
+			100%{transform: rotate(1080deg);}
+		}
+		.loading{
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			-ms-box-sizing: border-box;
+			box-sizing: border-box;
+			display: block;
+			width: 36px;
+			height: 36px;
+			margin: auto;
+			border-width: 4px;
+			border-style: solid;
+			border-color: transparent #fbfbfb;
+			border-radius: 18px;
+			-webkit-animation: spin 2s ease-in-out infinite;
+			animation: spin 2s ease-in-out infinite;
+		}
+		</style>
+
+		<div class='loading'></div>
+
+		<style>
+			.loading {
+				margin: 100px auto;
+			}
+		</style>
+
 		<my-app></my-app>
+		<script>
+			setTimeout(function () {
+				var link = document.createElement('link');
+				link.rel = "import";
+				link.href = "src/app.html";
+				document.body.appendChild(link);
+				link.onload = function () {
+					var loading = document.querySelector('loading');
+					loading.parentNode.removeChild(loading);
+				};
+			}, 0);
+		</script>
 	</body>
 </html>
