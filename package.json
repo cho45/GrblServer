@@ -11,12 +11,12 @@
   },
   "engines" : { "node" : "~0.12" },
   "dependencies": {
-    "config": "*",
+    "config": "^1.15.0",
     "node-static": "^0.7.7",
-    "http2": "*",
-    "serialport": "*",
-    "ip-range-check": "*",
-    "websocket": "*"
+    "http2": "^3.2.0",
+    "serialport": "^1.7.4",
+    "ip-range-check": "=0.0.1",
+    "websocket": "^1.0.21"
   },
   "author": "cho45 <cho45@lowreal.net> (http://www.lowreal.net/)",
   "repository" : {
