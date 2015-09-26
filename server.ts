@@ -5,6 +5,7 @@
 ///<reference path="./typings/config.d.ts" />
 ///<reference path="./typings/node-static.d.ts" />
 ///<reference path="./typings/http2.ts" />
+///<reference path="./typings/ip-range-check.ts" />
 
 import * as websocket from 'websocket';
 import {
@@ -26,7 +27,8 @@ import fs = require('fs');
 import serialport = require("serialport");
 import config = require("config");
 import path = require("path");
-import static = require("node-static");
+import staticFiles = require("node-static");
+import ipRangeCheck = require("ip-range-check");
 
 interface GrblServerConfig {
 	serialPort: string;
@@ -189,7 +191,7 @@ class GrblServer {
 	}
 
 	startHttp() {
-		var fileServer = new static.Server('./browser', {
+		var fileServer = new staticFiles.Server('./browser', {
 			cache: 3600 * 24 * 30
 		});
 
@@ -240,7 +242,16 @@ class GrblServer {
 		});
 
 		wsServer.on('request', (req) => {
-			if (!req.remoteAddress.match(/^((::ffff:)?(127\.|10\.|192\.168\.)|::1)/)) {
+			var allowed = ipRangeCheck(req.remoteAddress, [
+				'127.0.0.0/8',
+				'10.0.0.0/8',
+				'172.16.0.0/12',
+				'192.168.0.0/16',
+				'::1/128',
+				'fe80::/10',
+				'fc00::/7',
+			]);
+			if (!allowed) {
 				req.reject();
 				console.log('Connection from origin ' + req.remoteAddress + ' rejected.');
 				return;
