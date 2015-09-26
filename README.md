@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/cho45/GrblServer/master/browser/src/assets/icon-192.png"/>
+
 GrblServer
 ==========
 
