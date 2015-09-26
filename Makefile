@@ -9,7 +9,7 @@ tsc:
 
 .PHONY: server
 server: tsc
-	node out/server.js
+	node bin/grbl-server.js
 
 .PHONY: watch
 watch:

@@ -53,7 +53,7 @@ Create config/local.json. You must edit "serialPort" path.
 
 You should connect Grbl installed Arduino before running.
 
-	node out/server.js
+	node bin/grbl-server.js
 
 ### Open client by browser
 

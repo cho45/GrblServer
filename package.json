@@ -6,13 +6,23 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+      "grbl-server": "./bin/grbl-server.js"
+  },
+  "engines" : { "node" : "~0.12" },
   "dependencies": {
     "config": "*",
     "node-static": "^0.7.7",
     "http2": "*",
     "serialport": "*",
+    "ip-range-check": "*",
     "websocket": "*"
   },
   "author": "cho45 <cho45@lowreal.net> (http://www.lowreal.net/)",
+  "repository" : {
+      "type" : "git",
+      "url" : "https://github.com/cho45/GrblServer.git"
+  },
+
   "license": "MIT"
 }

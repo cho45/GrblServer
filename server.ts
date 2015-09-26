@@ -152,7 +152,7 @@ class GCode {
 	}
 }
 
-class GrblServer {
+export class GrblServer {
 	rev: String;
 	grblVersion: GrblVersion;
 
@@ -614,7 +614,4 @@ class GrblServer {
 			});
 	}
 }
-
-new GrblServer().start();
-
 
