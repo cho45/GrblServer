@@ -596,13 +596,13 @@ Polymer({
 
 	commandAny : function (e) {
 		var self = this;
-		if (e.keyIdentifier === 'Enter') {
+		if (e.key === 'Enter') {
 			var value = e.target.value;
 			e.target.value = "";
 			self.commandHistoryIndex = 0;
 			self.command(value);
 		} else
-		if (e.keyIdentifier === 'Up') {
+		if (e.key === 'ArrowUp') {
 			var history = self.commandHistory.filter(function (x) { return x.prefix === '>>' }).reverse();
 			self.commandHistoryIndex++;
 			if (self.commandHistoryIndex > history.length) {
@@ -612,7 +612,7 @@ Polymer({
 				e.target.value = history[self.commandHistoryIndex-1].value;
 			} catch (e) { }
 		} else
-		if (e.keyIdentifier === 'Down') {
+		if (e.key === 'ArrowDown') {
 			var history = self.commandHistory.filter(function (x) { return x.prefix === '>>' }).reverse(); // no warnings
 			if (self.commandHistoryIndex > 0) self.commandHistoryIndex--;
 			try {
