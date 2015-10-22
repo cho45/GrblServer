@@ -112,6 +112,10 @@ Clone GrblServer on Raspberry Pi:
 	git clone https://github.com/cho45/GrblServer.git
 	cd GrblServer
 	npm install
+
+Create config/local.json. You must edit "serialPort" path.
+
+	cp config/default.json config/local.json
 	vi config/local.json
 
 Edit /etc/inittab to auto login by user pi:
