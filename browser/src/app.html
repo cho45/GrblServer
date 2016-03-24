@@ -52,6 +52,10 @@
 			opacity: 0.3;
 		}
 
+		[hide] {
+			display: none;
+		}
+
 
 		.nav {
 			border-right: 1px solid #ccc;
@@ -697,16 +701,14 @@
 									</div>
 								</div>
 								<div class="flex layout vertical" style="padding: 0 16px">
-									<template is="dom-if" if="{{!gcode}}">
-										<div id="upload-file" style="self-center">
-											<div style="margin-top: 50px; padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
-												Drag and Drop here
-												<div style="font-size: 50%">or click to open select dialogue</div>
-											</div>
-											<input type="file" style="visibility: hidden"></input>
+									<div id="upload-file" style="self-center" hide$="{{gcode}}">
+										<div style="margin-top: 50px; padding: 60px 20px; font-size: 200%; font-weight: bold; color: #999; text-align: center; border: 5px solid #999" >
+											Drag and Drop here
+											<div style="font-size: 50%">or click to open select dialogue</div>
 										</div>
-									</template>
-									<template is="dom-if" if="{{gcode}}">
+										<input type="file" style="visibility: hidden"></input>
+									</div>
+									<div class="flex layout vertical" hide$="{{!gcode}}">
 										<div class="layout horizontal uploaded-info">
 											<paper-input class="flex" label="Uploaded File" value="{{gcode.name}}" readonly></paper-input>
 											<template is="dom-if" if="{{!isBatchMode}}">
@@ -740,16 +742,10 @@
 											</div>
 										</template>
 										<div class="flex gcode" style="overflow-y: scroll; position: relative;">
-											<div id="gcode-list" style="position: absolute; top: 10px; left: 0; right: 0; bottom: 0;">
-												<template is="dom-repeat" items="{{gcode.sent}}">
-													<div class="line sent">{{item}}</div>
-												</template>
-												<template is="dom-repeat" items="{{gcode.remain}}">
-													<div class="line remain">{{item}}</div>
-												</template>
+											<div id="gcodeList" style="position: absolute; top: 10px; left: 0; right: 0; bottom: 0;">
 											</div>
 										</div>
-									</template>
+									</div>
 								</div>
 							</iron-pages>
 						</div>

@@ -134,6 +134,7 @@ Polymer({
 	},
 
 	observers: [
+		'_gcodeChanged(gcode.*)',
 		'_settingsChanged(settings.*)',
 		'_configChanged(config)',
 		'_submenuChanged(selectedSubMenu)'
@@ -435,23 +436,38 @@ Polymer({
 					var total = 0;
 					var durations = [];
 					var lines = res.gcode.sent.concat(res.gcode.remain);
-					for (var i = 0, len = lines.length; i < len; i++) {
-						var duration = viewer.executeBlock(lines[i]);
-						total += duration;
-						durations.push(duration);
-					}
 
-					self.set('gcode.total', total);
-					self.set('gcode.durations', durations);
-					console.log('loaded gcode', 'total', total, 'durations', durations);
-					
-					viewer.constructPathObject();
+					Promise.resolve().
+						then( () => {
+							function _loop() {
+								var time = new Date().valueOf();
+								var line;
+								while ( (line = lines.shift()) !== undefined ) {
+									var duration = viewer.executeBlock(line);
+									total += duration;
+									durations.push(duration);
+									if (new Date().valueOf() - time > 24) break;
+								}
 
-					for (var i = 0, len = res.gcode.sent.length; i < len; i++) {
-						viewer.overridePathColor(i+1, "#000000");
-					}
+								if (lines.length) {
+									return Promise.resolve().then(_loop);
+								}
+							}
+							return _loop();
+						}).
+						then( () => {
+							self.set('gcode.total', total);
+							self.set('gcode.durations', durations);
+							console.log('loaded gcode', 'total', total, 'durations', durations);
 
-					viewer.render();
+							viewer.constructPathObject();
+
+							for (var i = 0, len = res.gcode.sent.length; i < len; i++) {
+								viewer.overridePathColor(i+1, "#000000");
+							}
+							viewer.render();
+						});
+
 				} else {
 					viewer.clear();
 				}
@@ -462,10 +478,12 @@ Polymer({
 		} else
 		if (res.type === 'gcode.progress') {
 			self.push('gcode.sent', self.shift('gcode.remain'));
+			/*
 			viewer.overridePathColor(self.gcode.sent.length, "#000000");
 			viewer.render();
+			*/
 			self.async(function () {
-				var container = document.getElementById('gcode-list').parentNode;
+				var container = this.$.gcodeList.parentNode;
 				var target = container.querySelector('.remain');
 				if (target) {
 					container.scrollTop = target.offsetTop - 100;
@@ -891,6 +909,31 @@ Polymer({
 		if (viewer) {
 			viewer.refit();
 		}
+	},
+
+	_gcodeChanged : function () {
+		this.debounce('gcode-changed', () => {
+			var container = this.$.gcodeList;
+			container.innerHTML = '';
+
+			console.log('gcode changed', this.gcode);
+			if (!this.gcode || !this.gcode.sent) return;
+
+			var html = '';
+			for (var i = 0, len = this.gcode.sent.length; i < len; i++) {
+				html += '<div class="my-app line sent">' + escape(this.gcode.sent[i]) + '</div>'
+			}
+			for (var i = 0, len = this.gcode.remain.length; i < len; i++) {
+				html += '<div class="my-app line remain">' + escape(this.gcode.remain[i]) + '</div>'
+			}
+			container.innerHTML = html;
+			
+			function escape (str) {
+				return str.replace(/[&<>]/g, function (e) {
+					return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[e];
+				});
+			}
+		}, 100);
 	},
 
 	bind: function (id) { return id },
